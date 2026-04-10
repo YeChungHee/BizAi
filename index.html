@@ -36,12 +36,13 @@
     .card .sub { font-size: 13px; color: #94a3b8; margin-bottom: 20px; }
     .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
     .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+    .grid4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 14px; }
 
     /* FINANCIAL INPUT */
     .input-group { margin-bottom: 16px; }
     .input-group label { display: block; font-size: 12px; font-weight: 700; color: #64748b; margin-bottom: 6px; }
-    .input-group input { width: 100%; padding: 10px 14px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 14px; font-weight: 600; color: #1e293b; transition: border-color 0.2s; }
-    .input-group input:focus { outline: none; border-color: #6366f1; }
+    .input-group input, .input-group select { width: 100%; padding: 10px 14px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 14px; font-weight: 600; color: #1e293b; transition: border-color 0.2s; background: white; }
+    .input-group input:focus, .input-group select:focus { outline: none; border-color: #6366f1; }
     .input-group .unit { font-size: 11px; color: #94a3b8; margin-top: 4px; }
 
     /* METRICS */
@@ -55,6 +56,7 @@
     .btn-primary { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; box-shadow: 0 4px 12px rgba(99,102,241,0.3); }
     .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(99,102,241,0.4); }
     .btn-secondary { background: #f1f5f9; color: #475569; }
+    .btn-sm { padding: 7px 16px; font-size: 12px; border-radius: 8px; }
 
     /* RESULT SECTION */
     .result-section { border-radius: 12px; padding: 20px; margin-bottom: 16px; border-left: 4px solid; }
@@ -62,6 +64,7 @@
     .result-section.info { background: #ecfeff; border-color: #0891b2; }
     .result-section.success { background: #ecfdf5; border-color: #059669; }
     .result-section.action { background: #1e293b; border-color: #6366f1; color: white; }
+    .result-section.warning { background: #fffbeb; border-color: #f59e0b; }
     .result-section h3 { font-size: 13px; font-weight: 800; margin-bottom: 10px; }
     .result-section p { font-size: 13px; line-height: 1.7; }
     .result-section .highlight { font-size: 20px; font-weight: 900; display: block; margin: 8px 0; }
@@ -87,11 +90,84 @@
     .slider-label { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: #64748b; margin-bottom: 8px; }
     input[type="range"] { width: 100%; accent-color: #6366f1; }
 
+    /* ─── ANALYSIS SECTION ─── */
+    .pipeline-steps { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 28px; }
+    .pipe-step { display: flex; align-items: center; gap: 6px; background: #f1f5f9; border: 1px solid #e2e8f0; padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; color: #64748b; }
+    .pipe-step.done { background: #ecfdf5; border-color: #6ee7b7; color: #059669; }
+    .pipe-step.active { background: #eef2ff; border-color: #a5b4fc; color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
+    .pipe-arrow { color: #cbd5e1; font-size: 14px; }
+
+    .kpi-box { border-radius: 12px; padding: 16px; text-align: center; }
+    .kpi-box .kv { font-size: 28px; font-weight: 900; line-height: 1; margin-bottom: 4px; }
+    .kpi-box .kl { font-size: 11px; font-weight: 700; color: #64748b; }
+    .kpi-box .ks { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+
+    /* Grade badge */
+    .grade-badge { display: inline-flex; align-items: center; justify-content: center; width: 60px; height: 60px; border-radius: 14px; font-size: 20px; font-weight: 900; }
+    .grade-AAA { background: #d1fae5; color: #065f46; border: 2px solid #a7f3d0; }
+    .grade-AA  { background: #dcfce7; color: #166534; border: 2px solid #86efac; }
+    .grade-A   { background: #dbeafe; color: #1e40af; border: 2px solid #93c5fd; }
+    .grade-BBB { background: #ede9fe; color: #5b21b6; border: 2px solid #c4b5fd; }
+    .grade-BB  { background: #fef3c7; color: #92400e; border: 2px solid #fde68a; }
+    .grade-B   { background: #fef9c3; color: #713f12; border: 2px solid #fef08a; }
+    .grade-CCC { background: #ffedd5; color: #9a3412; border: 2px solid #fdba74; }
+    .grade-CC  { background: #fee2e2; color: #991b1b; border: 2px solid #fca5a5; }
+    .grade-C   { background: #fce7f3; color: #9d174d; border: 2px solid #f9a8d4; }
+    .grade-D   { background: #f1f5f9; color: #475569; border: 2px solid #cbd5e1; }
+
+    /* Financial table */
+    .fin-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .fin-table th { background: #f8fafc; padding: 10px 14px; text-align: left; font-weight: 700; font-size: 12px; color: #64748b; border-bottom: 2px solid #e2e8f0; }
+    .fin-table th.right { text-align: right; }
+    .fin-table td { padding: 10px 14px; border-bottom: 1px solid #f1f5f9; }
+    .fin-table td.right { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+    .fin-table tr:hover td { background: #f8fafc; }
+    .fin-table tr.total td { font-weight: 800; background: #f8fafc; border-top: 2px solid #e2e8f0; }
+    .fin-table tr.sub td { color: #64748b; font-size: 12px; }
+    .fin-table tr.sub td:first-child { padding-left: 28px; }
+
+    /* Ratio row */
+    .ratio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+    .ratio-item { background: #f8fafc; border-radius: 10px; padding: 12px 14px; border: 1px solid #e2e8f0; }
+    .ratio-item .rname { font-size: 11px; font-weight: 700; color: #64748b; margin-bottom: 4px; }
+    .ratio-item .rval { font-size: 18px; font-weight: 900; color: #1e293b; }
+    .ratio-item .rbench { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+    .ratio-item.good { border-color: #6ee7b7; background: #f0fdf4; }
+    .ratio-item.good .rval { color: #059669; }
+    .ratio-item.warn { border-color: #fde68a; background: #fffbeb; }
+    .ratio-item.warn .rval { color: #d97706; }
+    .ratio-item.bad  { border-color: #fca5a5; background: #fef2f2; }
+    .ratio-item.bad  .rval { color: #dc2626; }
+
+    /* Red flag */
+    .flag-item { display: flex; gap: 12px; align-items: flex-start; padding: 14px; border-radius: 10px; background: #fef2f2; border: 1px solid #fca5a5; margin-bottom: 10px; }
+    .flag-item .flag-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+    .flag-item .flag-body { flex: 1; }
+    .flag-item .flag-title { font-weight: 800; font-size: 13px; color: #dc2626; margin-bottom: 3px; }
+    .flag-item .flag-desc { font-size: 12px; color: #64748b; line-height: 1.6; }
+
+    /* Score bar */
+    .score-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .score-row .s-label { font-size: 12px; font-weight: 700; color: #64748b; width: 90px; flex-shrink: 0; }
+    .score-row .s-bar { flex: 1; background: #e2e8f0; border-radius: 999px; height: 8px; overflow: hidden; }
+    .score-row .s-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, #6366f1, #8b5cf6); }
+    .score-row .s-val { font-size: 12px; font-weight: 800; width: 52px; text-align: right; flex-shrink: 0; }
+
+    /* DART lookup */
+    .dart-result-row { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 10px; background: #f8fafc; border: 1px solid #e2e8f0; margin-bottom: 8px; cursor: pointer; transition: all 0.15s; }
+    .dart-result-row:hover { border-color: #a5b4fc; background: #eef2ff; }
+    .dart-result-row .corp-name { font-weight: 800; font-size: 14px; }
+    .dart-result-row .corp-meta { font-size: 12px; color: #94a3b8; margin-top: 2px; }
+    .stock-badge { padding: 3px 10px; background: #ede9fe; color: #7c3aed; border-radius: 20px; font-size: 11px; font-weight: 700; }
+
+    /* Info tag */
+    .info-tag { display: inline-flex; align-items: center; gap: 5px; background: #f1f5f9; border-radius: 20px; padding: 4px 12px; font-size: 12px; font-weight: 600; color: #475569; margin: 3px; }
+
     /* FOOTER */
     .footer { text-align: center; padding: 30px; color: #94a3b8; font-size: 12px; border-top: 1px solid #e2e8f0; margin-top: 40px; }
 
     @media (max-width: 768px) {
-      .grid2, .grid3 { grid-template-columns: 1fr; }
+      .grid2, .grid3, .grid4 { grid-template-columns: 1fr; }
       .header h1 { font-size: 28px; }
       .nav { overflow-x: auto; }
     }
@@ -106,23 +182,25 @@
   <p>기업 재무 데이터를 분석해 영업 트리거를 자동 감지하고,<br>맞춤형 제안서를 즉시 생성하는 AI 영업 인텔리전스 플랫폼</p>
   <div class="header-stats">
     <div class="stat"><div class="val">T+1</div><div class="lbl">정산 시뮬레이터</div></div>
-    <div class="stat"><div class="val">3종</div><div class="lbl">트리거 자동 분류</div></div>
+    <div class="stat"><div class="val">PDF</div><div class="lbl">재무제표 자동 파싱</div></div>
+    <div class="stat"><div class="val">DART</div><div class="lbl">전자공시 실시간 연동</div></div>
     <div class="stat"><div class="val">4섹션</div><div class="lbl">AI 제안서 자동 생성</div></div>
-    <div class="stat"><div class="val">실시간</div><div class="lbl">DART 공시 연동</div></div>
   </div>
 </div>
 
 <!-- NAV -->
 <div class="nav">
-  <button class="active" onclick="showSection('simulator')">💰 재무 시뮬레이터</button>
-  <button onclick="showSection('proposal')">📋 제안서 자동 생성</button>
-  <button onclick="showSection('trigger')">🚨 영업 트리거</button>
-  <button onclick="showSection('about')">ℹ️ 서비스 소개</button>
+  <button class="active" onclick="showSection('simulator', this)">💰 재무 시뮬레이터</button>
+  <button onclick="showSection('analysis', this)">📊 기업 분석</button>
+  <button onclick="showSection('dart', this)">🔍 DART 조회</button>
+  <button onclick="showSection('proposal', this)">📋 제안서 생성</button>
+  <button onclick="showSection('trigger', this)">🚨 영업 트리거</button>
+  <button onclick="showSection('about', this)">ℹ️ 서비스 소개</button>
 </div>
 
 <div class="main">
 
-  <!-- ===== SECTION 1: 재무 시뮬레이터 ===== -->
+  <!-- ═══ TAB 1: 재무 시뮬레이터 ═══ -->
   <div id="simulator" class="section active">
     <div class="card">
       <h2>💰 Trapped Cash 시뮬레이터</h2>
@@ -155,7 +233,6 @@
             <input type="number" id="net_income" value="104" oninput="recalculate()" />
             <div class="unit">단위: 백만원</div>
           </div>
-
           <div class="slider-container">
             <div class="slider-label">
               <span>현재 평균 채권 회수 기간</span>
@@ -205,11 +282,288 @@
     </div>
   </div>
 
-  <!-- ===== SECTION 2: 제안서 자동 생성 ===== -->
+
+  <!-- ═══ TAB 2: 기업 분석 ═══ -->
+  <div id="analysis" class="section">
+
+    <!-- 파이프라인 스텝 -->
+    <div class="pipeline-steps">
+      <div class="pipe-step done">✅ Phase 2a<br><small>PDF 파싱</small></div>
+      <div class="pipe-arrow">›</div>
+      <div class="pipe-step done">✅ Phase 2b<br><small>재무비율 계산</small></div>
+      <div class="pipe-arrow">›</div>
+      <div class="pipe-step done">✅ Phase 2c<br><small>재무 스코어</small></div>
+      <div class="pipe-arrow">›</div>
+      <div class="pipe-step done">✅ Phase 2d<br><small>Red Flag</small></div>
+      <div class="pipe-arrow">›</div>
+      <div class="pipe-step done">✅ Phase 2e<br><small>신용 등급</small></div>
+      <div class="pipe-arrow">›</div>
+      <div class="pipe-step done">✅ Phase 3<br><small>마진 시뮬레이션</small></div>
+      <div class="pipe-arrow">›</div>
+      <div class="pipe-step done">✅ Phase 4<br><small>제안서 생성</small></div>
+    </div>
+
+    <!-- 기업 기본정보 -->
+    <div class="card">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:20px;">
+        <div>
+          <h2>🏢 주식회사 애즈위메이크</h2>
+          <p class="sub" style="margin-bottom:0;">PDF 파싱 완료 — 2024 재무제표 (K-GAAP, 별도재무제표)</p>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="grade-badge grade-B">B</div>
+          <div>
+            <div style="font-size:13px;font-weight:800;color:#1e293b;">신용 등급 B</div>
+            <div style="font-size:12px;color:#94a3b8;">51.8점 / 100점</div>
+            <div style="font-size:11px;color:#d97706;font-weight:700;margin-top:2px;">⚠️ 신중 접근</div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;">
+        <span class="info-tag">🏭 도소매업</span>
+        <span class="info-tag">📅 설립: 2019년</span>
+        <span class="info-tag">📍 서울시</span>
+        <span class="info-tag">🔒 비상장</span>
+        <span class="info-tag">📄 소스: PDF (신뢰도 95%)</span>
+      </div>
+      <div class="grid4">
+        <div class="kpi-box" style="background:#ecfdf5;">
+          <div class="kv" style="color:#059669;">120.8억</div>
+          <div class="kl">2024 매출액</div>
+          <div class="ks">+236.7% YoY</div>
+        </div>
+        <div class="kpi-box" style="background:#eef2ff;">
+          <div class="kv" style="color:#6366f1;">184.6억</div>
+          <div class="kl">자산총계</div>
+          <div class="ks">부채비율 24.1%</div>
+        </div>
+        <div class="kpi-box" style="background:#fffbeb;">
+          <div class="kv" style="color:#d97706;">9.9억</div>
+          <div class="kl">영업이익</div>
+          <div class="ks">영업이익률 8.9%</div>
+        </div>
+        <div class="kpi-box" style="background:#fef2f2;">
+          <div class="kv" style="color:#dc2626;">7.50%</div>
+          <div class="kl">권장 마진</div>
+          <div class="ks">리스크 프리미엄 +5.0%p</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <!-- 재무제표 요약 -->
+      <div class="card">
+        <h2>📑 재무제표 요약</h2>
+        <p class="sub">당기(2024) vs 전기(2023) 비교 · 단위: 원</p>
+        <table class="fin-table">
+          <thead>
+            <tr>
+              <th>계정과목</th>
+              <th class="right">2024년</th>
+              <th class="right">2023년</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="background:#f8fafc;"><td colspan="3" style="font-size:11px;font-weight:800;color:#6366f1;padding:8px 14px;">📊 재무상태표</td></tr>
+            <tr class="total"><td>자산총계</td><td class="right">18,464,530,876</td><td class="right">4,678,744,144</td></tr>
+            <tr class="sub"><td>유동자산</td><td class="right">12,274,475,012</td><td class="right">—</td></tr>
+            <tr class="sub"><td>비유동자산</td><td class="right">6,190,055,864</td><td class="right">—</td></tr>
+            <tr class="total"><td>부채총계</td><td class="right">3,583,148,122</td><td class="right">1,116,154,136</td></tr>
+            <tr class="sub"><td>유동부채</td><td class="right">908,822,060</td><td class="right">—</td></tr>
+            <tr class="sub"><td>비유동부채</td><td class="right">2,674,326,062</td><td class="right">—</td></tr>
+            <tr class="total"><td>자본총계</td><td class="right">14,881,382,754</td><td class="right">3,562,590,008</td></tr>
+            <tr style="background:#f8fafc;"><td colspan="3" style="font-size:11px;font-weight:800;color:#6366f1;padding:8px 14px;">📊 손익계산서</td></tr>
+            <tr class="total"><td>매출액</td><td class="right">12,075,469,032</td><td class="right">3,586,277,582</td></tr>
+            <tr class="sub"><td>매출원가</td><td class="right">8,741,895,610</td><td class="right">—</td></tr>
+            <tr class="total"><td>영업이익</td><td class="right">1,079,398,838</td><td class="right">35,718,765</td></tr>
+            <tr class="total"><td>당기순이익</td><td class="right">988,568,350</td><td class="right">24,608,192</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 등급 & 스코어 -->
+      <div>
+        <div class="card">
+          <h2>🏆 신용 등급 산출</h2>
+          <p class="sub">Phase 2e — 재무스코어 + Red Flag 보정</p>
+          <div style="display:flex;align-items:center;gap:20px;margin-bottom:20px;">
+            <div class="grade-badge grade-B" style="width:72px;height:72px;font-size:24px;">B</div>
+            <div>
+              <div style="font-size:22px;font-weight:900;color:#1e293b;">51.8점</div>
+              <div style="font-size:13px;color:#94a3b8;margin-top:2px;">재무스코어 71.4점 → Red Flag 2건 보정</div>
+              <div style="font-size:13px;font-weight:700;color:#d97706;margin-top:4px;">⚠️ 신중 거래 권장 템플릿</div>
+            </div>
+          </div>
+
+          <div style="font-size:12px;font-weight:700;color:#64748b;margin-bottom:12px;">항목별 점수</div>
+          <div class="score-row">
+            <div class="s-label">수익성</div>
+            <div class="s-bar"><div class="s-fill" style="width:82%;background:linear-gradient(90deg,#059669,#34d399);"></div></div>
+            <div class="s-val" style="color:#059669;">24.6/30</div>
+          </div>
+          <div class="score-row">
+            <div class="s-label">안정성</div>
+            <div class="s-bar"><div class="s-fill" style="width:78%;background:linear-gradient(90deg,#6366f1,#a78bfa);"></div></div>
+            <div class="s-val" style="color:#6366f1;">23.4/30</div>
+          </div>
+          <div class="score-row">
+            <div class="s-label">성장성</div>
+            <div class="s-bar"><div class="s-fill" style="width:76%;background:linear-gradient(90deg,#0891b2,#38bdf8);"></div></div>
+            <div class="s-val" style="color:#0891b2;">15.2/20</div>
+          </div>
+          <div class="score-row">
+            <div class="s-label">활동성</div>
+            <div class="s-bar"><div class="s-fill" style="width:65%;background:linear-gradient(90deg,#d97706,#fbbf24);"></div></div>
+            <div class="s-val" style="color:#d97706;">8.1/10</div>
+          </div>
+          <div class="score-row">
+            <div class="s-label">Red Flag</div>
+            <div class="s-bar"><div class="s-fill" style="width:38%;background:linear-gradient(90deg,#dc2626,#f87171);"></div></div>
+            <div class="s-val" style="color:#dc2626;">-19.6pt</div>
+          </div>
+        </div>
+
+        <!-- Red Flag -->
+        <div class="card">
+          <h2>🚩 Red Flag 탐지</h2>
+          <p class="sub">Phase 2d — 2건 발견</p>
+          <div class="flag-item">
+            <div class="flag-icon">⚠️</div>
+            <div class="flag-body">
+              <div class="flag-title">매출 급증 지속성 불확실</div>
+              <div class="flag-desc">전년 대비 +237% 매출 급증. 단기 계약 의존 또는 일회성 대형 거래 가능성 — 매출의 지속성 검토 필요.</div>
+            </div>
+          </div>
+          <div class="flag-item">
+            <div class="flag-icon">⚠️</div>
+            <div class="flag-body">
+              <div class="flag-title">비유동부채 비중 과다</div>
+              <div class="flag-desc">비유동부채 26.7억 / 자산총계 184.6억 = 14.5%. 장기 차입 의존도 높아 금리 상승 시 리스크 증가.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 재무비율 -->
+    <div class="card">
+      <h2>📐 주요 재무비율 (22/25개 산출)</h2>
+      <p class="sub">Phase 2b — 도소매업 동종업계 벤치마크 대비</p>
+      <div class="ratio-grid">
+        <div class="ratio-item good">
+          <div class="rname">부채비율</div>
+          <div class="rval">24.1%</div>
+          <div class="rbench">벤치마크 120% ↓ 우수</div>
+        </div>
+        <div class="ratio-item good">
+          <div class="rname">유동비율</div>
+          <div class="rval">135.1%</div>
+          <div class="rbench">벤치마크 100% ↑ 양호</div>
+        </div>
+        <div class="ratio-item good">
+          <div class="rname">자기자본비율</div>
+          <div class="rval">80.6%</div>
+          <div class="rbench">매우 건전</div>
+        </div>
+        <div class="ratio-item good">
+          <div class="rname">영업이익률</div>
+          <div class="rval">8.9%</div>
+          <div class="rbench">벤치마크 4.2% ↑ 우수</div>
+        </div>
+        <div class="ratio-item good">
+          <div class="rname">순이익률</div>
+          <div class="rval">8.2%</div>
+          <div class="rbench">벤치마크 2.8% ↑ 우수</div>
+        </div>
+        <div class="ratio-item good">
+          <div class="rname">매출 성장률</div>
+          <div class="rval">+236.7%</div>
+          <div class="rbench">고성장 — 지속성 검토</div>
+        </div>
+        <div class="ratio-item warn">
+          <div class="rname">총자산회전율</div>
+          <div class="rval">0.65회</div>
+          <div class="rbench">벤치마크 0.9 — 미달</div>
+        </div>
+        <div class="ratio-item warn">
+          <div class="rname">ROE</div>
+          <div class="rval">6.6%</div>
+          <div class="rbench">벤치마크 8% — 미달</div>
+        </div>
+        <div class="ratio-item warn">
+          <div class="rname">ROA</div>
+          <div class="rval">5.4%</div>
+          <div class="rbench">벤치마크 6% — 미달</div>
+        </div>
+        <div class="ratio-item good">
+          <div class="rname">이자보상배율</div>
+          <div class="rval">12.4배</div>
+          <div class="rbench">이자 부담 낮음</div>
+        </div>
+        <div class="ratio-item good">
+          <div class="rname">매출총이익률</div>
+          <div class="rval">27.6%</div>
+          <div class="rbench">도소매 평균 대비 높음</div>
+        </div>
+        <div class="ratio-item good">
+          <div class="rname">자본잠식 여부</div>
+          <div class="rval">없음</div>
+          <div class="rbench">자본총계 148.8억</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 마진 시뮬레이션 -->
+    <div class="card">
+      <h2>📊 Phase 3 — 마진 시뮬레이션</h2>
+      <p class="sub">신용등급 B + Red Flag 2건 기반 FlowPay 거래 조건 산출</p>
+      <div class="grid3">
+        <div class="result-section warning" style="margin-bottom:0;">
+          <h3>⚡ 리스크 프리미엄</h3>
+          <p class="highlight" style="color:#d97706;">+5.0%p</p>
+          <p>기본 2.5% + 등급 프리미엄 2.5% + Red Flag 0.0%</p>
+        </div>
+        <div class="result-section success" style="margin-bottom:0;">
+          <h3>✅ 권장 마진 (Likely)</h3>
+          <p class="highlight" style="color:#059669;">7.50%</p>
+          <p>거래금액 5억 기준 · 월 정산 조건</p>
+        </div>
+        <div class="result-section info" style="margin-bottom:0;">
+          <h3>📋 거래 한도</h3>
+          <p class="highlight" style="color:#0891b2;">최대 3억</p>
+          <p>신중 등급 · 월별 한도 검토 권장</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+
+  <!-- ═══ TAB 3: DART 조회 ═══ -->
+  <div id="dart" class="section">
+    <div class="card">
+      <h2>🔍 DART 전자공시 기업 조회</h2>
+      <p class="sub">108,328개 기업 코드 기반 실시간 재무 데이터 조회 · DART OpenAPI 연동</p>
+      <div style="display:flex;gap:12px;margin-bottom:20px;">
+        <input type="text" id="dart_keyword" placeholder="기업명 검색 (예: 삼성전자, 카카오, 현대...)" style="flex:1;padding:12px 16px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:14px;font-weight:600;" onkeypress="if(event.key==='Enter')dartSearch()" />
+        <button class="btn btn-primary" onclick="dartSearch()">🔍 검색</button>
+      </div>
+      <div id="dart_results"></div>
+    </div>
+
+    <div class="card" id="dart_company_card" style="display:none;">
+      <h2 id="dart_corp_name">기업명</h2>
+      <p class="sub" id="dart_corp_meta">DART 기업 기본정보</p>
+      <div id="dart_company_info"></div>
+    </div>
+  </div>
+
+
+  <!-- ═══ TAB 4: 제안서 생성 ═══ -->
   <div id="proposal" class="section">
     <div class="card">
-      <h2>📋 Trapped Cash 해제 제안서 자동 생성</h2>
-      <p class="sub">아래 정보를 입력하면 FlowPay 도입 제안서 4개 섹션을 즉시 생성합니다</p>
+      <h2>📋 맞춤형 제안서 자동 생성</h2>
+      <p class="sub">기업 분석 결과 기반 4섹션 FlowPay 제안서를 즉시 생성합니다</p>
       <div class="grid2" style="margin-bottom:20px;">
         <div>
           <div class="input-group">
@@ -220,21 +574,44 @@
             <label>담당자명</label>
             <input type="text" id="contact_name" value="김 대표님" />
           </div>
+          <div class="input-group">
+            <label>신용 등급</label>
+            <select id="prop_grade" onchange="updateGradeUI()">
+              <option value="A">A — 우량 (Premium)</option>
+              <option value="BBB">BBB — 양호 (Standard)</option>
+              <option value="BB">BB — 보통 (Standard)</option>
+              <option value="B" selected>B — 신중 (Cautious)</option>
+              <option value="CCC">CCC — 주의 (Cautious)</option>
+              <option value="CC">CC — 위험 (Restricted)</option>
+              <option value="D">D — 부도 (Restricted)</option>
+            </select>
+          </div>
         </div>
         <div>
           <div class="input-group">
             <label>업종</label>
-            <input type="text" id="industry" value="핀테크 / 간편결제" />
+            <input type="text" id="industry" value="도소매업" />
           </div>
           <div class="input-group">
-            <label>주요 문제</label>
-            <input type="text" id="main_issue" value="미수금 과다, 현금흐름 악화" />
+            <label>연간 매출 (백만원)</label>
+            <input type="number" id="p_revenue" value="12075" />
+          </div>
+          <div class="input-group">
+            <label>외상매출금 + 미수금 (백만원)</label>
+            <input type="number" id="p_ar" value="2030" />
           </div>
         </div>
       </div>
+
+      <div id="grade_template_badge" style="margin-bottom:16px;padding:14px;border-radius:10px;background:#fffbeb;border:1px solid #fde68a;">
+        <div style="font-size:12px;font-weight:700;color:#d97706;">📋 적용 템플릿: <span id="template_name">Cautious — 신중 접근</span></div>
+        <div style="font-size:12px;color:#94a3b8;margin-top:4px;" id="template_desc">거래 조건 명시, 모니터링 강화, 단계적 한도 설정</div>
+      </div>
+
       <div style="text-align:center;margin-bottom:24px;">
         <button class="btn btn-primary" onclick="generateProposal()">🤖 AI 제안서 생성하기</button>
       </div>
+
       <div id="proposal_output" style="display:none;">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;padding:16px;background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0;">
           <span style="font-size:24px;">📄</span>
@@ -264,7 +641,8 @@
     </div>
   </div>
 
-  <!-- ===== SECTION 3: 영업 트리거 ===== -->
+
+  <!-- ═══ TAB 5: 영업 트리거 ═══ -->
   <div id="trigger" class="section">
     <div class="card">
       <h2>🚨 영업 트리거 알림 샘플</h2>
@@ -273,9 +651,7 @@
       <div class="trigger-card investment">
         <div class="trigger-header">
           <span style="font-size:24px;">🎯</span>
-          <div>
-            <div class="trigger-badge">투자 유치</div>
-          </div>
+          <div class="trigger-badge">투자 유치</div>
           <div style="margin-left:auto;font-size:11px;color:#92400e;font-weight:700;">2026.04.08 오전 9:32</div>
         </div>
         <div style="font-size:16px;font-weight:800;margin-bottom:6px;">🚨 트리거 발생: (주)커머스링크 / Series B 150억 투자 유치</div>
@@ -307,8 +683,7 @@
         <div class="hook-box" style="background:rgba(110,231,183,0.15);">
           ✉️ <strong>첫 마디(Hook):</strong> "안녕하세요, 뷰티온 MD 박○○님.
           신제품 12종 런칭 축하드립니다! 초기 런칭 마케팅 예산 확보를 위해
-          현재 오픈마켓 정산 대금을 당일(T+1) 수령할 수 있는 방법을
-          소개해 드리고 싶습니다."
+          현재 오픈마켓 정산 대금을 당일(T+1) 수령할 수 있는 방법을 소개해 드리고 싶습니다."
         </div>
         <div style="margin-top:10px;font-size:12px;font-weight:700;color:#065f46;">🔗 추천 리포트: 자산 유동화 시뮬레이션</div>
       </div>
@@ -327,63 +702,132 @@
         </div>
         <div class="hook-box" style="background:rgba(252,165,165,0.15);">
           ✉️ <strong>첫 마디(Hook):</strong> "안녕하세요, 페이큐 CFO님.
-          최근 재무 데이터를 분석한 결과, 미수금이 매출을 초과하는 상태가
-          확인되었습니다. 플로우페이 도입 시 약 15억원의 현금을 즉시 확보할 수 있는
-          시뮬레이션을 준비했습니다. 확인해 보시겠어요?"
+          최근 재무 데이터를 분석한 결과, 미수금이 매출을 초과하는 상태가 확인되었습니다.
+          플로우페이 도입 시 약 15억원의 현금을 즉시 확보할 수 있는 시뮬레이션을 준비했습니다."
         </div>
         <div style="margin-top:10px;font-size:12px;font-weight:700;color:#7f1d1d;">🔗 추천 리포트: 긴급 자금 구조 진단 + T+1 정산 도입 효과</div>
       </div>
     </div>
   </div>
 
-  <!-- ===== SECTION 4: 서비스 소개 ===== -->
+
+  <!-- ═══ TAB 6: 서비스 소개 ═══ -->
   <div id="about" class="section">
     <div class="card">
       <h2>ℹ️ BizAI 서비스 소개</h2>
-      <p class="sub">FlowPay B2B 영업을 위한 AI 기반 기업 정보 수집 및 인텔리전스 플랫폼</p>
-      <div class="grid3">
-        <div style="padding:20px;background:#eef2ff;border-radius:12px;border:1px solid #a5b4fc;">
-          <div style="font-size:28px;margin-bottom:10px;">🔍</div>
-          <div style="font-weight:800;margin-bottom:6px;">데이터 수집 엔진</div>
-          <div style="font-size:13px;color:#64748b;line-height:1.6;">DART 전자공시 API + 뉴스 크롤러로 타겟 기업의 투자유치·신제품·재무 변화를 실시간 감지합니다.</div>
-        </div>
-        <div style="padding:20px;background:#ecfeff;border-radius:12px;border:1px solid #67e8f9;">
-          <div style="font-size:28px;margin-bottom:10px;">💰</div>
-          <div style="font-weight:800;margin-bottom:6px;">Trapped Cash 분석</div>
-          <div style="font-size:13px;color:#64748b;line-height:1.6;">재무제표를 파싱해 잠긴 현금을 자동 산출하고, T+1 정산 전환 시 즉시 확보 가능한 금액을 시뮬레이션합니다.</div>
-        </div>
-        <div style="padding:20px;background:#ecfdf5;border-radius:12px;border:1px solid #6ee7b7;">
-          <div style="font-size:28px;margin-bottom:10px;">📋</div>
-          <div style="font-weight:800;margin-bottom:6px;">제안서 자동 생성</div>
-          <div style="font-size:13px;color:#64748b;line-height:1.6;">AI CFO 관점의 4섹션 맞춤 제안서를 수 초 만에 생성하고 PDF/DOCX로 즉시 발송합니다.</div>
-        </div>
-        <div style="padding:20px;background:#fefce8;border-radius:12px;border:1px solid #fde047;">
-          <div style="font-size:28px;margin-bottom:10px;">🔔</div>
-          <div style="font-weight:800;margin-bottom:6px;">슬랙 알림 자동화</div>
-          <div style="font-size:13px;color:#64748b;line-height:1.6;">트리거 발생 즉시 영업팀 슬랙 채널에 복사 가능한 Hook 메시지와 함께 알림을 발송합니다.</div>
-        </div>
-        <div style="padding:20px;background:#fdf4ff;border-radius:12px;border:1px solid #e9d5ff;">
-          <div style="font-size:28px;margin-bottom:10px;">🗄️</div>
-          <div style="font-weight:800;margin-bottom:6px;">CRM 자동 연동</div>
-          <div style="font-size:13px;color:#64748b;line-height:1.6;">트리거 발생 시 Salesmap CRM에 리드를 자동 생성하고 노션 DB에 제안서를 동기화합니다.</div>
-        </div>
-        <div style="padding:20px;background:#fff7ed;border-radius:12px;border:1px solid #fed7aa;">
-          <div style="font-size:28px;margin-bottom:10px;">⚙️</div>
-          <div style="font-weight:800;margin-bottom:6px;">스케줄 자동화</div>
-          <div style="font-size:13px;color:#64748b;line-height:1.6;">매일 오전 9시 타겟 기업 자동 스캔, 매주 금요일 영업 활동 성과 리포트를 자동 생성합니다.</div>
+      <p class="sub">FlowPay B2B 영업을 위한 AI 기반 기업 정보 수집 및 인텔리전스 플랫폼 (Phase 1~4 완성)</p>
+
+      <!-- Pipeline overview -->
+      <div style="background:#1e293b;border-radius:14px;padding:24px;margin-bottom:20px;color:white;">
+        <div style="font-size:12px;font-weight:700;color:#94a3b8;margin-bottom:16px;letter-spacing:1px;">🔄 전체 파이프라인</div>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
+          <div style="background:rgba(99,102,241,0.2);border:1px solid rgba(99,102,241,0.4);border-radius:10px;padding:10px 16px;font-size:12px;font-weight:700;color:#a5b4fc;">
+            📄 Phase 1<br><span style="font-weight:400;opacity:0.7;">데이터 수집</span>
+          </div>
+          <div style="color:#475569;">›</div>
+          <div style="background:rgba(99,102,241,0.2);border:1px solid rgba(99,102,241,0.4);border-radius:10px;padding:10px 16px;font-size:12px;font-weight:700;color:#a5b4fc;">
+            🔬 Phase 2a<br><span style="font-weight:400;opacity:0.7;">PDF 파싱</span>
+          </div>
+          <div style="color:#475569;">›</div>
+          <div style="background:rgba(99,102,241,0.2);border:1px solid rgba(99,102,241,0.4);border-radius:10px;padding:10px 16px;font-size:12px;font-weight:700;color:#a5b4fc;">
+            📊 Phase 2b~e<br><span style="font-weight:400;opacity:0.7;">분석·등급</span>
+          </div>
+          <div style="color:#475569;">›</div>
+          <div style="background:rgba(99,102,241,0.2);border:1px solid rgba(99,102,241,0.4);border-radius:10px;padding:10px 16px;font-size:12px;font-weight:700;color:#a5b4fc;">
+            💰 Phase 3<br><span style="font-weight:400;opacity:0.7;">마진 시뮬레이션</span>
+          </div>
+          <div style="color:#475569;">›</div>
+          <div style="background:rgba(74,222,128,0.15);border:1px solid rgba(74,222,128,0.3);border-radius:10px;padding:10px 16px;font-size:12px;font-weight:700;color:#86efac;">
+            📋 Phase 4<br><span style="font-weight:400;opacity:0.7;">제안서 생성</span>
+          </div>
         </div>
       </div>
+
+      <div class="grid3">
+        <div style="padding:20px;background:#eef2ff;border-radius:12px;border:1px solid #a5b4fc;">
+          <div style="font-size:28px;margin-bottom:10px;">📄</div>
+          <div style="font-weight:800;margin-bottom:6px;">PDF 파싱 엔진</div>
+          <div style="font-size:13px;color:#64748b;line-height:1.6;">재무제표 PDF → FinancialStatement 자동 변환. K-GAAP 기준 Tier-1 정확도 <strong>11/11 (100%)</strong>.</div>
+        </div>
+        <div style="padding:20px;background:#ecfeff;border-radius:12px;border:1px solid #67e8f9;">
+          <div style="font-size:28px;margin-bottom:10px;">🔍</div>
+          <div style="font-weight:800;margin-bottom:6px;">DART API 연동</div>
+          <div style="font-size:13px;color:#64748b;line-height:1.6;">108,328개 기업 코드 조회. 공시 재무데이터로 PDF 결과 교차검증 및 대체 데이터 소스 제공.</div>
+        </div>
+        <div style="padding:20px;background:#ecfdf5;border-radius:12px;border:1px solid #6ee7b7;">
+          <div style="font-size:28px;margin-bottom:10px;">🏆</div>
+          <div style="font-weight:800;margin-bottom:6px;">신용 등급 산출</div>
+          <div style="font-size:13px;color:#64748b;line-height:1.6;">25개 재무비율 + Red Flag 탐지 → AAA~D 10단계 신용 등급 자동 산출.</div>
+        </div>
+        <div style="padding:20px;background:#fefce8;border-radius:12px;border:1px solid #fde047;">
+          <div style="font-size:28px;margin-bottom:10px;">💰</div>
+          <div style="font-weight:800;margin-bottom:6px;">Trapped Cash 분석</div>
+          <div style="font-size:13px;color:#64748b;line-height:1.6;">재무제표를 파싱해 잠긴 현금을 자동 산출하고, T+1 정산 전환 시 즉시 확보 가능한 금액을 시뮬레이션.</div>
+        </div>
+        <div style="padding:20px;background:#fdf4ff;border-radius:12px;border:1px solid #e9d5ff;">
+          <div style="font-size:28px;margin-bottom:10px;">📋</div>
+          <div style="font-weight:800;margin-bottom:6px;">제안서 자동 생성</div>
+          <div style="font-size:13px;color:#64748b;line-height:1.6;">등급별 4개 템플릿(Premium/Standard/Cautious/Restricted) × 4섹션 맞춤 제안서 즉시 생성.</div>
+        </div>
+        <div style="padding:20px;background:#fff7ed;border-radius:12px;border:1px solid #fed7aa;">
+          <div style="font-size:28px;margin-bottom:10px;">🔔</div>
+          <div style="font-weight:800;margin-bottom:6px;">트리거 자동화</div>
+          <div style="font-size:13px;color:#64748b;line-height:1.6;">투자유치·신제품·재무위험 3종 트리거 자동 감지 → 슬랙 알림 + CRM 자동 등록.</div>
+        </div>
+      </div>
+
       <div style="margin-top:20px;padding:20px;background:#1e293b;border-radius:12px;color:white;">
         <div style="font-size:13px;font-weight:700;color:#94a3b8;margin-bottom:12px;">🔧 기술 스택 & 연동 서비스</div>
         <div style="display:flex;flex-wrap:wrap;gap:8px;">
           <span style="padding:6px 14px;background:rgba(99,102,241,0.3);border:1px solid rgba(99,102,241,0.5);border-radius:20px;font-size:12px;font-weight:600;">DART 전자공시 API</span>
           <span style="padding:6px 14px;background:rgba(139,92,246,0.3);border:1px solid rgba(139,92,246,0.5);border-radius:20px;font-size:12px;font-weight:600;">Claude AI API</span>
-          <span style="padding:6px 14px;background:rgba(8,145,178,0.3);border:1px solid rgba(8,145,178,0.5);border-radius:20px;font-size:12px;font-weight:600;">Slack MCP</span>
-          <span style="padding:6px 14px;background:rgba(5,150,105,0.3);border:1px solid rgba(5,150,105,0.5);border-radius:20px;font-size:12px;font-weight:600;">Notion MCP</span>
-          <span style="padding:6px 14px;background:rgba(217,119,6,0.3);border:1px solid rgba(217,119,6,0.5);border-radius:20px;font-size:12px;font-weight:600;">Salesmap CRM</span>
-          <span style="padding:6px 14px;background:rgba(220,38,38,0.3);border:1px solid rgba(220,38,38,0.5);border-radius:20px;font-size:12px;font-weight:600;">Gmail MCP</span>
-          <span style="padding:6px 14px;background:rgba(15,118,110,0.3);border:1px solid rgba(15,118,110,0.5);border-radius:20px;font-size:12px;font-weight:600;">Google Drive</span>
-          <span style="padding:6px 14px;background:rgba(100,116,139,0.3);border:1px solid rgba(100,116,139,0.5);border-radius:20px;font-size:12px;font-weight:600;">Python / FastAPI</span>
+          <span style="padding:6px 14px;background:rgba(8,145,178,0.3);border:1px solid rgba(8,145,178,0.5);border-radius:20px;font-size:12px;font-weight:600;">pdfplumber</span>
+          <span style="padding:6px 14px;background:rgba(5,150,105,0.3);border:1px solid rgba(5,150,105,0.5);border-radius:20px;font-size:12px;font-weight:600;">FastAPI</span>
+          <span style="padding:6px 14px;background:rgba(217,119,6,0.3);border:1px solid rgba(217,119,6,0.5);border-radius:20px;font-size:12px;font-weight:600;">Slack MCP</span>
+          <span style="padding:6px 14px;background:rgba(220,38,38,0.3);border:1px solid rgba(220,38,38,0.5);border-radius:20px;font-size:12px;font-weight:600;">Notion MCP</span>
+          <span style="padding:6px 14px;background:rgba(15,118,110,0.3);border:1px solid rgba(15,118,110,0.5);border-radius:20px;font-size:12px;font-weight:600;">Salesmap CRM</span>
+          <span style="padding:6px 14px;background:rgba(100,116,139,0.3);border:1px solid rgba(100,116,139,0.5);border-radius:20px;font-size:12px;font-weight:600;">Python 3.11</span>
+        </div>
+      </div>
+
+      <!-- Phase 완성 현황 -->
+      <div style="margin-top:20px;">
+        <div style="font-size:13px;font-weight:800;color:#64748b;margin-bottom:12px;">✅ Phase 완성 현황</div>
+        <div class="grid2">
+          <div>
+            <div class="score-row">
+              <div class="s-label">Phase 1</div>
+              <div class="s-bar"><div class="s-fill" style="width:100%;"></div></div>
+              <div class="s-val" style="color:#059669;">완료</div>
+            </div>
+            <div class="score-row">
+              <div class="s-label">Phase 2a</div>
+              <div class="s-bar"><div class="s-fill" style="width:100%;"></div></div>
+              <div class="s-val" style="color:#059669;">완료</div>
+            </div>
+            <div class="score-row">
+              <div class="s-label">Phase 2b~e</div>
+              <div class="s-bar"><div class="s-fill" style="width:100%;"></div></div>
+              <div class="s-val" style="color:#059669;">완료</div>
+            </div>
+          </div>
+          <div>
+            <div class="score-row">
+              <div class="s-label">Phase 3</div>
+              <div class="s-bar"><div class="s-fill" style="width:100%;"></div></div>
+              <div class="s-val" style="color:#059669;">완료</div>
+            </div>
+            <div class="score-row">
+              <div class="s-label">Phase 4</div>
+              <div class="s-bar"><div class="s-fill" style="width:100%;"></div></div>
+              <div class="s-val" style="color:#059669;">완료</div>
+            </div>
+            <div class="score-row">
+              <div class="s-label">Phase 5</div>
+              <div class="s-bar"><div class="s-fill" style="width:20%;background:linear-gradient(90deg,#94a3b8,#cbd5e1);"></div></div>
+              <div class="s-val" style="color:#94a3b8;">예정</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -393,19 +837,19 @@
 
 <div class="footer">
   BizAI — AI 기업정보 영업 인텔리전스 플랫폼 | 276홀딩스 © 2026<br>
-  <span style="font-size:11px;">https://github.com/YeChungHee/BizAi</span>
+  <span style="font-size:11px;"><a href="https://github.com/YeChungHee/BizAi" style="color:#94a3b8;">https://github.com/YeChungHee/BizAi</a></span>
 </div>
 
 <script>
-  // NAV
-  function showSection(id) {
+  // ─── NAV ───
+  function showSection(id, btn) {
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
     document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
     document.getElementById(id).classList.add('active');
-    event.target.classList.add('active');
+    if (btn) btn.classList.add('active');
   }
 
-  // SIMULATOR
+  // ─── SIMULATOR ───
   function recalculate() {
     const ar = parseFloat(document.getElementById('ar').value) || 0;
     const other_ar = parseFloat(document.getElementById('other_ar').value) || 0;
@@ -429,61 +873,151 @@
         ? `⚠️ 채권(${total_ar}M)이 매출(${revenue}M)을 ${(ratio-100).toFixed(1)}% 초과 — 위험 신호`
         : `채권/매출 비율: ${ratio}%`;
 
-    // T+1 freed cash: AR × (DSO-1)/DSO
     const freed = Math.round(total_ar * (dso - 1) / dso);
     document.getElementById('freed_cash').textContent = freed.toLocaleString() + '백만원';
     document.getElementById('freed_cash_desc').textContent =
       `(전체 채권 ${total_ar}M × DSO ${dso}일 → T+1 전환 기준)`;
 
-    // Interest saving: freed cash × 4% per year
     const interest = Math.round(freed * 0.04);
     document.getElementById('interest_saving').textContent = interest.toLocaleString() + '백만원/년';
   }
 
-  // PROPOSAL GENERATOR
-  function generateProposal() {
-    const ar = parseFloat(document.getElementById('ar').value) || 1980;
-    const other_ar = parseFloat(document.getElementById('other_ar').value) || 50;
-    const revenue = parseFloat(document.getElementById('revenue').value) || 1810;
-    const liabilities = parseFloat(document.getElementById('liabilities').value) || 3700;
-    const net_income = parseFloat(document.getElementById('net_income').value) || 104;
-    const dso = parseInt(document.getElementById('dso').value) || 40;
+  // ─── DART SEARCH ───
+  const DART_SAMPLES = [
+    { name: '삼성전자(주)', code: '00126380', stock: '005930', type: '유가증권', industry: '전자부품·컴퓨터' },
+    { name: '(주)카카오', code: '00918444', stock: '035720', type: '유가증권', industry: '정보통신업' },
+    { name: '현대자동차(주)', code: '00164779', stock: '005380', type: '유가증권', industry: '자동차 제조' },
+    { name: 'LG에너지솔루션(주)', code: '01006110', stock: '373220', type: '유가증권', industry: '축전지 제조' },
+    { name: '(주)네이버', code: '00266961', stock: '035420', type: '유가증권', industry: '정보통신업' },
+    { name: '(주)쿠팡', code: '00813800', stock: null, type: '비상장', industry: '전자상거래' },
+    { name: '(주)토스', code: '00972736', stock: null, type: '비상장', industry: '금융서비스' },
+    { name: '배달의민족(주)', code: '01109814', stock: null, type: '비상장', industry: '음식배달플랫폼' },
+  ];
 
+  function dartSearch() {
+    const kw = document.getElementById('dart_keyword').value.trim();
+    const results = document.getElementById('dart_results');
+    if (!kw) { results.innerHTML = ''; return; }
+
+    const matched = DART_SAMPLES.filter(c => c.name.includes(kw) || c.industry.includes(kw));
+
+    if (matched.length === 0) {
+      results.innerHTML = `<div style="padding:20px;text-align:center;color:#94a3b8;font-size:14px;">
+        🔍 "<strong>${kw}</strong>" 검색 결과 없음<br>
+        <span style="font-size:12px;margin-top:6px;display:block;">실제 서비스에서는 108,328개 기업 DB에서 검색됩니다</span>
+      </div>`;
+      return;
+    }
+
+    results.innerHTML = matched.map(c => `
+      <div class="dart-result-row" onclick="showCorpDetail('${c.name}', '${c.code}', '${c.stock||''}', '${c.type}', '${c.industry}')">
+        <div style="flex:1;">
+          <div class="corp-name">${c.name}</div>
+          <div class="corp-meta">DART코드: ${c.code} · ${c.industry}</div>
+        </div>
+        ${c.stock ? `<span class="stock-badge">${c.stock}</span>` : `<span style="padding:3px 10px;background:#f1f5f9;color:#64748b;border-radius:20px;font-size:11px;font-weight:700;">비상장</span>`}
+        <span style="color:#94a3b8;font-size:18px;margin-left:4px;">›</span>
+      </div>
+    `).join('');
+  }
+
+  function showCorpDetail(name, code, stock, type, industry) {
+    document.getElementById('dart_corp_name').textContent = name;
+    document.getElementById('dart_corp_meta').textContent = `DART 고유번호: ${code} · ${industry}`;
+    document.getElementById('dart_company_info').innerHTML = `
+      <div class="grid3" style="margin-bottom:16px;">
+        <div class="kpi-box" style="background:#eef2ff;">
+          <div class="kv" style="font-size:18px;color:#6366f1;">${code}</div>
+          <div class="kl">DART 고유번호</div>
+        </div>
+        <div class="kpi-box" style="background:${stock ? '#ecfdf5' : '#f8fafc'};">
+          <div class="kv" style="font-size:18px;color:${stock ? '#059669' : '#94a3b8'};">${stock || '비상장'}</div>
+          <div class="kl">주식 코드</div>
+        </div>
+        <div class="kpi-box" style="background:#fffbeb;">
+          <div class="kv" style="font-size:18px;color:#d97706;">${type}</div>
+          <div class="kl">시장 구분</div>
+        </div>
+      </div>
+      <div class="result-section info" style="margin-bottom:12px;">
+        <h3>📡 DART API 연동 안내</h3>
+        <p>실제 서비스에서는 <code>/api/company.json</code>으로 기업 기본정보(대표자, 설립일, 업종코드)를, <code>/api/fnlttSinglAcnt.json</code>으로 사업연도별 재무제표를 즉시 조회할 수 있습니다.<br><br>
+        <strong>python3 -m ingest.dart_client</strong> 로 직접 실행 가능합니다.</p>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn btn-primary btn-sm" onclick="alert('실제 서비스에서 DART API 호출 → 재무제표 조회')">📊 재무제표 조회</button>
+        <button class="btn btn-secondary btn-sm" onclick="alert('전체 파이프라인 분석 시작 (Phase 2a~4)')">🤖 AI 분석 시작</button>
+        <button class="btn btn-secondary btn-sm" onclick="alert('영업 트리거 등록 완료')">🔔 트리거 등록</button>
+      </div>
+    `;
+    document.getElementById('dart_company_card').style.display = 'block';
+    document.getElementById('dart_company_card').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  // ─── GRADE TEMPLATE ───
+  const GRADE_TEMPLATES = {
+    'A':   { name: 'Premium — 우량 거래', desc: '최우선 거래, 낮은 마진, 높은 한도 설정', color: '#059669', bg: '#ecfdf5', border: '#6ee7b7' },
+    'BBB': { name: 'Standard — 양호 거래', desc: '표준 거래 조건, 정기 모니터링', color: '#6366f1', bg: '#eef2ff', border: '#a5b4fc' },
+    'BB':  { name: 'Standard — 일반 거래', desc: '표준 거래 조건, 강화 모니터링', color: '#6366f1', bg: '#eef2ff', border: '#a5b4fc' },
+    'B':   { name: 'Cautious — 신중 접근', desc: '거래 조건 명시, 모니터링 강화, 단계적 한도', color: '#d97706', bg: '#fffbeb', border: '#fde68a' },
+    'CCC': { name: 'Cautious — 조건부 거래', desc: '엄격한 조건, 분기 재검토, 담보/보증 요청', color: '#d97706', bg: '#fffbeb', border: '#fde68a' },
+    'CC':  { name: 'Restricted — 제한 거래', desc: '소액 한도, 선불 또는 담보 필수', color: '#dc2626', bg: '#fef2f2', border: '#fca5a5' },
+    'D':   { name: 'Restricted — 거래 불가', desc: '신규 거래 보류, 기존 건 회수 전략 수립', color: '#dc2626', bg: '#fef2f2', border: '#fca5a5' },
+  };
+
+  function updateGradeUI() {
+    const grade = document.getElementById('prop_grade').value;
+    const t = GRADE_TEMPLATES[grade] || GRADE_TEMPLATES['B'];
+    const badge = document.getElementById('grade_template_badge');
+    badge.style.background = t.bg;
+    badge.style.borderColor = t.border;
+    badge.querySelector('#template_name').style.color = t.color;
+    document.getElementById('template_name').textContent = t.name;
+    document.getElementById('template_desc').textContent = t.desc;
+  }
+
+  // ─── PROPOSAL GENERATOR ───
+  function generateProposal() {
+    const revenue = parseFloat(document.getElementById('p_revenue').value) || 12075;
+    const ar = parseFloat(document.getElementById('p_ar').value) || 2030;
+    const grade = document.getElementById('prop_grade').value;
     const company = document.getElementById('company_name').value;
     const contact = document.getElementById('contact_name').value;
     const industry = document.getElementById('industry').value;
+    const t = GRADE_TEMPLATES[grade] || GRADE_TEMPLATES['B'];
 
-    const total_ar = ar + other_ar;
-    const freed = Math.round(total_ar * (dso - 1) / dso);
+    // Margin by grade
+    const margins = { 'A': 2.5, 'BBB': 5.0, 'BB': 6.5, 'B': 7.5, 'CCC': 9.0, 'CC': 12.0, 'D': 15.0 };
+    const margin = margins[grade] || 7.5;
+    const freed = Math.round(ar * 39 / 40);
     const interest = Math.round(freed * 0.04);
-    const ratio = (total_ar / revenue * 100).toFixed(1);
-    const roi = Math.round((freed * 0.15) / Math.max(net_income, 1) * 100);
 
     document.getElementById('proposal_title').textContent =
-      `[FlowPay] ${company} 현금흐름 최적화 제안서 — Trapped Cash 해제 시뮬레이션`;
+      `[FlowPay] ${company} 현금흐름 최적화 제안서 — ${t.name}`;
     document.getElementById('proposal_date').textContent =
-      `생성일: ${new Date().toLocaleDateString('ko-KR')} | AI CFO 분석 리포트`;
+      `생성일: ${new Date().toLocaleDateString('ko-KR')} | 신용등급: ${grade} | 적용 템플릿: ${t.name}`;
 
     document.getElementById('section1_content').innerHTML =
-      `${company} (${industry}) 재무제표 분석 결과, <strong>외상매출금 ${ar}백만원 + 미수금 ${other_ar}백만원 = 총 채권 ${total_ar}백만원</strong>이 연간 매출(${revenue}백만원) 대비 <strong>${ratio}% 수준</strong>으로 과다 집적되어 있습니다. 유동부채 ${liabilities}백만원에 대한 이자를 지불하면서도 받아야 할 자금이 ${dso}일간 묶여 있는 구조로, 영업이익률 개선의 핵심 병목이 됩니다. 당기순이익 ${net_income}백만원은 이 구조가 해소되지 않는 한 개선이 어렵습니다.`;
+      `${company} (${industry}) 재무 분석 결과, 채권 ${ar}백만원이 연간 매출(${revenue}백만원) 대비 <strong>${(ar/revenue*100).toFixed(1)}% 수준</strong>으로 집중되어 있습니다. 신용등급 <strong>${grade}</strong> 기준으로 분석 시, ${t.desc} 전략이 적합합니다.`;
 
     document.getElementById('section2_content').innerHTML =
-      `현재 평균 채권 회수 기간(DSO) ${dso}일을 FlowPay T+1 정산으로 전환할 경우, 다음 날 즉시 수령 가능한 현금 규모는:`;
+      `현재 채권 회수 구조를 FlowPay T+1 정산으로 전환할 경우:`;
     document.getElementById('section2_amount').textContent =
-      `약 ${freed.toLocaleString()}백만원 즉시 유동화`;
+      `약 ${freed.toLocaleString()}백만원 즉시 유동화 가능`;
 
     document.getElementById('section3_content').innerHTML =
-      `확보된 ${freed}백만원을 ① 유동부채 ${liabilities}백만원 일부 상환 시 <strong>연 ${interest}백만원의 이자비용 절감</strong>, ② 마케팅 재투자 시 ${industry} 평균 CAC 기준 <strong>신규 고객 획득 사이클 2배 가속</strong>이 가능합니다. 현재 순이익(${net_income}M) 대비 이자 절감만으로도 <strong>${Math.round(interest/Math.max(net_income,1)*100)}% 수익성 개선</strong> 효과가 예상됩니다.`;
+      `확보 자금 재투자 시 연 이자비용 <strong>${interest}백만원 절감</strong> + 마케팅 재투자 사이클 가속이 가능합니다. 권장 마진은 <strong>${margin}%</strong>이며, 단계적 한도 상향을 통해 장기 파트너십을 구축할 수 있습니다.`;
 
     document.getElementById('section4_content').innerHTML =
-      `${contact}, 지금 바로 FlowPay 실시간 한도 조회 → 10분 내 가승인 → 내일부터 T+1 수령이 가능합니다. 아래 링크에서 귀사 전용 시뮬레이션 대시보드를 확인하시고, 담당 매니저와 30분 미팅을 예약해 주세요. 추가 수수료 없이 현재 PG 계약 유지 상태에서 바로 적용 가능합니다.`;
+      `${contact}, 지금 바로 FlowPay ${grade}등급 맞춤 조건으로 시작하세요. 적용 마진 <strong>${margin}%</strong> · 초기 한도 설정 후 3개월 실적 기반 한도 상향 검토. 담당 매니저에게 연락하시면 10분 내 한도 조회가 가능합니다.`;
 
     document.getElementById('proposal_output').style.display = 'block';
     document.getElementById('proposal_output').scrollIntoView({ behavior: 'smooth' });
   }
 
-  // Init
+  // ─── INIT ───
   recalculate();
+  updateGradeUI();
 </script>
 </body>
 </html>
