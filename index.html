@@ -1915,7 +1915,9 @@ Web: flowpay.kr`;
   const DART_KEY = '9017bdcbc6b17272814a66e99fa15f068cfaa61a';
   const CORS_PROXIES = [
     url => 'https://corsproxy.io/?' + encodeURIComponent(url),
+    url => 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(url),
     url => 'https://api.allorigins.win/get?url=' + encodeURIComponent(url),
+    url => 'https://thingproxy.freeboard.io/fetch/' + url,
   ];
 
   // 연도 셀렉트 초기화
@@ -1940,25 +1942,52 @@ Web: flowpay.kr`;
     if (!isPdf && !document.getElementById('dartYear').options.length) initYears();
   }
 
-  // DART API 호출 (CORS 프록시 순차 시도)
+  // DART API 호출 (CORS 프록시 순차 시도 + 디버깅 강화)
   async function dartFetch(url) {
+    const errors = [];
     // 1) 직접 시도
     try {
       const r = await fetch(url, { signal: AbortSignal.timeout(5000) });
-      if (r.ok) { const d = await r.json(); if (d.status !== undefined) return d; }
-    } catch(e) {}
+      if (r.ok) {
+        const d = await r.json();
+        if (d.status !== undefined) { console.log('[DART] 직접 연결 성공:', d.status); return d; }
+      }
+    } catch(e) { errors.push('직접: ' + e.message); }
     // 2) 프록시 순차 시도
-    for (const makeProxy of CORS_PROXIES) {
+    for (let i = 0; i < CORS_PROXIES.length; i++) {
+      const makeProxy = CORS_PROXIES[i];
       try {
-        const r = await fetch(makeProxy(url), { signal: AbortSignal.timeout(8000) });
-        if (!r.ok) continue;
-        const wrapper = await r.json();
-        // allorigins는 {contents:'...'} 래핑
-        const raw = wrapper.contents !== undefined ? wrapper.contents : JSON.stringify(wrapper);
-        return JSON.parse(raw);
-      } catch(e) {}
+        const proxyUrl = makeProxy(url);
+        console.log(`[DART] 프록시 ${i+1} 시도:`, proxyUrl.substring(0, 60) + '...');
+        const r = await fetch(proxyUrl, { signal: AbortSignal.timeout(10000) });
+        if (!r.ok) { errors.push(`프록시${i+1}: HTTP ${r.status}`); continue; }
+        const text = await r.text();
+        let parsed;
+        try {
+          const wrapper = JSON.parse(text);
+          // allorigins는 {contents:'...'} 래핑
+          if (wrapper.contents !== undefined) {
+            parsed = JSON.parse(wrapper.contents);
+          } else if (wrapper.status !== undefined) {
+            parsed = wrapper;  // 직접 DART 응답
+          } else {
+            parsed = wrapper;
+          }
+        } catch(pe) {
+          // JSON 파싱 실패 — HTML 등 비정상 응답
+          errors.push(`프록시${i+1}: 응답 파싱 실패`);
+          console.warn(`[DART] 프록시${i+1} 비정상 응답:`, text.substring(0, 200));
+          continue;
+        }
+        if (parsed && parsed.status !== undefined) {
+          console.log(`[DART] 프록시${i+1} 성공:`, parsed.status, parsed.message || '');
+          return parsed;
+        }
+        errors.push(`프록시${i+1}: status 필드 없음`);
+      } catch(e) { errors.push(`프록시${i+1}: ${e.message}`); }
     }
-    throw new Error('API 연결 실패');
+    console.error('[DART] 모든 연결 실패:', errors);
+    throw new Error('API 연결 실패 (' + errors.join(' / ') + ')');
   }
 
   function setDartStatus(type, msg) {
@@ -1974,20 +2003,46 @@ Web: flowpay.kr`;
     if (!name) { setDartStatus('error', '회사명을 입력하세요.'); return; }
 
     document.getElementById('dartCorpList').innerHTML = '';
-    setDartStatus('info', `🔍 "<strong>${name}</strong>" 검색 중...`);
+    setDartStatus('info', `🔍 "<strong>${name}</strong>" 검색 중... (프록시 연결 시도 중)`);
 
     try {
       // list.json으로 최근 사업보고서 공시 검색
       const year = document.getElementById('dartYear').value;
       const url = `https://opendart.fss.or.kr/api/list.json?crtfc_key=${DART_KEY}&corp_name=${encodeURIComponent(name)}&pblntf_ty=A&bgn_de=${year}0101&end_de=${year}1231&page_no=1&page_count=20`;
-      const data = await dartFetch(url);
+
+      let data;
+      try { data = await dartFetch(url); } catch(e) {
+        console.warn('[DART] 1차 검색 실패:', e.message);
+        data = { status: 'FAIL' };
+      }
 
       if (data.status !== '000' || !data.list || data.list.length === 0) {
-        // 연도 범위 확장해서 재시도
+        // 연도 범위 확장해서 재시도 (날짜 제한 없이)
+        setDartStatus('info', `🔍 "<strong>${name}</strong>" 전체 연도에서 재검색 중...`);
         const url2 = `https://opendart.fss.or.kr/api/list.json?crtfc_key=${DART_KEY}&corp_name=${encodeURIComponent(name)}&pblntf_ty=A&page_no=1&page_count=20`;
-        const data2 = await dartFetch(url2);
+
+        let data2;
+        try { data2 = await dartFetch(url2); } catch(e2) {
+          console.error('[DART] 2차 검색도 실패:', e2.message);
+          setDartStatus('error', `DART 서버 연결에 실패했습니다.<br><small>${e2.message}<br>브라우저 콘솔(F12)에서 상세 오류를 확인하세요.</small>`);
+          return;
+        }
+
+        // API 상태별 분기 처리
+        if (data2.status === '013') {
+          setDartStatus('error', `"${name}"에 해당하는 사업보고서 공시를 찾을 수 없습니다.<br><small>상장사/공시의무법인만 조회 가능합니다. 정확한 법인명을 입력해주세요. (예: "삼성전자" O / "삼성" X)</small>`);
+          return;
+        }
+        if (data2.status === '010' || data2.status === '800') {
+          setDartStatus('error', `DART API 인증 오류입니다. (코드: ${data2.status})<br><small>${data2.message || 'API Key를 확인해주세요.'}</small>`);
+          return;
+        }
+        if (data2.status === '020') {
+          setDartStatus('error', `DART API 요청 한도를 초과했습니다.<br><small>잠시 후 다시 시도해주세요. (일일 10,000회 제한)</small>`);
+          return;
+        }
         if (data2.status !== '000' || !data2.list || data2.list.length === 0) {
-          setDartStatus('error', `"${name}"에 해당하는 사업보고서 공시를 찾을 수 없습니다.<br><small>상장사/공시의무법인만 조회 가능합니다.</small>`);
+          setDartStatus('error', `"${name}" 검색 결과가 없습니다. (API 응답: ${data2.status || 'unknown'})<br><small>${data2.message || '회사명을 정확히 입력해주세요.'}</small>`);
           return;
         }
         renderDartCorpList(data2.list);
@@ -1995,7 +2050,8 @@ Web: flowpay.kr`;
         renderDartCorpList(data.list);
       }
     } catch(e) {
-      setDartStatus('error', 'DART 서버 연결에 실패했습니다. 잠시 후 다시 시도해주세요.');
+      console.error('[DART] searchDart 예외:', e);
+      setDartStatus('error', `DART 서버 연결에 실패했습니다.<br><small>${e.message}<br>브라우저 콘솔(F12)에서 상세 오류를 확인하세요.</small>`);
     }
   }
 
@@ -2027,11 +2083,11 @@ Web: flowpay.kr`;
     try {
       let result = null;
       let fsType = '';
-      for (const fs_div of ['OFS', 'CFS']) {
+      for (const fs_div of ['CFS', 'OFS']) {
         const url = `https://opendart.fss.or.kr/api/fnlttSinglAcntAll.json?crtfc_key=${DART_KEY}&corp_code=${corp_code}&bsns_year=${year}&reprt_code=11011&fs_div=${fs_div}`;
         const data = await dartFetch(url);
         if (data.status === '000' && data.list && data.list.length > 0) {
-          result = data.list; fsType = fs_div === 'OFS' ? '별도' : '연결'; break;
+          result = data.list; fsType = fs_div === 'CFS' ? '연결' : '별도'; break;
         }
       }
       if (!result) {
@@ -2043,7 +2099,8 @@ Web: flowpay.kr`;
       displayDartResult(fin, corp_name, year, fsType);
       setDartStatus('success', `✅ <strong>${corp_name}</strong> ${year}년 재무제표(${fsType}) 로드 완료`);
     } catch(e) {
-      setDartStatus('error', '재무제표 조회 중 오류가 발생했습니다.');
+      console.error('[DART] fetchDartFinancials 오류:', e);
+      setDartStatus('error', `재무제표 조회 중 오류가 발생했습니다.<br><small>${e.message}</small>`);
     }
   }
 
