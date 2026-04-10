@@ -80,4 +80,4 @@ BizAi/
 
 ---
 
-© 2026 276홀딩스 | claude@276holdings.com
+© 2026 276홀딩스 | appler@276holdings.com
