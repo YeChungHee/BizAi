@@ -3,1021 +3,2165 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BizAI — AI 기업정보 영업 인텔리전스 플랫폼</title>
+  <title>FlowBizAi — FlowPay 영업 인텔리전스 플랫폼 | 276홀딩스</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    // PDF.js 워커: CDN 워커를 시도하되, 로컬(file://) 환경에서 차단되면
+    // 명시적으로 가짜 워커 모드로 전환해 "Setting up fake worker" 경고를 제거합니다.
+    (function() {
+      if (typeof pdfjsLib === 'undefined') return;
+      const workerUrl = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      try {
+        // 워커 URL을 즉시 설정 (load 이벤트 대기 없이)
+        pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl;
+      } catch(e) {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = '';
+      }
+    })();
+  </script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Pretendard', 'Noto Sans KR', -apple-system, sans-serif; background: #f8fafc; color: #1e293b; }
+    body {
+      font-family: 'Apple SD Gothic Neo', 'AppleGothic', 'Malgun Gothic', 'Noto Sans KR', -apple-system, sans-serif;
+      background: #EEF2F7; color: #1A2332;
+      -webkit-font-smoothing: antialiased;
+    }
 
-    /* HEADER */
-    .header { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: white; padding: 60px 40px; text-align: center; }
-    .header .badge { display: inline-block; background: rgba(99,102,241,0.3); border: 1px solid rgba(99,102,241,0.6); color: #a5b4fc; padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 700; letter-spacing: 1px; margin-bottom: 20px; }
-    .header h1 { font-size: 42px; font-weight: 900; letter-spacing: -1px; margin-bottom: 12px; }
-    .header h1 span { color: #818cf8; }
-    .header p { font-size: 16px; opacity: 0.7; max-width: 500px; margin: 0 auto 30px; line-height: 1.6; }
-    .header-stats { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; }
-    .header-stats .stat { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 14px 24px; text-align: center; }
-    .header-stats .stat .val { font-size: 22px; font-weight: 800; }
-    .header-stats .stat .lbl { font-size: 11px; opacity: 0.6; margin-top: 2px; }
+    /* ── HEADER ── */
+    .header {
+      background: linear-gradient(160deg, #0D2045 0%, #1A3A6E 55%, #1B4FD8 100%);
+      color: white; padding: 48px 40px 40px; text-align: center; position: relative; overflow: hidden;
+    }
+    .header::before {
+      content: ''; position: absolute; inset: 0;
+      background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 40px 40px; pointer-events: none;
+    }
+    .header-inner { position: relative; z-index: 1; }
+    .trust-badges { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 22px; }
+    .trust-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18);
+      color: #B8CCEE; padding: 5px 13px; border-radius: 20px; font-size: 11px; font-weight: 600;
+    }
+    .trust-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: #4ADE80; flex-shrink: 0; }
+    .trust-badge .dot.b { background: #60A5FA; }
+    .trust-badge .dot.g { background: #FBBF24; }
+    .header h1 { font-size: 44px; font-weight: 900; letter-spacing: -1.5px; margin-bottom: 10px; }
+    .header h1 span { color: #60A5FA; }
+    .header .tagline { font-size: 15px; color: rgba(255,255,255,0.65); max-width: 520px; margin: 0 auto 30px; line-height: 1.7; }
+    .header-stats { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .stat-pill {
+      background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 14px; padding: 13px 20px; text-align: center; min-width: 110px;
+    }
+    .stat-pill .sv { font-size: 19px; font-weight: 800; color: #FBBF24; display: block; margin-bottom: 3px; }
+    .stat-pill .sl { font-size: 11px; color: rgba(255,255,255,0.55); }
 
-    /* NAV */
-    .nav { background: white; border-bottom: 1px solid #e2e8f0; padding: 0 40px; display: flex; gap: 0; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
-    .nav button { padding: 16px 20px; border: none; background: none; cursor: pointer; font-size: 13px; font-weight: 600; color: #94a3b8; border-bottom: 3px solid transparent; transition: all 0.2s; }
-    .nav button.active { color: #6366f1; border-bottom-color: #6366f1; }
-    .nav button:hover { color: #6366f1; }
+    /* ── NAV ── */
+    .nav {
+      background: white; border-bottom: 1px solid #D9E3EE; padding: 0 40px;
+      display: flex; justify-content: center; position: sticky; top: 0; z-index: 100;
+      box-shadow: 0 2px 8px rgba(26,58,110,0.07);
+    }
+    .nav button {
+      padding: 18px 22px; border: none; background: none; cursor: pointer;
+      font-size: 14.5px; font-weight: 800; font-family: inherit; color: #7A8DA8;
+      border-bottom: 3px solid transparent; transition: all 0.25s ease; white-space: nowrap;
+      position: relative;
+    }
+    .nav button.active { color: #1B4FD8; border-bottom-color: #1B4FD8; background: rgba(27,79,216,0.04); }
+    .nav button:hover { color: #1B4FD8; background: rgba(27,79,216,0.06); transform: translateY(-1px); }
+    .nav button:active { transform: translateY(0px) scale(0.97); background: rgba(27,79,216,0.10); transition: all 0.08s; }
 
-    /* MAIN */
-    .main { max-width: 1100px; margin: 0 auto; padding: 40px 20px; }
+    /* ── MAIN ── */
+    .main { max-width: 1100px; margin: 0 auto; padding: 32px 20px; }
     .section { display: none; }
     .section.active { display: block; }
 
-    /* CARDS */
-    .card { background: white; border-radius: 16px; padding: 28px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); margin-bottom: 20px; }
-    .card h2 { font-size: 18px; font-weight: 800; margin-bottom: 6px; }
-    .card .sub { font-size: 13px; color: #94a3b8; margin-bottom: 20px; }
-    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-    .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
-    .grid4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 14px; }
+    /* ── CARD ── */
+    .card {
+      background: white; border-radius: 16px; padding: 26px 28px;
+      box-shadow: 0 1px 4px rgba(26,58,110,0.07), 0 4px 16px rgba(26,58,110,0.04);
+      margin-bottom: 18px; border: 1px solid #E8EEF6;
+    }
+    .card h2 { font-size: 17px; font-weight: 800; color: #0D2045; margin-bottom: 5px; }
+    .card .sub { font-size: 13px; color: #7A8DA8; line-height: 1.5; margin-bottom: 20px; }
 
-    /* FINANCIAL INPUT */
-    .input-group { margin-bottom: 16px; }
-    .input-group label { display: block; font-size: 12px; font-weight: 700; color: #64748b; margin-bottom: 6px; }
-    .input-group input, .input-group select { width: 100%; padding: 10px 14px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 14px; font-weight: 600; color: #1e293b; transition: border-color 0.2s; background: white; }
-    .input-group input:focus, .input-group select:focus { outline: none; border-color: #6366f1; }
-    .input-group .unit { font-size: 11px; color: #94a3b8; margin-top: 4px; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .sec-title {
+      font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px;
+      color: #1B4FD8; margin-bottom: 14px; display: flex; align-items: center; gap: 6px;
+    }
+    .sec-title::after { content: ''; flex: 1; height: 1px; background: #E8EEF6; }
 
-    /* METRICS */
-    .metric-card { border-radius: 12px; padding: 18px; text-align: center; }
-    .metric-card .metric-val { font-size: 26px; font-weight: 900; margin-bottom: 4px; }
-    .metric-card .metric-lbl { font-size: 12px; font-weight: 600; }
-    .metric-card .metric-sub { font-size: 11px; opacity: 0.7; margin-top: 2px; }
+    /* ── INPUTS ── */
+    .ig { margin-bottom: 13px; }
+    .ig label {
+      display: flex; justify-content: space-between; align-items: baseline;
+      font-size: 12px; font-weight: 700; color: #3A4F6A; margin-bottom: 5px;
+    }
+    .ig label .hint { font-size: 11px; font-weight: 500; color: #A0AFBE; }
+    .ig input, .ig select {
+      width: 100%; padding: 10px 14px; border: 1.5px solid #D9E3EE; border-radius: 10px;
+      font-size: 14px; font-weight: 700; color: #0D2045; font-family: inherit;
+      background: #FAFBFD; transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .ig input:focus, .ig select:focus {
+      outline: none; border-color: #1B4FD8; box-shadow: 0 0 0 3px rgba(27,79,216,0.08); background: #fff;
+    }
+    .ig .unit { font-size: 11px; color: #A0AFBE; margin-top: 4px; }
 
-    /* BUTTONS */
-    .btn { padding: 12px 28px; border-radius: 10px; border: none; cursor: pointer; font-size: 14px; font-weight: 700; transition: all 0.2s; }
-    .btn-primary { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; box-shadow: 0 4px 12px rgba(99,102,241,0.3); }
-    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(99,102,241,0.4); }
-    .btn-secondary { background: #f1f5f9; color: #475569; }
-    .btn-sm { padding: 7px 16px; font-size: 12px; border-radius: 8px; }
+    /* ── RANGE ── */
+    .range-wrap { margin: 16px 0 4px; }
+    .range-label { display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 700; color: #3A4F6A; margin-bottom: 8px; }
+    .range-val { background: #EEF2FF; color: #1B4FD8; padding: 2px 10px; border-radius: 20px; font-size: 13px; font-weight: 800; }
+    input[type=range] { width: 100%; height: 6px; -webkit-appearance: none; appearance: none; background: linear-gradient(90deg,#1B4FD8,#60A5FA); border-radius: 999px; cursor: pointer; }
+    input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: white; border: 3px solid #1B4FD8; box-shadow: 0 2px 6px rgba(27,79,216,0.3); }
 
-    /* RESULT SECTION */
-    .result-section { border-radius: 12px; padding: 20px; margin-bottom: 16px; border-left: 4px solid; }
-    .result-section.danger { background: #fef2f2; border-color: #dc2626; }
-    .result-section.info { background: #ecfeff; border-color: #0891b2; }
-    .result-section.success { background: #ecfdf5; border-color: #059669; }
-    .result-section.action { background: #1e293b; border-color: #6366f1; color: white; }
-    .result-section.warning { background: #fffbeb; border-color: #f59e0b; }
-    .result-section h3 { font-size: 13px; font-weight: 800; margin-bottom: 10px; }
-    .result-section p { font-size: 13px; line-height: 1.7; }
-    .result-section .highlight { font-size: 20px; font-weight: 900; display: block; margin: 8px 0; }
+    /* ── RESULT BOXES ── */
+    .rbox { border-radius: 12px; padding: 16px 18px; margin-bottom: 13px; border: 1px solid; }
+    .rbox.green { background: linear-gradient(135deg,#F0FDF4,#DCFCE7); border-color: #6EE7B7; }
+    .rbox.amber { background: linear-gradient(135deg,#FFFBEB,#FEF3C7); border-color: #FCD34D; }
+    .rbox.red { background: #FFF1F1; border-color: #FECACA; }
+    .rbox.blue { background: #EFF6FF; border-color: #BFDBFE; }
+    .rbox .rl { font-size: 11px; font-weight: 800; letter-spacing: 0.4px; margin-bottom: 5px; display: flex; align-items: center; gap: 5px; }
+    .rbox .rv { font-size: 28px; font-weight: 900; line-height: 1.1; }
+    .rbox .rd { font-size: 12px; margin-top: 5px; opacity: 0.75; line-height: 1.5; }
 
-    /* PROGRESS BAR */
-    .progress-bar { background: #e2e8f0; border-radius: 999px; height: 10px; overflow: hidden; margin: 6px 0; }
-    .progress-fill { height: 100%; border-radius: 999px; transition: width 0.8s ease; }
+    /* ── KV CARDS ── */
+    .kv-card { border-radius: 14px; padding: 20px; border-top: 4px solid; }
+    .kv-card.c1 { background: #F0FDF4; border-color: #22C55E; }
+    .kv-card.c2 { background: #EFF6FF; border-color: #3B82F6; }
+    .kv-card.c3 { background: #FFFBEB; border-color: #F59E0B; }
+    .kv-icon { width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 12px; }
+    .c1 .kv-icon { background: #DCFCE7; }
+    .c2 .kv-icon { background: #DBEAFE; }
+    .c3 .kv-icon { background: #FEF3C7; }
+    .kv-card h3 { font-size: 15px; font-weight: 800; margin-bottom: 10px; color: #0D2045; }
+    .kv-card ul { list-style: none; padding: 0; }
+    .kv-card ul li { font-size: 13px; color: #475569; line-height: 1.7; padding: 3px 0; border-bottom: 1px dashed rgba(0,0,0,0.06); }
+    .kv-card ul li:last-child { border-bottom: none; }
+    .kv-card ul li::before { content: '· '; color: #94A3B8; }
+    .kv-result { margin-top: 12px; padding: 10px 14px; border-radius: 8px; font-size: 12px; font-weight: 800; }
+    .c1 .kv-result { background: #DCFCE7; color: #166534; }
+    .c2 .kv-result { background: #DBEAFE; color: #1E40AF; }
+    .c3 .kv-result { background: #FEF3C7; color: #92400E; }
 
-    /* TRIGGER SECTION */
-    .trigger-card { border-radius: 12px; padding: 20px; border: 1px solid; margin-bottom: 12px; }
-    .trigger-card.investment { background: #fefce8; border-color: #fde047; }
-    .trigger-card.product { background: #ecfdf5; border-color: #6ee7b7; }
-    .trigger-card.risk { background: #fef2f2; border-color: #fca5a5; }
-    .trigger-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-    .trigger-badge { padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; }
-    .trigger-card.investment .trigger-badge { background: #fef08a; color: #92400e; }
-    .trigger-card.product .trigger-badge { background: #6ee7b7; color: #065f46; }
-    .trigger-card.risk .trigger-badge { background: #fca5a5; color: #7f1d1d; }
-    .hook-box { background: rgba(0,0,0,0.06); border-radius: 8px; padding: 12px 14px; font-size: 12px; line-height: 1.7; margin-top: 10px; font-style: italic; }
+    /* ── PROCESS STEPS ── */
+    .steps { display: flex; gap: 0; margin: 20px 0; }
+    .step { flex: 1; text-align: center; position: relative; }
+    .step:not(:last-child)::after { content: '→'; position: absolute; right: -10px; top: 20px; font-size: 18px; color: #CBD5E1; font-weight: 700; }
+    .step-num { width: 42px; height: 42px; border-radius: 50%; background: #1B4FD8; color: white; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 900; margin: 0 auto 10px; }
+    .step-title { font-size: 13px; font-weight: 800; color: #0D2045; margin-bottom: 5px; }
+    .step-desc { font-size: 11px; color: #7A8DA8; line-height: 1.5; }
 
-    /* SIMULATION SLIDER */
-    .slider-container { margin: 16px 0; }
-    .slider-label { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: #64748b; margin-bottom: 8px; }
-    input[type="range"] { width: 100%; accent-color: #6366f1; }
+    /* ── BUTTONS ── */
+    .btn { padding: 13px 30px; border-radius: 10px; border: none; cursor: pointer; font-size: 14px; font-weight: 800; font-family: inherit; transition: all 0.2s; }
+    .btn-primary { background: linear-gradient(135deg,#1B4FD8,#2563EB); color: white; box-shadow: 0 4px 14px rgba(27,79,216,0.35); }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 7px 20px rgba(27,79,216,0.45); }
+    .btn-green { background: linear-gradient(135deg,#059669,#10B981); color: white; box-shadow: 0 4px 14px rgba(5,150,105,0.35); }
+    .btn-green:hover { transform: translateY(-2px); }
+    .btn-sm { padding: 8px 18px; font-size: 13px; border-radius: 8px; }
 
-    /* ─── ANALYSIS SECTION ─── */
-    .pipeline-steps { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 28px; }
-    .pipe-step { display: flex; align-items: center; gap: 6px; background: #f1f5f9; border: 1px solid #e2e8f0; padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; color: #64748b; }
-    .pipe-step.done { background: #ecfdf5; border-color: #6ee7b7; color: #059669; }
-    .pipe-step.active { background: #eef2ff; border-color: #a5b4fc; color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
-    .pipe-arrow { color: #cbd5e1; font-size: 14px; }
+    /* ── PROPOSAL (McKinsey Style) ── */
+    .proposal-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 20px; }
+    .proposal-actions .btn-icon { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; border-radius: 10px; border: 1.5px solid #D1DAEA; background: white; font-size: 13px; font-weight: 700; color: #1A2332; cursor: pointer; transition: all 0.2s; font-family: inherit; }
+    .proposal-actions .btn-icon:hover { border-color: #1B4FD8; color: #1B4FD8; background: #F0F5FF; }
+    .proposal-actions .btn-icon.primary { background: linear-gradient(135deg,#1B4FD8,#2563EB); color: white; border-color: transparent; box-shadow: 0 4px 14px rgba(27,79,216,0.3); }
+    .proposal-actions .btn-icon.primary:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(27,79,216,0.4); }
+    .rep-select { padding: 10px 14px; border: 1.5px solid #D1DAEA; border-radius: 10px; font-size: 13px; font-weight: 700; color: #1A2332; background: white; outline: none; cursor: pointer; font-family: inherit; min-width: 200px; }
+    .rep-select:focus { border-color: #1B4FD8; }
 
-    .kpi-box { border-radius: 12px; padding: 16px; text-align: center; }
-    .kpi-box .kv { font-size: 28px; font-weight: 900; line-height: 1; margin-bottom: 4px; }
-    .kpi-box .kl { font-size: 11px; font-weight: 700; color: #64748b; }
-    .kpi-box .ks { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+    /* McKinsey Report Container */
+    .mck-report { background: white; border-radius: 0; padding: 0; font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', serif; }
+    .mck-cover { background: linear-gradient(135deg, #0D2045 0%, #1B4FD8 100%); padding: 60px 48px 50px; color: white; position: relative; overflow: hidden; }
+    .mck-cover::after { content: ''; position: absolute; right: -60px; top: -60px; width: 300px; height: 300px; background: rgba(255,255,255,0.03); border-radius: 50%; }
+    .mck-cover-label { font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 20px; }
+    .mck-cover h1 { font-size: 28px; font-weight: 900; line-height: 1.4; margin-bottom: 6px; }
+    .mck-cover h1 .mck-sub { display: block; font-size: 14px; font-weight: 500; color: rgba(255,255,255,0.55); margin-top: 6px; }
+    .mck-cover-meta { display: flex; gap: 24px; margin-top: 24px; font-size: 12px; color: rgba(255,255,255,0.6); }
+    .mck-cover-meta span { display: flex; align-items: center; gap: 6px; }
 
-    /* Grade badge */
-    .grade-badge { display: inline-flex; align-items: center; justify-content: center; width: 60px; height: 60px; border-radius: 14px; font-size: 20px; font-weight: 900; }
-    .grade-AAA { background: #d1fae5; color: #065f46; border: 2px solid #a7f3d0; }
-    .grade-AA  { background: #dcfce7; color: #166534; border: 2px solid #86efac; }
-    .grade-A   { background: #dbeafe; color: #1e40af; border: 2px solid #93c5fd; }
-    .grade-BBB { background: #ede9fe; color: #5b21b6; border: 2px solid #c4b5fd; }
-    .grade-BB  { background: #fef3c7; color: #92400e; border: 2px solid #fde68a; }
-    .grade-B   { background: #fef9c3; color: #713f12; border: 2px solid #fef08a; }
-    .grade-CCC { background: #ffedd5; color: #9a3412; border: 2px solid #fdba74; }
-    .grade-CC  { background: #fee2e2; color: #991b1b; border: 2px solid #fca5a5; }
-    .grade-C   { background: #fce7f3; color: #9d174d; border: 2px solid #f9a8d4; }
-    .grade-D   { background: #f1f5f9; color: #475569; border: 2px solid #cbd5e1; }
+    .mck-body { padding: 40px 48px; }
+    .mck-section { margin-bottom: 36px; }
+    .mck-section-num { font-size: 11px; font-weight: 800; color: #1B4FD8; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
+    .mck-section h2 { font-size: 18px; font-weight: 900; color: #0D2045; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 2px solid #E8EEF6; }
+    .mck-section p { font-size: 14px; line-height: 1.9; color: #334155; margin-bottom: 12px; }
+    .mck-highlight { background: #F0F5FF; border-left: 4px solid #1B4FD8; padding: 18px 22px; border-radius: 0 10px 10px 0; margin: 16px 0; }
+    .mck-highlight .mck-hl-value { font-size: 26px; font-weight: 900; color: #1B4FD8; }
+    .mck-highlight .mck-hl-label { font-size: 12px; color: #64748B; margin-top: 4px; }
+    .mck-kpi-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 18px 0; }
+    .mck-kpi { background: #F8FAFD; border: 1px solid #E8EEF6; border-radius: 12px; padding: 18px; text-align: center; }
+    .mck-kpi .kv { font-size: 24px; font-weight: 900; color: #1B4FD8; }
+    .mck-kpi .kl { font-size: 11px; color: #7A8DA8; margin-top: 4px; }
+    .mck-divider { border: none; border-top: 1px solid #E8EEF6; margin: 32px 0; }
+    .mck-cta { background: linear-gradient(135deg, #0D2045, #1B4FD8); border-radius: 14px; padding: 32px; color: white; text-align: center; margin-top: 20px; }
+    .mck-cta h3 { font-size: 18px; font-weight: 900; margin-bottom: 10px; }
+    .mck-cta p { font-size: 13px; line-height: 1.8; color: rgba(255,255,255,0.8); }
+    .mck-cta .cta-contact { margin-top: 16px; font-size: 13px; color: rgba(255,255,255,0.6); }
+    .mck-cta .cta-contact strong { color: white; }
+    .mck-footer { padding: 20px 48px; background: #F8FAFD; border-top: 1px solid #E8EEF6; font-size: 11px; color: #94A3B8; text-align: center; }
 
-    /* Financial table */
-    .fin-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    .fin-table th { background: #f8fafc; padding: 10px 14px; text-align: left; font-weight: 700; font-size: 12px; color: #64748b; border-bottom: 2px solid #e2e8f0; }
-    .fin-table th.right { text-align: right; }
-    .fin-table td { padding: 10px 14px; border-bottom: 1px solid #f1f5f9; }
-    .fin-table td.right { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
-    .fin-table tr:hover td { background: #f8fafc; }
-    .fin-table tr.total td { font-weight: 800; background: #f8fafc; border-top: 2px solid #e2e8f0; }
-    .fin-table tr.sub td { color: #64748b; font-size: 12px; }
-    .fin-table tr.sub td:first-child { padding-left: 28px; }
-
-    /* Ratio row */
-    .ratio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
-    .ratio-item { background: #f8fafc; border-radius: 10px; padding: 12px 14px; border: 1px solid #e2e8f0; }
-    .ratio-item .rname { font-size: 11px; font-weight: 700; color: #64748b; margin-bottom: 4px; }
-    .ratio-item .rval { font-size: 18px; font-weight: 900; color: #1e293b; }
-    .ratio-item .rbench { font-size: 11px; color: #94a3b8; margin-top: 2px; }
-    .ratio-item.good { border-color: #6ee7b7; background: #f0fdf4; }
-    .ratio-item.good .rval { color: #059669; }
-    .ratio-item.warn { border-color: #fde68a; background: #fffbeb; }
-    .ratio-item.warn .rval { color: #d97706; }
-    .ratio-item.bad  { border-color: #fca5a5; background: #fef2f2; }
-    .ratio-item.bad  .rval { color: #dc2626; }
-
-    /* Red flag */
-    .flag-item { display: flex; gap: 12px; align-items: flex-start; padding: 14px; border-radius: 10px; background: #fef2f2; border: 1px solid #fca5a5; margin-bottom: 10px; }
-    .flag-item .flag-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
-    .flag-item .flag-body { flex: 1; }
-    .flag-item .flag-title { font-weight: 800; font-size: 13px; color: #dc2626; margin-bottom: 3px; }
-    .flag-item .flag-desc { font-size: 12px; color: #64748b; line-height: 1.6; }
-
-    /* Score bar */
-    .score-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
-    .score-row .s-label { font-size: 12px; font-weight: 700; color: #64748b; width: 90px; flex-shrink: 0; }
-    .score-row .s-bar { flex: 1; background: #e2e8f0; border-radius: 999px; height: 8px; overflow: hidden; }
-    .score-row .s-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, #6366f1, #8b5cf6); }
-    .score-row .s-val { font-size: 12px; font-weight: 800; width: 52px; text-align: right; flex-shrink: 0; }
-
-    /* DART lookup */
-    .dart-result-row { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 10px; background: #f8fafc; border: 1px solid #e2e8f0; margin-bottom: 8px; cursor: pointer; transition: all 0.15s; }
-    .dart-result-row:hover { border-color: #a5b4fc; background: #eef2ff; }
-    .dart-result-row .corp-name { font-weight: 800; font-size: 14px; }
-    .dart-result-row .corp-meta { font-size: 12px; color: #94a3b8; margin-top: 2px; }
-    .stock-badge { padding: 3px 10px; background: #ede9fe; color: #7c3aed; border-radius: 20px; font-size: 11px; font-weight: 700; }
-
-    /* Info tag */
-    .info-tag { display: inline-flex; align-items: center; gap: 5px; background: #f1f5f9; border-radius: 20px; padding: 4px 12px; font-size: 12px; font-weight: 600; color: #475569; margin: 3px; }
-
-    /* FOOTER */
-    .footer { text-align: center; padding: 30px; color: #94a3b8; font-size: 12px; border-top: 1px solid #e2e8f0; margin-top: 40px; }
+    /* Email Template */
+    .email-template-wrap { margin-top: 24px; background: #FFFBEB; border: 1.5px solid #FCD34D; border-radius: 14px; overflow: hidden; }
+    .email-template-header { background: #FEF3C7; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; }
+    .email-template-header span { font-size: 14px; font-weight: 800; color: #92400E; }
+    .email-template-body { padding: 20px; font-size: 13px; line-height: 1.9; color: #1A2332; white-space: pre-wrap; }
+    .email-copy-btn { padding: 8px 16px; border: 1.5px solid #D97706; border-radius: 8px; background: white; color: #92400E; font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; transition: all 0.2s; }
+    .email-copy-btn:hover { background: #FEF3C7; }
 
     @media (max-width: 768px) {
-      .grid2, .grid3, .grid4 { grid-template-columns: 1fr; }
-      .header h1 { font-size: 28px; }
-      .nav { overflow-x: auto; }
+      .mck-cover { padding: 36px 24px 30px; }
+      .mck-body { padding: 24px 20px; }
+      .mck-kpi-row { grid-template-columns: 1fr; }
+      .mck-cover h1 { font-size: 22px; }
+      .mck-footer { padding: 16px 20px; }
+      .proposal-actions { flex-direction: column; align-items: stretch; }
+    }
+
+    /* ── TRIGGER ── */
+    .tc { border-radius: 14px; padding: 20px; border: 1px solid; margin-bottom: 14px; }
+    .tc.ti { background: linear-gradient(135deg,#FFFBEB,#FEF9EE); border-color: #FCD34D; }
+    .tc.tg { background: linear-gradient(135deg,#F0FDF4,#ECFDF5); border-color: #6EE7B7; }
+    .tc.tr { background: linear-gradient(135deg,#FFF1F1,#FEF2F2); border-color: #FCA5A5; }
+    .tc.tp { background: linear-gradient(135deg,#F0F9FF,#E0F2FE); border-color: #7DD3FC; }
+    .th { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .ti-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+    .ti .ti-icon { background: #FEF3C7; }
+    .tg .ti-icon { background: #D1FAE5; }
+    .tr .ti-icon { background: #FEE2E2; }
+    .tp .ti-icon { background: #BAE6FD; }
+    .tb { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 800; margin-bottom: 3px; }
+    .ti .tb { background: #FDE68A; color: #92400E; }
+    .tg .tb { background: #A7F3D0; color: #065F46; }
+    .tr .tb { background: #FECACA; color: #991B1B; }
+    .tp .tb { background: #BAE6FD; color: #0C4A6E; }
+    .tt { font-size: 15px; font-weight: 800; margin-bottom: 8px; }
+    .td { font-size: 13px; line-height: 1.7; margin-bottom: 12px; }
+    .ti .td { color: #78350F; }
+    .tg .td { color: #064E3B; }
+    .tr .td { color: #7F1D1D; }
+    .tp .td { color: #0C4A6E; }
+    .hb { border-radius: 10px; padding: 13px 16px; font-size: 12px; line-height: 1.8; }
+    .ti .hb { background: rgba(251,191,36,0.12); color: #78350F; }
+    .tg .hb { background: rgba(52,211,153,0.12); color: #065F46; }
+    .tr .hb { background: rgba(248,113,113,0.12); color: #7F1D1D; }
+    .tp .hb { background: rgba(56,189,248,0.12); color: #0C4A6E; }
+    .trp { margin-top: 10px; font-size: 12px; font-weight: 700; }
+    .ti .trp { color: #92400E; }
+    .tg .trp { color: #065F46; }
+    .tr .trp { color: #991B1B; }
+    .tp .trp { color: #0C4A6E; }
+
+    /* ── INFO BANNER ── */
+    .ib { background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 12px; padding: 14px 18px; display: flex; gap: 10px; align-items: flex-start; margin-bottom: 18px; }
+    .ib .ii { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+    .ib .it { font-size: 12px; color: #1E40AF; line-height: 1.6; }
+    .ib.amber { background: #FFFBEB; border-color: #FCD34D; }
+    .ib.amber .it { color: #92400E; }
+    .ib.green { background: #F0FDF4; border-color: #6EE7B7; }
+    .ib.green .it { color: #065F46; }
+
+    /* ── UPLOAD ZONE ── */
+    .upload-zone {
+      border: 2.5px dashed #BFDBFE; border-radius: 16px;
+      padding: 36px 24px; text-align: center; cursor: pointer;
+      transition: all 0.25s; background: #F8FBFF; position: relative;
+      margin-bottom: 20px;
+    }
+    .upload-zone:hover, .upload-zone.drag-over {
+      border-color: #1B4FD8; background: #EFF6FF;
+      box-shadow: 0 0 0 4px rgba(27,79,216,0.08);
+    }
+    .upload-zone input[type=file] { display: none; }
+    .upload-icon { font-size: 44px; margin-bottom: 12px; display: block; }
+    .upload-title { font-size: 16px; font-weight: 800; color: #0D2045; margin-bottom: 6px; }
+    .upload-desc { font-size: 13px; color: #7A8DA8; line-height: 1.6; }
+    .upload-btn {
+      display: inline-block; margin-top: 16px; padding: 10px 24px;
+      background: #1B4FD8; color: white; border-radius: 10px;
+      font-size: 13px; font-weight: 800; cursor: pointer; transition: all 0.2s;
+    }
+    .upload-btn:hover { background: #2563EB; transform: translateY(-1px); }
+    .upload-progress {
+      display: none; margin-top: 16px;
+    }
+    .progress-bar-wrap { background: #E8EEF6; border-radius: 999px; height: 8px; overflow: hidden; margin: 8px 0; }
+    .progress-bar-fill { height: 100%; background: linear-gradient(90deg,#1B4FD8,#60A5FA); border-radius: 999px; transition: width 0.4s ease; }
+    .progress-text { font-size: 12px; color: #566480; }
+
+    /* ── FILE LIST ── */
+    .file-list-wrap { margin-bottom: 16px; }
+    .file-list-header { font-size: 12px; font-weight: 800; color: #3A4F6A; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
+    .file-item {
+      display: flex; align-items: center; gap: 10px;
+      background: #F8FAFD; border: 1px solid #E8EEF6; border-radius: 10px;
+      padding: 10px 14px; margin-bottom: 6px;
+    }
+    .file-item .fi-icon { font-size: 18px; flex-shrink: 0; }
+    .file-item .fi-name { flex: 1; font-size: 13px; font-weight: 700; color: #1A2332; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .file-item .fi-size { font-size: 11px; color: #94A3B8; flex-shrink: 0; }
+    .file-item .fi-remove {
+      background: none; border: none; cursor: pointer;
+      color: #94A3B8; font-size: 16px; padding: 0 4px; line-height: 1;
+      flex-shrink: 0; transition: color 0.15s;
+    }
+    .file-item .fi-remove:hover { color: #EF4444; }
+    /* ── DART SOURCE TOGGLE ── */
+    .src-toggle { display: flex; gap: 0; background: #F1F5F9; border-radius: 12px; padding: 4px; margin-bottom: 20px; }
+    .src-tab { flex: 1; padding: 10px 16px; border: none; background: none; border-radius: 9px; font-size: 13px; font-weight: 700; color: #94A3B8; cursor: pointer; transition: all 0.2s; }
+    .src-tab.active { background: white; color: #1B4FD8; box-shadow: 0 2px 8px rgba(27,79,216,0.15); }
+    .src-tab:hover:not(.active) { color: #475569; }
+    /* ── DART SEARCH UI ── */
+    .dart-search-row { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+    .dart-search-row input { flex: 1; min-width: 200px; padding: 11px 14px; border: 1.5px solid #D1DAEA; border-radius: 10px; font-size: 14px; font-weight: 600; color: #1e293b; outline: none; font-family: inherit; }
+    .dart-search-row input:focus { border-color: #1B4FD8; }
+    .dart-search-row select { padding: 11px 10px; border: 1.5px solid #D1DAEA; border-radius: 10px; font-size: 13px; font-weight: 700; color: #1e293b; background: white; outline: none; cursor: pointer; }
+    .dart-corp-list { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; max-height: 280px; overflow-y: auto; }
+    .dart-corp-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: #F8FAFD; border: 1.5px solid #E2EAF4; border-radius: 10px; cursor: pointer; transition: all 0.15s; }
+    .dart-corp-item:hover { background: #EFF6FF; border-color: #1B4FD8; }
+    .dart-corp-name { font-size: 14px; font-weight: 800; color: #1A2332; }
+    .dart-corp-meta { font-size: 11px; color: #94A3B8; margin-top: 2px; }
+    .dart-corp-btn { padding: 5px 14px; background: #1B4FD8; color: white; border: none; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+    .dart-corp-btn:hover { background: #1E40AF; }
+    .dart-status { padding: 10px 14px; border-radius: 10px; font-size: 13px; font-weight: 600; margin-top: 8px; }
+    .dart-status.info { background: #EFF6FF; color: #1E40AF; border: 1px solid #BFDBFE; }
+    .dart-status.error { background: #FFF1F2; color: #991B1B; border: 1px solid #FECACA; }
+    .dart-status.success { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
+    .dart-fs-badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 700; background: #DBEAFE; color: #1E40AF; margin-left: 6px; }
+    .add-more-btn {
+      display: block; width: 100%; padding: 9px; border: 1.5px dashed #BFDBFE;
+      border-radius: 10px; background: #F8FBFF; color: #1B4FD8;
+      font-size: 12px; font-weight: 800; font-family: inherit;
+      cursor: pointer; text-align: center; margin-bottom: 14px;
+      transition: all 0.2s;
+    }
+    .add-more-btn:hover { background: #EFF6FF; border-color: #1B4FD8; }
+
+    /* ── RESULT NAVIGATION ── */
+    .result-nav { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+    .result-nav-btn { background: #EEF2F7; border: none; border-radius: 8px; padding: 6px 12px; font-size: 12px; font-weight: 800; font-family: inherit; cursor: pointer; color: #3A4F6A; transition: all 0.15s; }
+    .result-nav-btn:hover:not(:disabled) { background: #D9E3EE; }
+    .result-nav-btn:disabled { opacity: 0.35; cursor: default; }
+    .result-nav-label { font-size: 13px; font-weight: 800; color: #0D2045; flex: 1; text-align: center; }
+
+    /* ── EXTRACTED DATA ── */
+    .extracted-card {
+      background: white; border-radius: 14px; border: 1px solid #E8EEF6;
+      padding: 20px; margin-bottom: 16px; display: none;
+    }
+    .extracted-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #F1F5F9;
+    }
+    .extracted-company { font-size: 16px; font-weight: 800; color: #0D2045; }
+    .extracted-year { font-size: 12px; color: #94A3B8; margin-top: 2px; }
+    .extracted-badge {
+      display: flex; gap: 6px; align-items: center;
+      background: #F0FDF4; border: 1px solid #6EE7B7;
+      color: #065F46; padding: 5px 12px; border-radius: 20px;
+      font-size: 12px; font-weight: 800;
+    }
+    .data-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
+    .data-item {
+      background: #F8FAFD; border: 1px solid #E8EEF6; border-radius: 10px;
+      padding: 12px 14px;
+    }
+    .data-item .dl { font-size: 11px; color: #7A8DA8; font-weight: 600; margin-bottom: 4px; }
+    .data-item .dv { font-size: 16px; font-weight: 800; color: #0D2045; }
+    .data-item .dc { font-size: 11px; color: #A0AFBE; margin-top: 2px; }
+    .data-item.highlight { background: #EFF6FF; border-color: #BFDBFE; }
+    .data-item.highlight .dv { color: #1B4FD8; }
+    .data-item.warn { background: #FFFBEB; border-color: #FCD34D; }
+    .data-item.warn .dv { color: #D97706; }
+
+    /* ── SCORE BADGE ── */
+    .score-bar { margin-bottom: 16px; }
+    .score-label { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: #3A4F6A; margin-bottom: 6px; }
+    .score-track { background: #E8EEF6; border-radius: 999px; height: 10px; overflow: hidden; }
+    .score-fill { height: 100%; border-radius: 999px; transition: width 0.8s ease 0.3s; }
+
+    /* ── STAT TABLE ── */
+    .stat-row { display: flex; gap: 12px; margin-bottom: 18px; flex-wrap: wrap; }
+    .stat-box { flex: 1; min-width: 120px; background: #F8FAFD; border: 1px solid #E8EEF6; border-radius: 12px; padding: 14px 16px; text-align: center; }
+    .stat-box .sbv { font-size: 22px; font-weight: 900; color: #1B4FD8; }
+    .stat-box .sbl { font-size: 11px; color: #7A8DA8; margin-top: 3px; }
+
+    /* ── FEATURE CARDS ── */
+    .fc { border-radius: 14px; padding: 20px; border: 1px solid #E8EEF6; }
+    .fi { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 12px; }
+    .fc h3 { font-size: 14px; font-weight: 800; margin-bottom: 7px; color: #0D2045; }
+    .fc p { font-size: 13px; color: #566480; line-height: 1.65; }
+    .stag { display: inline-block; padding: 6px 13px; border-radius: 20px; font-size: 12px; font-weight: 700; margin: 4px; }
+    .ph { display: flex; align-items: center; gap: 14px; padding: 16px 18px; background: #F8FAFD; border-radius: 12px; border: 1px solid #E8EEF6; margin-bottom: 18px; }
+    .ph .phi { width: 44px; height: 44px; border-radius: 12px; background: #EFF6FF; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+    .ph .pht { font-size: 15px; font-weight: 800; color: #0D2045; }
+    .ph .phd { font-size: 12px; color: #94A3B8; margin-top: 3px; }
+
+    .footer { text-align: center; padding: 26px 20px; color: #94A3B8; font-size: 12px; border-top: 1px solid #D9E3EE; margin-top: 16px; background: white; }
+    .footer .disc { font-size: 11px; color: #B0BCC8; margin-top: 6px; line-height: 1.7; }
+
+    @media (max-width: 768px) {
+      .grid2, .grid3, .data-grid { grid-template-columns: 1fr; }
+      .header h1 { font-size: 30px; }
+      .header { padding: 36px 20px 30px; }
+      .nav { overflow-x: auto; padding: 0 16px; }
+      .main { padding: 20px 14px; }
+      .steps { flex-direction: column; gap: 14px; }
+      .step:not(:last-child)::after { display: none; }
     }
   </style>
 </head>
 <body>
 
-<!-- HEADER -->
+<!-- ══ HEADER ══ -->
 <div class="header">
-  <div class="badge">🤖 AI-POWERED B2B SALES INTELLIGENCE</div>
-  <h1>Biz<span>AI</span></h1>
-  <p>기업 재무 데이터를 분석해 영업 트리거를 자동 감지하고,<br>맞춤형 제안서를 즉시 생성하는 AI 영업 인텔리전스 플랫폼</p>
-  <div class="header-stats">
-    <div class="stat"><div class="val">T+1</div><div class="lbl">정산 시뮬레이터</div></div>
-    <div class="stat"><div class="val">PDF</div><div class="lbl">재무제표 자동 파싱</div></div>
-    <div class="stat"><div class="val">DART</div><div class="lbl">전자공시 실시간 연동</div></div>
-    <div class="stat"><div class="val">4섹션</div><div class="lbl">AI 제안서 자동 생성</div></div>
+  <div class="header-inner">
+    <div class="trust-badges">
+      <span class="trust-badge"><span class="dot"></span>DART 공시 데이터 연동</span>
+      <span class="trust-badge"><span class="dot b"></span>재무제표 AI 자동 분석</span>
+      <span class="trust-badge"><span class="dot g"></span>FlowPay 영업 인텔리전스</span>
+    </div>
+    <h1>Flow<span>BizAi</span></h1>
+    <p class="tagline">수주는 있는데 원자재 살 돈이 없는 기업을 자동으로 찾아내고<br>FlowPay 맞춤 제안서를 즉시 생성하는 B2B 영업 인텔리전스 플랫폼</p>
+    <div class="header-stats">
+      <div class="stat-pill"><span class="sv">3~12%</span><span class="sl">건당 유통 마진</span></div>
+      <div class="stat-pill"><span class="sv">1,110개사</span><span class="sl">현재 이용 기업</span></div>
+      <div class="stat-pill"><span class="sv">6,794억</span><span class="sl">등록 채권 금액</span></div>
+      <div class="stat-pill"><span class="sv">358%</span><span class="sl">도입사 평균 매출 증가</span></div>
+    </div>
   </div>
 </div>
 
-<!-- NAV -->
+<!-- ══ NAV ══ -->
 <div class="nav">
-  <button class="active" onclick="showSection('simulator', this)">💰 재무 시뮬레이터</button>
-  <button onclick="showSection('analysis', this)">📊 기업 분석</button>
-  <button onclick="showSection('dart', this)">🔍 DART 조회</button>
-  <button onclick="showSection('proposal', this)">📋 제안서 생성</button>
-  <button onclick="showSection('trigger', this)">🚨 영업 트리거</button>
-  <button onclick="showSection('about', this)">ℹ️ 서비스 소개</button>
+  <button onclick="showTab('upload', this)">📂 재무제표 분석</button>
+  <button class="active" onclick="showTab('sim', this)">💰 마진 시뮬레이터</button>
+  <button onclick="showTab('proposal', this)">📋 제안서 자동 생성</button>
+  <button onclick="showTab('trigger', this)">🚨 영업 트리거</button>
+  <button onclick="showTab('about', this)">ℹ️ 서비스 소개</button>
 </div>
 
 <div class="main">
 
-  <!-- ═══ TAB 1: 재무 시뮬레이터 ═══ -->
-  <div id="simulator" class="section active">
+  <!-- ══ TAB 0: 재무제표 업로드 분석 ══ -->
+  <div id="upload" class="section">
+
+    <div class="ib">
+      <span class="ii">📌</span>
+      <span class="it">
+        재무제표 PDF를 업로드하면 <strong>핵심 재무 지표를 자동 추출</strong>하고,
+        FlowPay 도입 적합도를 분석한 뒤 <strong>마진 시뮬레이터와 제안서에 자동 반영</strong>합니다.
+        지원 형식: <strong>PDF</strong> (감사보고서, 재무제표, 사업보고서)
+      </span>
+    </div>
+
+    <!-- 업로드 존 -->
     <div class="card">
-      <h2>💰 Trapped Cash 시뮬레이터</h2>
-      <p class="sub">재무제표 핵심 지표를 입력하면 T+1 정산 도입 시 즉시 확보 가능한 현금을 자동 산출합니다</p>
-      <div class="grid2">
-        <div>
-          <div style="font-size:13px;font-weight:700;color:#6366f1;margin-bottom:14px;">📊 재무 데이터 입력</div>
-          <div class="input-group">
-            <label>외상매출금 (Accounts Receivable)</label>
-            <input type="number" id="ar" value="1980" oninput="recalculate()" />
-            <div class="unit">단위: 백만원</div>
-          </div>
-          <div class="input-group">
-            <label>미수금 (Other Receivables)</label>
-            <input type="number" id="other_ar" value="50" oninput="recalculate()" />
-            <div class="unit">단위: 백만원</div>
-          </div>
-          <div class="input-group">
-            <label>연간 매출 (Annual Revenue)</label>
-            <input type="number" id="revenue" value="1810" oninput="recalculate()" />
-            <div class="unit">단위: 백만원</div>
-          </div>
-          <div class="input-group">
-            <label>유동부채 (Current Liabilities)</label>
-            <input type="number" id="liabilities" value="3700" oninput="recalculate()" />
-            <div class="unit">단위: 백만원</div>
-          </div>
-          <div class="input-group">
-            <label>당기순이익 (Net Income)</label>
-            <input type="number" id="net_income" value="104" oninput="recalculate()" />
-            <div class="unit">단위: 백만원</div>
-          </div>
-          <div class="slider-container">
-            <div class="slider-label">
-              <span>현재 평균 채권 회수 기간</span>
-              <span id="dso_val" style="color:#6366f1;">40일</span>
-            </div>
-            <input type="range" id="dso" min="7" max="90" value="40" oninput="recalculate()" />
-          </div>
+      <h2>📂 재무제표 업로드</h2>
+      <p class="sub">PDF를 최대 5개까지 선택한 후 '분석하기' 버튼을 눌러주세요 — AI가 핵심 수치를 자동 추출합니다</p>
+
+      <!-- 소스 선택 토글 -->
+      <div class="src-toggle">
+        <button class="src-tab active" id="srcTabPdf" onclick="switchSource('pdf')">📄 PDF 업로드</button>
+        <button class="src-tab" id="srcTabDart" onclick="switchSource('dart')">🔍 DART 자동조회</button>
+      </div>
+
+      <!-- DART 검색 섹션 -->
+      <div id="dartSection" style="display:none;">
+        <div class="dart-search-row">
+          <input type="text" id="dartCorpName" placeholder="회사명 입력 (예: 삼성전자, 롯데케미칼, 현대제철)" onkeydown="if(event.key==='Enter')searchDart()" />
+          <select id="dartYear"></select>
+          <button class="btn btn-primary btn-sm" onclick="searchDart()">🔍 검색</button>
         </div>
+        <div id="dartStatus" style="display:none;"></div>
+        <div id="dartCorpList" class="dart-corp-list"></div>
+      </div>
 
-        <div>
-          <div style="font-size:13px;font-weight:700;color:#6366f1;margin-bottom:14px;">📈 시뮬레이션 결과</div>
-          <div class="grid2" style="margin-bottom:16px;">
-            <div class="metric-card" style="background:#fef2f2;">
-              <div class="metric-val" style="color:#dc2626;" id="m_dso">40일</div>
-              <div class="metric-lbl" style="color:#dc2626;">현재 DSO</div>
-              <div class="metric-sub">채권 회수 기간</div>
-            </div>
-            <div class="metric-card" style="background:#ecfdf5;">
-              <div class="metric-val" style="color:#059669;">T+1</div>
-              <div class="metric-lbl" style="color:#059669;">목표 DSO</div>
-              <div class="metric-sub">FlowPay 도입 후</div>
-            </div>
-          </div>
+      <div id="pdfSection">
+      <div class="upload-zone" id="uploadZone" onclick="document.getElementById('pdfInput').click()"
+           ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+        <input type="file" id="pdfInput" accept=".pdf" multiple onchange="handleFileSelect(event)" />
+        <span class="upload-icon">📄</span>
+        <div class="upload-title">재무제표 PDF를 드래그하거나 클릭해서 선택하세요</div>
+        <div class="upload-desc">
+          최대 5개 파일 동시 선택 가능 · 감사보고서 / 재무제표 / 사업보고서<br>
+          DART 전자공시에서 다운로드한 파일도 바로 사용 가능합니다
+        </div>
+        <div class="upload-btn">📂 파일 선택하기</div>
+      </div>
 
-          <div style="margin-bottom:16px;">
-            <div style="font-size:12px;font-weight:700;color:#64748b;margin-bottom:8px;">채권/매출 비율</div>
-            <div class="progress-bar">
-              <div class="progress-fill" id="ar_ratio_bar" style="background:linear-gradient(90deg,#dc2626,#f87171);width:100%;"></div>
-            </div>
-            <div style="font-size:12px;color:#64748b;margin-top:4px;" id="ar_ratio_text">미수금이 매출을 초과 중</div>
-          </div>
+      <!-- 선택된 파일 목록 -->
+      <div class="file-list-wrap" id="fileListWrap" style="display:none;">
+        <div class="file-list-header">
+          <span>📋 선택된 파일 &nbsp;<span id="fileCount">0</span>/5</span>
+          <button class="add-more-btn" style="width:auto;padding:5px 14px;margin:0;display:inline-block;" onclick="document.getElementById('pdfInput').click()">+ 추가</button>
+        </div>
+        <div id="fileList"></div>
+      </div>
 
-          <div style="background:linear-gradient(135deg,#ecfdf5,#d1fae5);border-radius:12px;padding:20px;border:1px solid #6ee7b7;margin-bottom:16px;">
-            <div style="font-size:12px;font-weight:700;color:#059669;">💡 T+1 전환 시 즉시 확보 현금</div>
-            <div style="font-size:32px;font-weight:900;color:#059669;margin:8px 0;" id="freed_cash">계산중...</div>
-            <div style="font-size:12px;color:#065f46;" id="freed_cash_desc">백만원 즉시 유동화 가능</div>
-          </div>
+      <!-- 분석하기 버튼 -->
+      <button id="analyzeBtn" class="btn btn-primary" onclick="runAnalysis()" style="display:none;width:100%;margin-bottom:16px;font-size:15px;padding:15px;">
+        📊 분석하기
+      </button>
 
-          <div style="background:#fff8f1;border-radius:12px;padding:16px;border:1px solid #fed7aa;">
-            <div style="font-size:12px;font-weight:700;color:#ea580c;margin-bottom:6px;">📊 이익 개선 시뮬레이션</div>
-            <div style="font-size:11px;color:#64748b;margin-bottom:8px;">유동부채 이자비용 절감 추정 (연 4% 기준)</div>
-            <div style="font-size:22px;font-weight:800;color:#ea580c;" id="interest_saving">계산중...</div>
-            <div style="font-size:11px;color:#64748b;">연간 절감 가능 이자비용</div>
-          </div>
+      <!-- 진행 표시 -->
+      <div class="upload-progress" id="uploadProgress">
+        <div class="progress-text" id="progressText">파일을 읽는 중...</div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
         </div>
       </div>
-    </div>
-  </div>
-
-
-  <!-- ═══ TAB 2: 기업 분석 ═══ -->
-  <div id="analysis" class="section">
-
-    <!-- 파이프라인 스텝 -->
-    <div class="pipeline-steps">
-      <div class="pipe-step done">✅ Phase 2a<br><small>PDF 파싱</small></div>
-      <div class="pipe-arrow">›</div>
-      <div class="pipe-step done">✅ Phase 2b<br><small>재무비율 계산</small></div>
-      <div class="pipe-arrow">›</div>
-      <div class="pipe-step done">✅ Phase 2c<br><small>재무 스코어</small></div>
-      <div class="pipe-arrow">›</div>
-      <div class="pipe-step done">✅ Phase 2d<br><small>Red Flag</small></div>
-      <div class="pipe-arrow">›</div>
-      <div class="pipe-step done">✅ Phase 2e<br><small>신용 등급</small></div>
-      <div class="pipe-arrow">›</div>
-      <div class="pipe-step done">✅ Phase 3<br><small>마진 시뮬레이션</small></div>
-      <div class="pipe-arrow">›</div>
-      <div class="pipe-step done">✅ Phase 4<br><small>제안서 생성</small></div>
+      </div><!-- /#pdfSection -->
     </div>
 
-    <!-- 기업 기본정보 -->
-    <div class="card">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:20px;">
+    <!-- 추출 결과 -->
+    <div class="extracted-card" id="extractedCard" style="display:none;">
+      <!-- 다중 파일 결과 네비게이션 (2개 이상일 때만 표시) -->
+      <div class="result-nav" id="resultNav" style="display:none;">
+        <button class="result-nav-btn" id="prevResult" onclick="navigateResult(-1)">◀ 이전</button>
+        <div class="result-nav-label" id="resultNavLabel">1 / 1</div>
+        <button class="result-nav-btn" id="nextResult" onclick="navigateResult(1)">다음 ▶</button>
+      </div>
+
+      <div class="extracted-header">
         <div>
-          <h2>🏢 주식회사 애즈위메이크</h2>
-          <p class="sub" style="margin-bottom:0;">PDF 파싱 완료 — 2024 재무제표 (K-GAAP, 별도재무제표)</p>
+          <div class="extracted-company" id="ext_company">기업명</div>
+          <div class="extracted-year" id="ext_year">회계연도</div>
         </div>
-        <div style="display:flex;align-items:center;gap:12px;">
-          <div class="grade-badge grade-B">B</div>
-          <div>
-            <div style="font-size:13px;font-weight:800;color:#1e293b;">신용 등급 B</div>
-            <div style="font-size:12px;color:#94a3b8;">51.8점 / 100점</div>
-            <div style="font-size:11px;color:#d97706;font-weight:700;margin-top:2px;">⚠️ 신중 접근</div>
-          </div>
+        <div class="extracted-badge" id="ext_badge">
+          <span>✅</span><span id="ext_badge_text">분석 완료</span>
         </div>
-      </div>
-      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;">
-        <span class="info-tag">🏭 도소매업</span>
-        <span class="info-tag">📅 설립: 2019년</span>
-        <span class="info-tag">📍 서울시</span>
-        <span class="info-tag">🔒 비상장</span>
-        <span class="info-tag">📄 소스: PDF (신뢰도 95%)</span>
-      </div>
-      <div class="grid4">
-        <div class="kpi-box" style="background:#ecfdf5;">
-          <div class="kv" style="color:#059669;">120.8억</div>
-          <div class="kl">2024 매출액</div>
-          <div class="ks">+236.7% YoY</div>
-        </div>
-        <div class="kpi-box" style="background:#eef2ff;">
-          <div class="kv" style="color:#6366f1;">184.6억</div>
-          <div class="kl">자산총계</div>
-          <div class="ks">부채비율 24.1%</div>
-        </div>
-        <div class="kpi-box" style="background:#fffbeb;">
-          <div class="kv" style="color:#d97706;">9.9억</div>
-          <div class="kl">영업이익</div>
-          <div class="ks">영업이익률 8.9%</div>
-        </div>
-        <div class="kpi-box" style="background:#fef2f2;">
-          <div class="kv" style="color:#dc2626;">7.50%</div>
-          <div class="kl">권장 마진</div>
-          <div class="ks">리스크 프리미엄 +5.0%p</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="grid2">
-      <!-- 재무제표 요약 -->
-      <div class="card">
-        <h2>📑 재무제표 요약</h2>
-        <p class="sub">당기(2024) vs 전기(2023) 비교 · 단위: 원</p>
-        <table class="fin-table">
-          <thead>
-            <tr>
-              <th>계정과목</th>
-              <th class="right">2024년</th>
-              <th class="right">2023년</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr style="background:#f8fafc;"><td colspan="3" style="font-size:11px;font-weight:800;color:#6366f1;padding:8px 14px;">📊 재무상태표</td></tr>
-            <tr class="total"><td>자산총계</td><td class="right">18,464,530,876</td><td class="right">4,678,744,144</td></tr>
-            <tr class="sub"><td>유동자산</td><td class="right">12,274,475,012</td><td class="right">—</td></tr>
-            <tr class="sub"><td>비유동자산</td><td class="right">6,190,055,864</td><td class="right">—</td></tr>
-            <tr class="total"><td>부채총계</td><td class="right">3,583,148,122</td><td class="right">1,116,154,136</td></tr>
-            <tr class="sub"><td>유동부채</td><td class="right">908,822,060</td><td class="right">—</td></tr>
-            <tr class="sub"><td>비유동부채</td><td class="right">2,674,326,062</td><td class="right">—</td></tr>
-            <tr class="total"><td>자본총계</td><td class="right">14,881,382,754</td><td class="right">3,562,590,008</td></tr>
-            <tr style="background:#f8fafc;"><td colspan="3" style="font-size:11px;font-weight:800;color:#6366f1;padding:8px 14px;">📊 손익계산서</td></tr>
-            <tr class="total"><td>매출액</td><td class="right">12,075,469,032</td><td class="right">3,586,277,582</td></tr>
-            <tr class="sub"><td>매출원가</td><td class="right">8,741,895,610</td><td class="right">—</td></tr>
-            <tr class="total"><td>영업이익</td><td class="right">1,079,398,838</td><td class="right">35,718,765</td></tr>
-            <tr class="total"><td>당기순이익</td><td class="right">988,568,350</td><td class="right">24,608,192</td></tr>
-          </tbody>
-        </table>
       </div>
 
-      <!-- 등급 & 스코어 -->
+      <!-- 핵심 지표 -->
+      <div style="font-size:12px;font-weight:800;color:#566480;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:10px;">📊 추출된 핵심 재무 지표</div>
+      <div class="data-grid" id="dataGrid">
+        <!-- JS로 채워짐 -->
+      </div>
+
+      <!-- FlowPay 적합도 -->
+      <div style="font-size:12px;font-weight:800;color:#566480;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:12px;">🎯 FlowPay 도입 적합도 분석</div>
+      <div id="scoreSection"></div>
+
+      <!-- 인사이트 -->
+      <div id="insightSection" style="margin-bottom:16px;"></div>
+
+      <!-- 적용 버튼 (시뮬레이터로 이동만) -->
       <div>
-        <div class="card">
-          <h2>🏆 신용 등급 산출</h2>
-          <p class="sub">Phase 2e — 재무스코어 + Red Flag 보정</p>
-          <div style="display:flex;align-items:center;gap:20px;margin-bottom:20px;">
-            <div class="grade-badge grade-B" style="width:72px;height:72px;font-size:24px;">B</div>
-            <div>
-              <div style="font-size:22px;font-weight:900;color:#1e293b;">51.8점</div>
-              <div style="font-size:13px;color:#94a3b8;margin-top:2px;">재무스코어 71.4점 → Red Flag 2건 보정</div>
-              <div style="font-size:13px;font-weight:700;color:#d97706;margin-top:4px;">⚠️ 신중 거래 권장 템플릿</div>
-            </div>
-          </div>
-
-          <div style="font-size:12px;font-weight:700;color:#64748b;margin-bottom:12px;">항목별 점수</div>
-          <div class="score-row">
-            <div class="s-label">수익성</div>
-            <div class="s-bar"><div class="s-fill" style="width:82%;background:linear-gradient(90deg,#059669,#34d399);"></div></div>
-            <div class="s-val" style="color:#059669;">24.6/30</div>
-          </div>
-          <div class="score-row">
-            <div class="s-label">안정성</div>
-            <div class="s-bar"><div class="s-fill" style="width:78%;background:linear-gradient(90deg,#6366f1,#a78bfa);"></div></div>
-            <div class="s-val" style="color:#6366f1;">23.4/30</div>
-          </div>
-          <div class="score-row">
-            <div class="s-label">성장성</div>
-            <div class="s-bar"><div class="s-fill" style="width:76%;background:linear-gradient(90deg,#0891b2,#38bdf8);"></div></div>
-            <div class="s-val" style="color:#0891b2;">15.2/20</div>
-          </div>
-          <div class="score-row">
-            <div class="s-label">활동성</div>
-            <div class="s-bar"><div class="s-fill" style="width:65%;background:linear-gradient(90deg,#d97706,#fbbf24);"></div></div>
-            <div class="s-val" style="color:#d97706;">8.1/10</div>
-          </div>
-          <div class="score-row">
-            <div class="s-label">Red Flag</div>
-            <div class="s-bar"><div class="s-fill" style="width:38%;background:linear-gradient(90deg,#dc2626,#f87171);"></div></div>
-            <div class="s-val" style="color:#dc2626;">-19.6pt</div>
-          </div>
-        </div>
-
-        <!-- Red Flag -->
-        <div class="card">
-          <h2>🚩 Red Flag 탐지</h2>
-          <p class="sub">Phase 2d — 2건 발견</p>
-          <div class="flag-item">
-            <div class="flag-icon">⚠️</div>
-            <div class="flag-body">
-              <div class="flag-title">매출 급증 지속성 불확실</div>
-              <div class="flag-desc">전년 대비 +237% 매출 급증. 단기 계약 의존 또는 일회성 대형 거래 가능성 — 매출의 지속성 검토 필요.</div>
-            </div>
-          </div>
-          <div class="flag-item">
-            <div class="flag-icon">⚠️</div>
-            <div class="flag-body">
-              <div class="flag-title">비유동부채 비중 과다</div>
-              <div class="flag-desc">비유동부채 26.7억 / 자산총계 184.6억 = 14.5%. 장기 차입 의존도 높아 금리 상승 시 리스크 증가.</div>
-            </div>
-          </div>
-        </div>
+        <button class="btn btn-green" onclick="applyToSimulator()" style="width:100%;padding:14px;font-size:15px;">
+          💰 마진 시뮬레이터에 적용하기 →
+        </button>
       </div>
     </div>
 
-    <!-- 재무비율 -->
-    <div class="card">
-      <h2>📐 주요 재무비율 (22/25개 산출)</h2>
-      <p class="sub">Phase 2b — 도소매업 동종업계 벤치마크 대비</p>
-      <div class="ratio-grid">
-        <div class="ratio-item good">
-          <div class="rname">부채비율</div>
-          <div class="rval">24.1%</div>
-          <div class="rbench">벤치마크 120% ↓ 우수</div>
-        </div>
-        <div class="ratio-item good">
-          <div class="rname">유동비율</div>
-          <div class="rval">135.1%</div>
-          <div class="rbench">벤치마크 100% ↑ 양호</div>
-        </div>
-        <div class="ratio-item good">
-          <div class="rname">자기자본비율</div>
-          <div class="rval">80.6%</div>
-          <div class="rbench">매우 건전</div>
-        </div>
-        <div class="ratio-item good">
-          <div class="rname">영업이익률</div>
-          <div class="rval">8.9%</div>
-          <div class="rbench">벤치마크 4.2% ↑ 우수</div>
-        </div>
-        <div class="ratio-item good">
-          <div class="rname">순이익률</div>
-          <div class="rval">8.2%</div>
-          <div class="rbench">벤치마크 2.8% ↑ 우수</div>
-        </div>
-        <div class="ratio-item good">
-          <div class="rname">매출 성장률</div>
-          <div class="rval">+236.7%</div>
-          <div class="rbench">고성장 — 지속성 검토</div>
-        </div>
-        <div class="ratio-item warn">
-          <div class="rname">총자산회전율</div>
-          <div class="rval">0.65회</div>
-          <div class="rbench">벤치마크 0.9 — 미달</div>
-        </div>
-        <div class="ratio-item warn">
-          <div class="rname">ROE</div>
-          <div class="rval">6.6%</div>
-          <div class="rbench">벤치마크 8% — 미달</div>
-        </div>
-        <div class="ratio-item warn">
-          <div class="rname">ROA</div>
-          <div class="rval">5.4%</div>
-          <div class="rbench">벤치마크 6% — 미달</div>
-        </div>
-        <div class="ratio-item good">
-          <div class="rname">이자보상배율</div>
-          <div class="rval">12.4배</div>
-          <div class="rbench">이자 부담 낮음</div>
-        </div>
-        <div class="ratio-item good">
-          <div class="rname">매출총이익률</div>
-          <div class="rval">27.6%</div>
-          <div class="rbench">도소매 평균 대비 높음</div>
-        </div>
-        <div class="ratio-item good">
-          <div class="rname">자본잠식 여부</div>
-          <div class="rval">없음</div>
-          <div class="rbench">자본총계 148.8억</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 마진 시뮬레이션 -->
-    <div class="card">
-      <h2>📊 Phase 3 — 마진 시뮬레이션</h2>
-      <p class="sub">신용등급 B + Red Flag 2건 기반 FlowPay 거래 조건 산출</p>
-      <div class="grid3">
-        <div class="result-section warning" style="margin-bottom:0;">
-          <h3>⚡ 리스크 프리미엄</h3>
-          <p class="highlight" style="color:#d97706;">+5.0%p</p>
-          <p>기본 2.5% + 등급 프리미엄 2.5% + Red Flag 0.0%</p>
-        </div>
-        <div class="result-section success" style="margin-bottom:0;">
-          <h3>✅ 권장 마진 (Likely)</h3>
-          <p class="highlight" style="color:#059669;">7.50%</p>
-          <p>거래금액 5억 기준 · 월 정산 조건</p>
-        </div>
-        <div class="result-section info" style="margin-bottom:0;">
-          <h3>📋 거래 한도</h3>
-          <p class="highlight" style="color:#0891b2;">최대 3억</p>
-          <p>신중 등급 · 월별 한도 검토 권장</p>
-        </div>
-      </div>
+    <!-- 오류 메시지 -->
+    <div id="errorBox" style="display:none;" class="ib" style="background:#FFF1F1;border-color:#FECACA;">
+      <span class="ii">⚠️</span>
+      <span class="it" id="errorText" style="color:#991B1B;"></span>
     </div>
 
   </div>
 
+  <!-- ══ TAB 1: 마진 시뮬레이터 ══ -->
+  <div id="sim" class="section active">
 
-  <!-- ═══ TAB 3: DART 조회 ═══ -->
-  <div id="dart" class="section">
-    <div class="card">
-      <h2>🔍 DART 전자공시 기업 조회</h2>
-      <p class="sub">108,328개 기업 코드 기반 실시간 재무 데이터 조회 · DART OpenAPI 연동</p>
-      <div style="display:flex;gap:12px;margin-bottom:20px;">
-        <input type="text" id="dart_keyword" placeholder="기업명 검색 (예: 삼성전자, 카카오, 현대...)" style="flex:1;padding:12px 16px;border:1.5px solid #e2e8f0;border-radius:10px;font-size:14px;font-weight:600;" onkeypress="if(event.key==='Enter')dartSearch()" />
-        <button class="btn btn-primary" onclick="dartSearch()">🔍 검색</button>
-      </div>
-      <div id="dart_results"></div>
+    <div class="ib">
+      <span class="ii">💡</span>
+      <span class="it">
+        <strong>FlowPay 핵심 개념:</strong> 수주(발주서)는 있는데 원자재 살 돈이 없을 때,
+        FlowPay가 <strong>대신 원자재를 사서 바로 납품</strong>해드립니다.
+        대출이 아닌 <strong>유통 구매 대행</strong> 방식이라 재무제표에 부채로 잡히지 않습니다.
+        (마진: 건당 3.5%~5%)
+      </span>
     </div>
 
-    <div class="card" id="dart_company_card" style="display:none;">
-      <h2 id="dart_corp_name">기업명</h2>
-      <p class="sub" id="dart_corp_meta">DART 기업 기본정보</p>
-      <div id="dart_company_info"></div>
+    <div class="card">
+      <h2>💰 FlowPay 도입 효과 시뮬레이터</h2>
+      <p class="sub">수주 정보를 입력하면 FlowPay 이용 시 순이익과 수주 포기 대비 효과를 자동 계산합니다</p>
+
+      <div class="grid2">
+        <!-- 입력 -->
+        <div>
+          <div class="sec-title">📊 수주·원자재 정보 입력</div>
+
+          <div class="ig">
+            <label>수주 금액 (납품 후 받을 금액) <span class="hint">계약 금액</span></label>
+            <input type="number" id="order_amt" value="20" oninput="calc()" />
+            <div class="unit">단위: 천만원</div>
+          </div>
+
+          <div class="ig">
+            <label>원자재 매입 필요 금액 <span class="hint">선결제 필요 금액</span></label>
+            <input type="number" id="material_amt" value="12" oninput="calc()" />
+            <div class="unit">단위: 천만원</div>
+          </div>
+
+          <div class="range-wrap">
+            <div class="range-label">
+              <span>매출처 결제 주기 <span style="color:#94A3B8;font-weight:500;">(매출처가 돈 주는 날까지)</span></span>
+              <span class="range-val" id="pay_cycle_val">30일</span>
+            </div>
+            <input type="range" id="pay_cycle" min="30" max="90" step="1" value="30" oninput="calc()" />
+            <div style="display:flex;justify-content:space-between;font-size:10px;color:#A0AFBE;margin-top:4px;">
+              <span>30일 · 3%</span>
+              <span>60일 · 6%</span>
+              <span>90일 · 9%</span>
+            </div>
+          </div>
+
+          <!-- 마진율 자동 표시 -->
+          <div style="background:#F0FDF4;border:1.5px solid #6EE7B7;border-radius:12px;padding:14px 16px;margin-top:4px;margin-bottom:13px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div>
+                <div style="font-size:11px;font-weight:700;color:#566480;margin-bottom:3px;">자동 계산 마진율</div>
+                <div style="font-size:11px;color:#94A3B8;">기본 마진율 (30일=3% · 60일=6% · 90일=9%) + 리스크 가감</div>
+              </div>
+              <div id="fee_rate_display" style="font-size:28px;font-weight:900;color:#059669;min-width:70px;text-align:right;">3.0%</div>
+            </div>
+            <div id="riskAdjInfo" style="display:none;margin-top:6px;padding:6px 10px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;font-size:11px;color:#92400E;"></div>
+            <!-- 마진율 구간 바 -->
+            <div style="margin-top:10px;">
+              <div style="height:8px;border-radius:999px;background:linear-gradient(90deg,#10B981 0%,#F59E0B 50%,#EF4444 100%);position:relative;">
+                <div id="fee_marker" style="position:absolute;top:-4px;width:16px;height:16px;background:white;border:3px solid #059669;border-radius:50%;transform:translateX(-50%);left:0%;transition:left 0.2s,border-color 0.2s;box-shadow:0 2px 6px rgba(0,0,0,0.15);"></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:10px;color:#A0AFBE;margin-top:4px;">
+                <span>3% (최저)</span><span>6%</span><span>9% (최고)</span>
+              </div>
+            </div>
+          </div>
+          <!-- hidden input for calc() compatibility -->
+          <input type="hidden" id="fee_rate" value="0.03" />
+
+          <!-- 연간 이용 횟수 자동 연동 표시 -->
+          <div style="background:#EFF6FF;border:1.5px solid #BFDBFE;border-radius:12px;padding:14px 16px;margin-top:4px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div>
+                <div style="font-size:11px;font-weight:700;color:#566480;margin-bottom:3px;">연간 예상 이용 횟수 <span style="color:#94A3B8;font-weight:500;">(자동 계산)</span></div>
+                <div style="font-size:11px;color:#94A3B8;">365일 ÷ 결제주기 (소수점 제외)</div>
+              </div>
+              <div style="text-align:right;">
+                <div id="use_cnt_disp" style="font-size:28px;font-weight:900;color:#1B4FD8;line-height:1;">12</div>
+                <div style="font-size:11px;color:#94A3B8;margin-top:2px;">회 / 년</div>
+              </div>
+            </div>
+            <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+              <span style="background:#DBEAFE;color:#1E40AF;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;">30일 → 12회</span>
+              <span style="background:#DBEAFE;color:#1E40AF;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;">60일 → 6회</span>
+              <span style="background:#DBEAFE;color:#1E40AF;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;">90일 → 4회</span>
+            </div>
+          </div>
+          <input type="hidden" id="use_count" value="12" />
+        </div>
+
+        <!-- 결과 -->
+        <div>
+          <div class="sec-title">📈 도입 효과 분석</div>
+
+          <div class="rbox red">
+            <div class="rl" style="color:#DC2626;">❌ 수주 포기 시 (FlowPay 미사용)</div>
+            <div class="rv" style="color:#DC2626;" id="no_flowpay">0 원</div>
+            <div class="rd" style="color:#7F1D1D;">자금 부족으로 수주 포기 → 매출 0원</div>
+          </div>
+
+          <div class="rbox green">
+            <div class="rl" style="color:#059669;">✅ FlowPay 이용 시 순이익 (건당)</div>
+            <div class="rv" style="color:#059669;" id="with_flowpay">—</div>
+            <div class="rd" style="color:#065F46;" id="with_flowpay_desc">수주 완수 후 마진 제외 순이익</div>
+          </div>
+
+          <div class="rbox amber">
+            <div class="rl" style="color:#D97706;">📊 연간 추가 매출 (연 <span id="use_cnt_label">12</span>회 기준)</div>
+            <div class="rv" style="color:#D97706;" id="annual_benefit">—</div>
+            <div class="rd" style="color:#92400E;" id="annual_desc">수주 금액 × 연간 이용 횟수</div>
+          </div>
+
+          <div class="rbox blue">
+            <div class="rl" style="color:#1D4ED8;">💡 FlowPay 마진 총액</div>
+            <div class="rv" style="color:#1D4ED8;" id="fee_total">—</div>
+            <div class="rd" style="color:#1E40AF;" id="fee_desc">건당 유통 마진 (원자재 금액 × 마진율)</div>
+          </div>
+
+          <div style="padding:14px 16px;background:#F8FAFD;border-radius:10px;border:1px solid #E8EEF6;margin-top:4px;">
+            <div style="font-size:11px;font-weight:700;color:#566480;margin-bottom:6px;">📌 계산 공식</div>
+            <div style="font-size:11px;color:#7A8DA8;line-height:1.8;">
+              마진 = 원자재 금액 × 마진율 (기본 + 리스크 가감)<br>
+              건당 순이익 = 수주 금액 − 원자재 금액 − 마진<br>
+              연간 이용 횟수 = 365일 ÷ 결제주기 (소수 버림)<br>
+              연간 추가 매출 = 수주 금액 × 연간 이용 횟수 (억원/년)<br>
+              <span style="color:#1B4FD8;font-weight:700;">기본: 30일=3% · 60일=6% · 90일=9% / 리스크 가감 반영 (최소 3%, 최대 12%)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 제안서 자동 생성 버튼 -->
+      <div style="margin-top:20px;">
+        <button class="btn btn-primary" onclick="goToProposal()" style="width:100%;padding:14px;font-size:15px;">
+          📋 제안서 자동 생성하기 →
+        </button>
+        <div style="font-size:11px;color:#94A3B8;text-align:center;margin-top:6px;">위 시뮬레이션 수치를 기반으로 맞춤 제안서를 자동 생성합니다</div>
+      </div>
+    </div>
+
+    <!-- 프로세스 -->
+    <div class="card">
+      <h2>⚙️ FlowPay 이용 프로세스</h2>
+      <p class="sub">최초 심사 후 매 건 당일 또는 익일 즉시 납품 — 평균 매출처 결제 주기 30일</p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">01</div>
+          <div class="step-title">온라인 신청</div>
+          <div class="step-desc">flowpay.kr에서 기업 회원 가입 후 간단한 신청 양식 작성</div>
+        </div>
+        <div class="step">
+          <div class="step-num">02</div>
+          <div class="step-title">공급 심사</div>
+          <div class="step-desc">최초 1회 심사 약 7~10일 (발주서 + 매출처 신용도 기준)</div>
+        </div>
+        <div class="step">
+          <div class="step-num">03</div>
+          <div class="step-title">즉시 납품</div>
+          <div class="step-desc">계약 후 매 건 당일 or 익일 즉시 원자재 공급</div>
+        </div>
+        <div class="step">
+          <div class="step-num">04</div>
+          <div class="step-title">매출처 정산 후 결제</div>
+          <div class="step-desc">납품 완료 → 매출처에서 대금 회수 후 FlowPay에 정산</div>
+        </div>
+      </div>
     </div>
   </div>
 
-
-  <!-- ═══ TAB 4: 제안서 생성 ═══ -->
+  <!-- ══ TAB 2: 제안서 자동 생성 (McKinsey Style) ══ -->
   <div id="proposal" class="section">
     <div class="card">
-      <h2>📋 맞춤형 제안서 자동 생성</h2>
-      <p class="sub">기업 분석 결과 기반 4섹션 FlowPay 제안서를 즉시 생성합니다</p>
-      <div class="grid2" style="margin-bottom:20px;">
+      <h2>📋 FlowPay 도입 제안서 자동 생성</h2>
+      <p class="sub">타겟 기업 정보를 입력하면 맥킨지 스타일의 전문 제안서를 즉시 생성합니다</p>
+
+      <div class="ib">
+        <span class="ii">💡</span>
+        <span class="it">재무제표 분석 → 마진 시뮬레이터 → 제안서 순서로 진행하면 <strong>실제 수치가 자동 반영</strong>됩니다.</span>
+      </div>
+
+      <div class="grid2" style="margin-bottom:16px;">
         <div>
-          <div class="input-group">
-            <label>기업명</label>
-            <input type="text" id="company_name" value="페이큐(Pay-Q)" />
-          </div>
-          <div class="input-group">
-            <label>담당자명</label>
-            <input type="text" id="contact_name" value="김 대표님" />
-          </div>
-          <div class="input-group">
-            <label>신용 등급</label>
-            <select id="prop_grade" onchange="updateGradeUI()">
-              <option value="A">A — 우량 (Premium)</option>
-              <option value="BBB">BBB — 양호 (Standard)</option>
-              <option value="BB">BB — 보통 (Standard)</option>
-              <option value="B" selected>B — 신중 (Cautious)</option>
-              <option value="CCC">CCC — 주의 (Cautious)</option>
-              <option value="CC">CC — 위험 (Restricted)</option>
-              <option value="D">D — 부도 (Restricted)</option>
-            </select>
-          </div>
+          <div class="ig"><label>기업명</label><input type="text" id="co_name" value="(주)비플러스마케팅" /></div>
+          <div class="ig"><label>담당자명</label><input type="text" id="co_contact" value="대표님" /></div>
         </div>
         <div>
-          <div class="input-group">
-            <label>업종</label>
-            <input type="text" id="industry" value="도소매업" />
-          </div>
-          <div class="input-group">
-            <label>연간 매출 (백만원)</label>
-            <input type="number" id="p_revenue" value="12075" />
-          </div>
-          <div class="input-group">
-            <label>외상매출금 + 미수금 (백만원)</label>
-            <input type="number" id="p_ar" value="2030" />
-          </div>
+          <div class="ig"><label>업종</label><input type="text" id="co_industry" value="쿠폰·광고 수수료업" /></div>
+          <div class="ig"><label>주요 고민</label><input type="text" id="co_pain" value="수주 늘었는데 원자재 구입 자금 부족" /></div>
         </div>
       </div>
 
-      <div id="grade_template_badge" style="margin-bottom:16px;padding:14px;border-radius:10px;background:#fffbeb;border:1px solid #fde68a;">
-        <div style="font-size:12px;font-weight:700;color:#d97706;">📋 적용 템플릿: <span id="template_name">Cautious — 신중 접근</span></div>
-        <div style="font-size:12px;color:#94a3b8;margin-top:4px;" id="template_desc">거래 조건 명시, 모니터링 강화, 단계적 한도 설정</div>
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:22px;">
+        <div class="ig" style="margin-bottom:0;flex:1;min-width:200px;">
+          <label>영업 담당자</label>
+          <select id="sales_rep" class="rep-select">
+            <option value="yeh">영업이사 예충희 (010-4815-1411)</option>
+            <option value="park">전략이사 박진용 (010-9600-1630)</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" onclick="genProposal()" style="margin-top:18px;">📄 AI 제안서 생성</button>
       </div>
 
-      <div style="text-align:center;margin-bottom:24px;">
-        <button class="btn btn-primary" onclick="generateProposal()">🤖 AI 제안서 생성하기</button>
-      </div>
+      <!-- 제안서 출력 영역 -->
+      <div id="prop_out" style="display:none;">
 
-      <div id="proposal_output" style="display:none;">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;padding:16px;background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0;">
-          <span style="font-size:24px;">📄</span>
-          <div>
-            <div style="font-weight:800;font-size:15px;" id="proposal_title">제안서 제목</div>
-            <div style="font-size:12px;color:#94a3b8;" id="proposal_date"></div>
+        <!-- 액션 버튼 바 -->
+        <div class="proposal-actions">
+          <button class="btn-icon primary" onclick="downloadProposalPDF()">📥 PDF 다운로드</button>
+          <button class="btn-icon" onclick="copyProposal()">📋 제안서 복사</button>
+          <button class="btn-icon" onclick="toggleEmailTemplate()">✉️ 이메일 템플릿</button>
+        </div>
+
+        <!-- McKinsey 리포트 -->
+        <div id="mck_report" class="mck-report">
+          <!-- 커버 -->
+          <div class="mck-cover">
+            <div class="mck-cover-label">CONFIDENTIAL</div>
+            <h1 id="mck_title">FlowPay-Proposal<span class="mck-sub">by FlowBizAi</span></h1>
+            <div class="mck-cover-meta">
+              <span id="mck_date"></span>
+              <span id="mck_rep"></span>
+              <span id="mck_corp"></span>
+            </div>
+          </div>
+
+          <!-- 본문 -->
+          <div class="mck-body">
+            <!-- Section 1: Executive Summary -->
+            <div class="mck-section">
+              <div class="mck-section-num">Section 01</div>
+              <h2>Executive Summary — 현황 진단</h2>
+              <p id="mck_s1"></p>
+              <div class="mck-kpi-row" id="mck_kpi_row"></div>
+            </div>
+
+            <hr class="mck-divider" />
+
+            <!-- Section 2: Solution -->
+            <div class="mck-section">
+              <div class="mck-section-num">Section 02</div>
+              <h2>FlowPay Solution — 선공급·후결제 구조</h2>
+              <p id="mck_s2"></p>
+              <div class="mck-highlight">
+                <div class="mck-hl-value" id="mck_s2_amt"></div>
+                <div class="mck-hl-label" id="mck_s2_label"></div>
+              </div>
+            </div>
+
+            <hr class="mck-divider" />
+
+            <!-- Section 3: Impact & ROI -->
+            <div class="mck-section">
+              <div class="mck-section-num">Section 03</div>
+              <h2>Impact Analysis — 도입 효과 및 ROI</h2>
+              <p id="mck_s3"></p>
+              <div class="mck-kpi-row" id="mck_roi_row"></div>
+            </div>
+
+            <hr class="mck-divider" />
+
+            <!-- Section 4: Next Steps -->
+            <div class="mck-cta">
+              <h3>Next Steps — 지금 바로 시작하세요</h3>
+              <p id="mck_s4"></p>
+              <div class="cta-contact" id="mck_cta_contact"></div>
+            </div>
+          </div>
+
+          <!-- 푸터 -->
+          <div class="mck-footer">
+            FlowPay-Proposal by FlowBizAi · 276홀딩스 · 본 제안서는 AI 기반 자동 생성되었으며, 실제 조건은 심사 후 확정됩니다.
           </div>
         </div>
-        <div class="result-section danger" id="section1">
-          <h3>🔴 섹션 1. 현황 진단 — 데이터로 본 귀사의 현금 흐름 경고등</h3>
-          <p id="section1_content"></p>
+
+        <!-- 이메일 템플릿 (토글) -->
+        <div id="email_template_wrap" class="email-template-wrap" style="display:none;">
+          <div class="email-template-header">
+            <span>✉️ 이메일 발송용 템플릿 (금융전문가 톤)</span>
+            <button class="email-copy-btn" onclick="copyEmailTemplate()">📋 복사</button>
+          </div>
+          <div class="email-template-body" id="email_body"></div>
         </div>
-        <div class="result-section info">
-          <h3>💡 섹션 2. 잠긴 돈 찾기 — T+1 전환 시 즉시 입금 가능한 예상 금액</h3>
-          <p id="section2_content"></p>
-          <span class="highlight" id="section2_amount" style="color:#0891b2;"></span>
-        </div>
-        <div class="result-section success">
-          <h3>🚀 섹션 3. 성장의 기회 — 이 자금을 재투자했을 때의 예상 ROI</h3>
-          <p id="section3_content"></p>
-        </div>
-        <div class="result-section action">
-          <h3 style="color:#a5b4fc;">⚡ 섹션 4. Action — 지금 바로 시작하세요</h3>
-          <p id="section4_content" style="color:#cbd5e1;"></p>
-        </div>
+
       </div>
     </div>
   </div>
 
-
-  <!-- ═══ TAB 5: 영업 트리거 ═══ -->
+  <!-- ══ TAB 3: 영업 트리거 ══ -->
   <div id="trigger" class="section">
     <div class="card">
-      <h2>🚨 영업 트리거 알림 샘플</h2>
-      <p class="sub">DART 공시·뉴스 데이터를 분석해 자동 생성되는 영업 트리거 알림 예시입니다</p>
+      <h2>🚨 실시간 영업 트리거 알림 (샘플)</h2>
+      <p class="sub">DART 공시·뉴스 데이터를 분석해 FlowPay 잠재 고객을 자동 감지하는 트리거 예시입니다</p>
 
-      <div class="trigger-card investment">
-        <div class="trigger-header">
-          <span style="font-size:24px;">🎯</span>
-          <div class="trigger-badge">투자 유치</div>
-          <div style="margin-left:auto;font-size:11px;color:#92400e;font-weight:700;">2026.04.08 오전 9:32</div>
+      <div class="tc tg">
+        <div class="th">
+          <div class="ti-icon" style="background:#D1FAE5;">🚀</div>
+          <div><div class="tb">급성장 기업</div><div style="font-size:11px;color:#065F46;font-weight:600;margin-top:2px;">2026.04.08 오전 9:32</div></div>
         </div>
-        <div style="font-size:16px;font-weight:800;margin-bottom:6px;">🚨 트리거 발생: (주)커머스링크 / Series B 150억 투자 유치</div>
-        <div style="font-size:13px;color:#78350f;margin-bottom:10px;line-height:1.6;">
-          <strong>💡 영업 포인트:</strong> Series B 투자 유치 직후는 운영자금 집행이 급증하는 시점입니다.
-          현재 D2C 쇼핑몰 5개 운영 중이며 월 결제 처리액 약 80억원 추정.
-          T+1 정산 도입 시 연간 약 15억원의 현금흐름 개선 효과 기대.
+        <div class="tt">🚨 트리거 감지: (주)씨랩(C lab) — 매출 5.6배 급성장, 단기차입금 24.1억 압박</div>
+        <div class="td">
+          <strong>💡 FlowPay 영업 포인트:</strong> 매출이 16억 → 91.8억으로 5.6배 폭증했지만
+          단기차입금이 유동부채의 91.8%를 차지합니다. 수주는 계속 들어오는데 은행 한도가 부족한 전형적인 패턴입니다.
+          FlowPay 이용 시 은행 신용도에 영향 없이 원자재를 즉시 조달할 수 있습니다.
         </div>
-        <div class="hook-box" style="background:rgba(251,191,36,0.15);">
-          ✉️ <strong>첫 마디(Hook):</strong> "안녕하세요, 커머스링크 김○○ 대표님. Series B 축하드립니다!
-          투자금 집행 효율을 극대화하기 위해, 현재 PG사 정산 주기를 T+1로 전환했을 때
-          즉시 확보 가능한 운전자금 시뮬레이션을 준비했습니다. 3분만 시간 내주시겠어요?"
+        <div class="hb">
+          ✉️ <strong>바로 보낼 첫 마디:</strong> "안녕하세요, 씨랩 담당자님. 올해 매출이 5.6배 성장하신 것을 확인했습니다!
+          빠르게 성장하는 시기에 가장 흔한 고민이 '수주는 들어오는데 원자재 살 자금이 부족하다'는 것인데요.
+          FlowPay를 활용하면 은행 대출 한도를 소진하지 않고도 원자재를 즉시 조달할 수 있습니다. 잠깐 시간 내주시겠어요?"
         </div>
-        <div style="margin-top:10px;font-size:12px;font-weight:700;color:#92400e;">🔗 추천 리포트: T+1 정산 도입 효과 분석</div>
+        <div class="trp">🔗 추천 리포트: 급성장 기업 운전자금 솔루션 + FlowPay 도입 효과</div>
       </div>
 
-      <div class="trigger-card product">
-        <div class="trigger-header">
-          <span style="font-size:24px;">🚀</span>
-          <div class="trigger-badge">신제품 런칭</div>
-          <div style="margin-left:auto;font-size:11px;color:#065f46;font-weight:700;">2026.04.07 오후 2:15</div>
+      <div class="tc tp">
+        <div class="th">
+          <div class="ti-icon" style="background:#BAE6FD;">🏛️</div>
+          <div><div class="tb">공공조달 수주</div><div style="font-size:11px;color:#0C4A6E;font-weight:600;margin-top:2px;">2026.04.07 오후 2:15</div></div>
         </div>
-        <div style="font-size:16px;font-weight:800;margin-bottom:6px;">🚨 트리거 발생: (주)뷰티온 / 자체 PB 화장품 라인 12종 런칭</div>
-        <div style="font-size:13px;color:#065f46;margin-bottom:10px;line-height:1.6;">
-          <strong>💡 영업 포인트:</strong> 신제품 런칭 초기 3개월은 마케팅·원자재 구매로 현금이 급격히 소요됩니다.
-          현재 오픈마켓 3개 채널 입점 중이며 정산 주기 평균 14일 추정.
-          조기 유동화 시 마케팅 재투자 사이클 2배 가속 가능.
+        <div class="tt">🚨 트리거 감지: (주)더포스 — 공공기관 반도체 부품 납품 계약 2억원 수주</div>
+        <div class="td">
+          <strong>💡 FlowPay 영업 포인트:</strong> 공공기관 납품은 선결제 원자재가 필요하지만 대금은 수개월 후에 들어옵니다.
+          FlowPay는 납품 일정에 맞춰 원자재를 선공급하고, 공공기관 대금 회수 후 정산하는 구조입니다.
         </div>
-        <div class="hook-box" style="background:rgba(110,231,183,0.15);">
-          ✉️ <strong>첫 마디(Hook):</strong> "안녕하세요, 뷰티온 MD 박○○님.
-          신제품 12종 런칭 축하드립니다! 초기 런칭 마케팅 예산 확보를 위해
-          현재 오픈마켓 정산 대금을 당일(T+1) 수령할 수 있는 방법을 소개해 드리고 싶습니다."
+        <div class="hb">
+          ✉️ <strong>바로 보낼 첫 마디:</strong> "안녕하세요, 더포스 대표님. 공공기관 납품 계약 수주 축하드립니다!
+          FlowPay를 이용하시면 납품 일정에 맞춰 원자재를 바로 조달하고, 대금 수령 후 정산하실 수 있습니다."
         </div>
-        <div style="margin-top:10px;font-size:12px;font-weight:700;color:#065f46;">🔗 추천 리포트: 자산 유동화 시뮬레이션</div>
+        <div class="trp">🔗 추천 리포트: 공공조달 선결제 솔루션 + 수주 완수 시뮬레이션</div>
       </div>
 
-      <div class="trigger-card risk">
-        <div class="trigger-header">
-          <span style="font-size:24px;">⚠️</span>
-          <div class="trigger-badge">재무 위험</div>
-          <div style="margin-left:auto;font-size:11px;color:#7f1d1d;font-weight:700;">2026.04.06 오전 11:04</div>
+      <div class="tc tr">
+        <div class="th">
+          <div class="ti-icon">⚠️</div>
+          <div><div class="tb">재무 위험</div><div style="font-size:11px;color:#991B1B;font-weight:600;margin-top:2px;">2026.04.06 오전 11:04</div></div>
         </div>
-        <div style="font-size:16px;font-weight:800;margin-bottom:6px;">🚨 트리거 발생: 페이큐(Pay-Q) / 매출채권 과다 — 긴급 구조 진단</div>
-        <div style="font-size:13px;color:#7f1d1d;margin-bottom:10px;line-height:1.6;">
-          <strong>💡 영업 포인트:</strong> 매출(18.1억) 대비 미수금+채권(20.3억)이 역전된 위험 신호 포착.
-          유동부채 37억에 이자를 납부하면서 받아야 할 돈이 묶여 있는 구조.
-          T+1 전환 시 약 15억원 즉시 유동화 → 부채 상환 및 이자 절감 효과.
+        <div class="tt">🚨 트리거 감지: (주)비플러스마케팅 — 이자비용(13.5억)이 영업이익(5.2억) 2.6배 초과</div>
+        <div class="td">
+          <strong>💡 FlowPay 영업 포인트:</strong> 은행 이자가 영업이익보다 2.6배 많습니다.
+          FlowPay는 대출이 아닌 유통 구조라 재무제표에 부채로 안 잡히고 기존 은행 신용도에 전혀 영향을 주지 않습니다.
         </div>
-        <div class="hook-box" style="background:rgba(252,165,165,0.15);">
-          ✉️ <strong>첫 마디(Hook):</strong> "안녕하세요, 페이큐 CFO님.
-          최근 재무 데이터를 분석한 결과, 미수금이 매출을 초과하는 상태가 확인되었습니다.
-          플로우페이 도입 시 약 15억원의 현금을 즉시 확보할 수 있는 시뮬레이션을 준비했습니다."
+        <div class="hb">
+          ✉️ <strong>바로 보낼 첫 마디:</strong> "안녕하세요, 비플러스마케팅 대표님.
+          추가 대출 없이 원자재를 조달할 수 있는 방법이 있어 연락드렸습니다.
+          FlowPay는 대출이 아닌 유통 방식이라 기존 은행 거래에 전혀 영향을 주지 않습니다. 5분만 시간 내주실 수 있을까요?"
         </div>
-        <div style="margin-top:10px;font-size:12px;font-weight:700;color:#7f1d1d;">🔗 추천 리포트: 긴급 자금 구조 진단 + T+1 정산 도입 효과</div>
+        <div class="trp">🔗 추천 리포트: 재무제표 방어형 자금 조달 + FlowPay vs 대출 비교</div>
+      </div>
+
+      <div class="tc ti">
+        <div class="th">
+          <div class="ti-icon">🎯</div>
+          <div><div class="tb">투자 유치</div><div style="font-size:11px;color:#92400E;font-weight:600;margin-top:2px;">2026.04.05 오후 3:20</div></div>
+        </div>
+        <div class="tt">🚨 트리거 감지: (주)애즈위메이크 — Series A 50억원 투자 유치, M&A 확장 중</div>
+        <div class="td">
+          <strong>💡 FlowPay 영업 포인트:</strong> 투자금 유치 직후는 원자재·재고 조달 수요가 급증하는 시점입니다.
+          투자금은 성장 재원으로 쓰고, 반복 원자재 매입은 FlowPay Revolving 한도로 운영하면 투자금 효율이 극대화됩니다.
+        </div>
+        <div class="hb">
+          ✉️ <strong>바로 보낼 첫 마디:</strong> "안녕하세요, 애즈위메이크 CFO님. Series A 투자 유치 진심으로 축하드립니다!
+          반복적인 원자재 매입은 FlowPay의 1년 Revolving 한도로 운영하시는 방법을 소개드리고 싶습니다."
+        </div>
+        <div class="trp">🔗 추천 리포트: 투자금 효율 극대화 + FlowPay Revolving 구조 안내</div>
       </div>
     </div>
   </div>
 
-
-  <!-- ═══ TAB 6: 서비스 소개 ═══ -->
+  <!-- ══ TAB 4: 서비스 소개 ══ -->
   <div id="about" class="section">
     <div class="card">
-      <h2>ℹ️ BizAI 서비스 소개</h2>
-      <p class="sub">FlowPay B2B 영업을 위한 AI 기반 기업 정보 수집 및 인텔리전스 플랫폼 (Phase 1~4 완성)</p>
+      <h2>ℹ️ FlowPay 서비스 소개</h2>
+      <p class="sub">276홀딩스 — 중소기업의 자금 흐름 문제를 해결하는 디지털 유통·금융 인프라 플랫폼</p>
 
-      <!-- Pipeline overview -->
-      <div style="background:#1e293b;border-radius:14px;padding:24px;margin-bottom:20px;color:white;">
-        <div style="font-size:12px;font-weight:700;color:#94a3b8;margin-bottom:16px;letter-spacing:1px;">🔄 전체 파이프라인</div>
-        <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
-          <div style="background:rgba(99,102,241,0.2);border:1px solid rgba(99,102,241,0.4);border-radius:10px;padding:10px 16px;font-size:12px;font-weight:700;color:#a5b4fc;">
-            📄 Phase 1<br><span style="font-weight:400;opacity:0.7;">데이터 수집</span>
-          </div>
-          <div style="color:#475569;">›</div>
-          <div style="background:rgba(99,102,241,0.2);border:1px solid rgba(99,102,241,0.4);border-radius:10px;padding:10px 16px;font-size:12px;font-weight:700;color:#a5b4fc;">
-            🔬 Phase 2a<br><span style="font-weight:400;opacity:0.7;">PDF 파싱</span>
-          </div>
-          <div style="color:#475569;">›</div>
-          <div style="background:rgba(99,102,241,0.2);border:1px solid rgba(99,102,241,0.4);border-radius:10px;padding:10px 16px;font-size:12px;font-weight:700;color:#a5b4fc;">
-            📊 Phase 2b~e<br><span style="font-weight:400;opacity:0.7;">분석·등급</span>
-          </div>
-          <div style="color:#475569;">›</div>
-          <div style="background:rgba(99,102,241,0.2);border:1px solid rgba(99,102,241,0.4);border-radius:10px;padding:10px 16px;font-size:12px;font-weight:700;color:#a5b4fc;">
-            💰 Phase 3<br><span style="font-weight:400;opacity:0.7;">마진 시뮬레이션</span>
-          </div>
-          <div style="color:#475569;">›</div>
-          <div style="background:rgba(74,222,128,0.15);border:1px solid rgba(74,222,128,0.3);border-radius:10px;padding:10px 16px;font-size:12px;font-weight:700;color:#86efac;">
-            📋 Phase 4<br><span style="font-weight:400;opacity:0.7;">제안서 생성</span>
-          </div>
+      <div class="stat-row">
+        <div class="stat-box"><div class="sbv">1,110개사</div><div class="sbl">기업 회원수</div></div>
+        <div class="stat-box"><div class="sbv">14,296건</div><div class="sbl">거래 채권수</div></div>
+        <div class="stat-box"><div class="sbv">6,794억</div><div class="sbl">등록 채권금액</div></div>
+        <div class="stat-box"><div class="sbv">4,500만원</div><div class="sbl">건별 평균 거래금액</div></div>
+        <div class="stat-box"><div class="sbv">28일</div><div class="sbl">평균 결제주기</div></div>
+        <div class="stat-box"><div class="sbv">6회</div><div class="sbl">연평균 이용횟수</div></div>
+      </div>
+
+      <div style="font-size:14px;font-weight:800;color:#0D2045;margin-bottom:14px;">🏆 3대 킬러 혜택 (Key Value Proposition)</div>
+      <div class="grid3" style="margin-bottom:22px;">
+        <div class="kv-card c1">
+          <div class="kv-icon">🛡️</div>
+          <h3>재무제표 방어</h3>
+          <ul>
+            <li>대출이 아닌 '구매 대행(유통)' 구조</li>
+            <li>부채로 안 잡혀 기존 은행 거래 영향 0%</li>
+            <li>보증보험 별도 한도 활용, 신용도 보호</li>
+          </ul>
+          <div class="kv-result">Result: 신용등급 하락 걱정 없이 자금 조달</div>
+        </div>
+        <div class="kv-card c2">
+          <div class="kv-icon">🔄</div>
+          <h3>마이너스 통장 방식</h3>
+          <ul>
+            <li>최초 심사 확정 시 1년 내내 한도 유지</li>
+            <li>매 발주 건마다 즉각적인 납품 제공</li>
+            <li>쓰고, 갚고, 다시 쓰는 Revolving 구조</li>
+          </ul>
+          <div class="kv-result">Result: 필요할 때 즉시 꺼내 쓰는 유동성 확보</div>
+        </div>
+        <div class="kv-card c3">
+          <div class="kv-icon">📈</div>
+          <h3>확실한 이익 창출</h3>
+          <ul>
+            <li>거래 금액의 5% 내외 마진 (유통 마진)</li>
+            <li>고객사별 마진율 협의 조정 가능</li>
+            <li>수주 포기(0원)보다 마진 내고 수익이 이득</li>
+          </ul>
+          <div class="kv-result">Result: 수주 포기 대신 마진 확보 및 매출 달성</div>
         </div>
       </div>
 
-      <div class="grid3">
-        <div style="padding:20px;background:#eef2ff;border-radius:12px;border:1px solid #a5b4fc;">
-          <div style="font-size:28px;margin-bottom:10px;">📄</div>
-          <div style="font-weight:800;margin-bottom:6px;">PDF 파싱 엔진</div>
-          <div style="font-size:13px;color:#64748b;line-height:1.6;">재무제표 PDF → FinancialStatement 자동 변환. K-GAAP 기준 Tier-1 정확도 <strong>11/11 (100%)</strong>.</div>
-        </div>
-        <div style="padding:20px;background:#ecfeff;border-radius:12px;border:1px solid #67e8f9;">
-          <div style="font-size:28px;margin-bottom:10px;">🔍</div>
-          <div style="font-weight:800;margin-bottom:6px;">DART API 연동</div>
-          <div style="font-size:13px;color:#64748b;line-height:1.6;">108,328개 기업 코드 조회. 공시 재무데이터로 PDF 결과 교차검증 및 대체 데이터 소스 제공.</div>
-        </div>
-        <div style="padding:20px;background:#ecfdf5;border-radius:12px;border:1px solid #6ee7b7;">
-          <div style="font-size:28px;margin-bottom:10px;">🏆</div>
-          <div style="font-weight:800;margin-bottom:6px;">신용 등급 산출</div>
-          <div style="font-size:13px;color:#64748b;line-height:1.6;">25개 재무비율 + Red Flag 탐지 → AAA~D 10단계 신용 등급 자동 산출.</div>
-        </div>
-        <div style="padding:20px;background:#fefce8;border-radius:12px;border:1px solid #fde047;">
-          <div style="font-size:28px;margin-bottom:10px;">💰</div>
-          <div style="font-weight:800;margin-bottom:6px;">Trapped Cash 분석</div>
-          <div style="font-size:13px;color:#64748b;line-height:1.6;">재무제표를 파싱해 잠긴 현금을 자동 산출하고, T+1 정산 전환 시 즉시 확보 가능한 금액을 시뮬레이션.</div>
-        </div>
-        <div style="padding:20px;background:#fdf4ff;border-radius:12px;border:1px solid #e9d5ff;">
-          <div style="font-size:28px;margin-bottom:10px;">📋</div>
-          <div style="font-weight:800;margin-bottom:6px;">제안서 자동 생성</div>
-          <div style="font-size:13px;color:#64748b;line-height:1.6;">등급별 4개 템플릿(Premium/Standard/Cautious/Restricted) × 4섹션 맞춤 제안서 즉시 생성.</div>
-        </div>
-        <div style="padding:20px;background:#fff7ed;border-radius:12px;border:1px solid #fed7aa;">
-          <div style="font-size:28px;margin-bottom:10px;">🔔</div>
-          <div style="font-weight:800;margin-bottom:6px;">트리거 자동화</div>
-          <div style="font-size:13px;color:#64748b;line-height:1.6;">투자유치·신제품·재무위험 3종 트리거 자동 감지 → 슬랙 알림 + CRM 자동 등록.</div>
-        </div>
-      </div>
-
-      <div style="margin-top:20px;padding:20px;background:#1e293b;border-radius:12px;color:white;">
-        <div style="font-size:13px;font-weight:700;color:#94a3b8;margin-bottom:12px;">🔧 기술 스택 & 연동 서비스</div>
-        <div style="display:flex;flex-wrap:wrap;gap:8px;">
-          <span style="padding:6px 14px;background:rgba(99,102,241,0.3);border:1px solid rgba(99,102,241,0.5);border-radius:20px;font-size:12px;font-weight:600;">DART 전자공시 API</span>
-          <span style="padding:6px 14px;background:rgba(139,92,246,0.3);border:1px solid rgba(139,92,246,0.5);border-radius:20px;font-size:12px;font-weight:600;">Claude AI API</span>
-          <span style="padding:6px 14px;background:rgba(8,145,178,0.3);border:1px solid rgba(8,145,178,0.5);border-radius:20px;font-size:12px;font-weight:600;">pdfplumber</span>
-          <span style="padding:6px 14px;background:rgba(5,150,105,0.3);border:1px solid rgba(5,150,105,0.5);border-radius:20px;font-size:12px;font-weight:600;">FastAPI</span>
-          <span style="padding:6px 14px;background:rgba(217,119,6,0.3);border:1px solid rgba(217,119,6,0.5);border-radius:20px;font-size:12px;font-weight:600;">Slack MCP</span>
-          <span style="padding:6px 14px;background:rgba(220,38,38,0.3);border:1px solid rgba(220,38,38,0.5);border-radius:20px;font-size:12px;font-weight:600;">Notion MCP</span>
-          <span style="padding:6px 14px;background:rgba(15,118,110,0.3);border:1px solid rgba(15,118,110,0.5);border-radius:20px;font-size:12px;font-weight:600;">Salesmap CRM</span>
-          <span style="padding:6px 14px;background:rgba(100,116,139,0.3);border:1px solid rgba(100,116,139,0.5);border-radius:20px;font-size:12px;font-weight:600;">Python 3.11</span>
-        </div>
-      </div>
-
-      <!-- Phase 완성 현황 -->
-      <div style="margin-top:20px;">
-        <div style="font-size:13px;font-weight:800;color:#64748b;margin-bottom:12px;">✅ Phase 완성 현황</div>
-        <div class="grid2">
-          <div>
-            <div class="score-row">
-              <div class="s-label">Phase 1</div>
-              <div class="s-bar"><div class="s-fill" style="width:100%;"></div></div>
-              <div class="s-val" style="color:#059669;">완료</div>
-            </div>
-            <div class="score-row">
-              <div class="s-label">Phase 2a</div>
-              <div class="s-bar"><div class="s-fill" style="width:100%;"></div></div>
-              <div class="s-val" style="color:#059669;">완료</div>
-            </div>
-            <div class="score-row">
-              <div class="s-label">Phase 2b~e</div>
-              <div class="s-bar"><div class="s-fill" style="width:100%;"></div></div>
-              <div class="s-val" style="color:#059669;">완료</div>
-            </div>
-          </div>
-          <div>
-            <div class="score-row">
-              <div class="s-label">Phase 3</div>
-              <div class="s-bar"><div class="s-fill" style="width:100%;"></div></div>
-              <div class="s-val" style="color:#059669;">완료</div>
-            </div>
-            <div class="score-row">
-              <div class="s-label">Phase 4</div>
-              <div class="s-bar"><div class="s-fill" style="width:100%;"></div></div>
-              <div class="s-val" style="color:#059669;">완료</div>
-            </div>
-            <div class="score-row">
-              <div class="s-label">Phase 5</div>
-              <div class="s-bar"><div class="s-fill" style="width:20%;background:linear-gradient(90deg,#94a3b8,#cbd5e1);"></div></div>
-              <div class="s-val" style="color:#94a3b8;">예정</div>
-            </div>
-          </div>
+      <div style="background:#0D2045;border-radius:14px;padding:22px;">
+        <div style="font-size:12px;font-weight:800;color:#475569;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:14px;">연동 서비스 & 기술 스택</div>
+        <div>
+          <span class="stag" style="background:rgba(96,165,250,0.2);border:1px solid rgba(96,165,250,0.4);color:#93C5FD;">DART 전자공시 API</span>
+          <span class="stag" style="background:rgba(167,139,250,0.2);border:1px solid rgba(167,139,250,0.4);color:#C4B5FD;">Claude AI API</span>
+          <span class="stag" style="background:rgba(34,211,153,0.2);border:1px solid rgba(34,211,153,0.4);color:#6EE7B7;">Slack MCP</span>
+          <span class="stag" style="background:rgba(251,191,36,0.2);border:1px solid rgba(251,191,36,0.4);color:#FDE68A;">Notion MCP</span>
+          <span class="stag" style="background:rgba(248,113,113,0.2);border:1px solid rgba(248,113,113,0.4);color:#FCA5A5;">Gmail MCP</span>
+          <span class="stag" style="background:rgba(74,222,128,0.2);border:1px solid rgba(74,222,128,0.4);color:#BBF7D0;">Salesmap CRM</span>
+          <span class="stag" style="background:rgba(56,189,248,0.2);border:1px solid rgba(56,189,248,0.4);color:#BAE6FD;">Google Drive</span>
+          <span class="stag" style="background:rgba(148,163,184,0.2);border:1px solid rgba(148,163,184,0.4);color:#CBD5E1;">Python / FastAPI</span>
         </div>
       </div>
     </div>
   </div>
 
-</div><!-- /main -->
+</div>
 
 <div class="footer">
-  BizAI — AI 기업정보 영업 인텔리전스 플랫폼 | 276홀딩스 © 2026<br>
-  <span style="font-size:11px;"><a href="https://github.com/YeChungHee/BizAi" style="color:#94a3b8;">https://github.com/YeChungHee/BizAi</a></span>
+  <strong>FlowBizAi</strong> — FlowPay 영업 인텔리전스 플랫폼 &nbsp;|&nbsp; 276홀딩스 © 2026
+  &nbsp;|&nbsp; 02-785-7080 &nbsp;|&nbsp; contact@276holdings.com
+  <div class="disc">
+    본 시뮬레이션은 실제 거래 조건에 따라 달라질 수 있으며 참고용입니다. FlowPay는 대출 상품이 아닌 유통/구매 대행 서비스입니다.<br>
+    마진율(3.5%~5%)은 결제 기간 및 거래 조건에 따라 협의 가능합니다. &nbsp;
+    <a href="https://github.com/YeChungHee/BizAi" style="color:#94A3B8;">GitHub</a>
+  </div>
 </div>
 
 <script>
-  // ─── NAV ───
-  function showSection(id, btn) {
+  // PDF.js 워커는 <head> 인라인 스크립트에서 즉시 설정됨
+
+  // ── 탭 전환 ──
+  function showTab(id, btn) {
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
     document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
     document.getElementById(id).classList.add('active');
     if (btn) btn.classList.add('active');
   }
 
-  // ─── SIMULATOR ───
-  function recalculate() {
-    const ar = parseFloat(document.getElementById('ar').value) || 0;
-    const other_ar = parseFloat(document.getElementById('other_ar').value) || 0;
-    const revenue = parseFloat(document.getElementById('revenue').value) || 1;
-    const liabilities = parseFloat(document.getElementById('liabilities').value) || 0;
-    const net_income = parseFloat(document.getElementById('net_income').value) || 0;
-    const dso = parseInt(document.getElementById('dso').value) || 30;
-
-    document.getElementById('dso_val').textContent = dso + '일';
-    document.getElementById('m_dso').textContent = dso + '일';
-
-    const total_ar = ar + other_ar;
-    const ratio = (total_ar / revenue * 100).toFixed(1);
-    const bar_width = Math.min(ratio, 150);
-    document.getElementById('ar_ratio_bar').style.width = Math.min(bar_width, 100) + '%';
-    document.getElementById('ar_ratio_bar').style.background = ratio > 100
-      ? 'linear-gradient(90deg,#dc2626,#f87171)'
-      : 'linear-gradient(90deg,#f59e0b,#fcd34d)';
-    document.getElementById('ar_ratio_text').textContent =
-      ratio > 100
-        ? `⚠️ 채권(${total_ar}M)이 매출(${revenue}M)을 ${(ratio-100).toFixed(1)}% 초과 — 위험 신호`
-        : `채권/매출 비율: ${ratio}%`;
-
-    const freed = Math.round(total_ar * (dso - 1) / dso);
-    document.getElementById('freed_cash').textContent = freed.toLocaleString() + '백만원';
-    document.getElementById('freed_cash_desc').textContent =
-      `(전체 채권 ${total_ar}M × DSO ${dso}일 → T+1 전환 기준)`;
-
-    const interest = Math.round(freed * 0.04);
-    document.getElementById('interest_saving').textContent = interest.toLocaleString() + '백만원/년';
+  // ── 포맷 유틸 ──
+  function fmt(n) { return Math.round(n).toLocaleString('ko-KR'); }
+  function fmtB(n) {
+    if (n >= 100000) return (n / 100000).toFixed(1) + '억원';
+    if (n >= 10000)  return (n / 10000).toFixed(1) + '만원';
+    return n.toLocaleString() + '원';
   }
 
-  // ─── DART SEARCH ───
-  const DART_SAMPLES = [
-    { name: '삼성전자(주)', code: '00126380', stock: '005930', type: '유가증권', industry: '전자부품·컴퓨터' },
-    { name: '(주)카카오', code: '00918444', stock: '035720', type: '유가증권', industry: '정보통신업' },
-    { name: '현대자동차(주)', code: '00164779', stock: '005380', type: '유가증권', industry: '자동차 제조' },
-    { name: 'LG에너지솔루션(주)', code: '01006110', stock: '373220', type: '유가증권', industry: '축전지 제조' },
-    { name: '(주)네이버', code: '00266961', stock: '035420', type: '유가증권', industry: '정보통신업' },
-    { name: '(주)쿠팡', code: '00813800', stock: null, type: '비상장', industry: '전자상거래' },
-    { name: '(주)토스', code: '00972736', stock: null, type: '비상장', industry: '금융서비스' },
-    { name: '배달의민족(주)', code: '01109814', stock: null, type: '비상장', industry: '음식배달플랫폼' },
-  ];
+  // ── 파일 드래그 ──
+  // ── 다중 파일 관리 ──
+  let selectedFiles = [];
+  let allResults    = [];
+  let currentResult = 0;
 
-  function dartSearch() {
-    const kw = document.getElementById('dart_keyword').value.trim();
-    const results = document.getElementById('dart_results');
-    if (!kw) { results.innerHTML = ''; return; }
+  function addFiles(fileList) {
+    const pdfs = Array.from(fileList).filter(f => f.type === 'application/pdf');
+    if (pdfs.length === 0) { showError('PDF 파일만 업로드 가능합니다.'); return; }
+    for (const f of pdfs) {
+      if (selectedFiles.length >= 5) break;
+      // 중복 제거
+      if (!selectedFiles.find(sf => sf.name === f.name && sf.size === f.size)) {
+        selectedFiles.push(f);
+      }
+    }
+    renderFileList();
+  }
 
-    const matched = DART_SAMPLES.filter(c => c.name.includes(kw) || c.industry.includes(kw));
+  function removeFile(idx) {
+    selectedFiles.splice(idx, 1);
+    renderFileList();
+  }
 
-    if (matched.length === 0) {
-      results.innerHTML = `<div style="padding:20px;text-align:center;color:#94a3b8;font-size:14px;">
-        🔍 "<strong>${kw}</strong>" 검색 결과 없음<br>
-        <span style="font-size:12px;margin-top:6px;display:block;">실제 서비스에서는 108,328개 기업 DB에서 검색됩니다</span>
-      </div>`;
+  function renderFileList() {
+    const wrap = document.getElementById('fileListWrap');
+    const list = document.getElementById('fileList');
+    const countEl = document.getElementById('fileCount');
+    const btn = document.getElementById('analyzeBtn');
+
+    if (selectedFiles.length === 0) {
+      wrap.style.display = 'none';
+      btn.style.display  = 'none';
       return;
     }
+    wrap.style.display = 'block';
+    btn.style.display  = 'block';
+    countEl.textContent = selectedFiles.length;
 
-    results.innerHTML = matched.map(c => `
-      <div class="dart-result-row" onclick="showCorpDetail('${c.name}', '${c.code}', '${c.stock||''}', '${c.type}', '${c.industry}')">
-        <div style="flex:1;">
-          <div class="corp-name">${c.name}</div>
-          <div class="corp-meta">DART코드: ${c.code} · ${c.industry}</div>
-        </div>
-        ${c.stock ? `<span class="stock-badge">${c.stock}</span>` : `<span style="padding:3px 10px;background:#f1f5f9;color:#64748b;border-radius:20px;font-size:11px;font-weight:700;">비상장</span>`}
-        <span style="color:#94a3b8;font-size:18px;margin-left:4px;">›</span>
-      </div>
-    `).join('');
+    list.innerHTML = selectedFiles.map((f, i) => {
+      const size = f.size < 1024*1024 ? (f.size/1024).toFixed(0)+'KB' : (f.size/1024/1024).toFixed(1)+'MB';
+      return `<div class="file-item">
+        <span class="fi-icon">📄</span>
+        <span class="fi-name" title="${f.name}">${f.name}</span>
+        <span class="fi-size">${size}</span>
+        <button class="fi-remove" onclick="removeFile(${i})" title="삭제">✕</button>
+      </div>`;
+    }).join('');
+
+    // pdfInput 초기화 (같은 파일 재선택 허용)
+    document.getElementById('pdfInput').value = '';
   }
 
-  function showCorpDetail(name, code, stock, type, industry) {
-    document.getElementById('dart_corp_name').textContent = name;
-    document.getElementById('dart_corp_meta').textContent = `DART 고유번호: ${code} · ${industry}`;
-    document.getElementById('dart_company_info').innerHTML = `
-      <div class="grid3" style="margin-bottom:16px;">
-        <div class="kpi-box" style="background:#eef2ff;">
-          <div class="kv" style="font-size:18px;color:#6366f1;">${code}</div>
-          <div class="kl">DART 고유번호</div>
-        </div>
-        <div class="kpi-box" style="background:${stock ? '#ecfdf5' : '#f8fafc'};">
-          <div class="kv" style="font-size:18px;color:${stock ? '#059669' : '#94a3b8'};">${stock || '비상장'}</div>
-          <div class="kl">주식 코드</div>
-        </div>
-        <div class="kpi-box" style="background:#fffbeb;">
-          <div class="kv" style="font-size:18px;color:#d97706;">${type}</div>
-          <div class="kl">시장 구분</div>
-        </div>
-      </div>
-      <div class="result-section info" style="margin-bottom:12px;">
-        <h3>📡 DART API 연동 안내</h3>
-        <p>실제 서비스에서는 <code>/api/company.json</code>으로 기업 기본정보(대표자, 설립일, 업종코드)를, <code>/api/fnlttSinglAcnt.json</code>으로 사업연도별 재무제표를 즉시 조회할 수 있습니다.<br><br>
-        <strong>python3 -m ingest.dart_client</strong> 로 직접 실행 가능합니다.</p>
-      </div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;">
-        <button class="btn btn-primary btn-sm" onclick="alert('실제 서비스에서 DART API 호출 → 재무제표 조회')">📊 재무제표 조회</button>
-        <button class="btn btn-secondary btn-sm" onclick="alert('전체 파이프라인 분석 시작 (Phase 2a~4)')">🤖 AI 분석 시작</button>
-        <button class="btn btn-secondary btn-sm" onclick="alert('영업 트리거 등록 완료')">🔔 트리거 등록</button>
-      </div>
-    `;
-    document.getElementById('dart_company_card').style.display = 'block';
-    document.getElementById('dart_company_card').scrollIntoView({ behavior: 'smooth' });
+  // ── 분석하기 버튼 트리거 ──
+  async function runAnalysis() {
+    if (selectedFiles.length === 0) return;
+    allResults = [];
+    currentResult = 0;
+
+    document.getElementById('errorBox').style.display = 'none';
+    document.getElementById('extractedCard').style.display = 'none';
+    document.getElementById('analyzeBtn').disabled = true;
+    document.getElementById('analyzeBtn').textContent = '⏳ 분석 중...';
+
+    for (let i = 0; i < selectedFiles.length; i++) {
+      setProgress(
+        Math.round((i / selectedFiles.length) * 10),
+        `📄 [${i+1}/${selectedFiles.length}] ${selectedFiles[i].name}`
+      );
+      const result = await processPDF(selectedFiles[i], i, selectedFiles.length);
+      if (result) allResults.push(result);
+    }
+
+    document.getElementById('analyzeBtn').disabled = false;
+    document.getElementById('analyzeBtn').textContent = '📊 분석하기';
+    document.getElementById('uploadProgress').style.display = 'none';
+
+    if (allResults.length > 0) {
+      currentResult = 0;
+      showResult(0);
+    }
   }
 
-  // ─── GRADE TEMPLATE ───
-  const GRADE_TEMPLATES = {
-    'A':   { name: 'Premium — 우량 거래', desc: '최우선 거래, 낮은 마진, 높은 한도 설정', color: '#059669', bg: '#ecfdf5', border: '#6ee7b7' },
-    'BBB': { name: 'Standard — 양호 거래', desc: '표준 거래 조건, 정기 모니터링', color: '#6366f1', bg: '#eef2ff', border: '#a5b4fc' },
-    'BB':  { name: 'Standard — 일반 거래', desc: '표준 거래 조건, 강화 모니터링', color: '#6366f1', bg: '#eef2ff', border: '#a5b4fc' },
-    'B':   { name: 'Cautious — 신중 접근', desc: '거래 조건 명시, 모니터링 강화, 단계적 한도', color: '#d97706', bg: '#fffbeb', border: '#fde68a' },
-    'CCC': { name: 'Cautious — 조건부 거래', desc: '엄격한 조건, 분기 재검토, 담보/보증 요청', color: '#d97706', bg: '#fffbeb', border: '#fde68a' },
-    'CC':  { name: 'Restricted — 제한 거래', desc: '소액 한도, 선불 또는 담보 필수', color: '#dc2626', bg: '#fef2f2', border: '#fca5a5' },
-    'D':   { name: 'Restricted — 거래 불가', desc: '신규 거래 보류, 기존 건 회수 전략 수립', color: '#dc2626', bg: '#fef2f2', border: '#fca5a5' },
+  function navigateResult(dir) {
+    currentResult = Math.max(0, Math.min(allResults.length - 1, currentResult + dir));
+    showResult(currentResult);
+  }
+
+  function showResult(idx) {
+    const nav    = document.getElementById('resultNav');
+    const prevBtn = document.getElementById('prevResult');
+    const nextBtn = document.getElementById('nextResult');
+    const label  = document.getElementById('resultNavLabel');
+
+    if (allResults.length > 1) {
+      nav.style.display = 'flex';
+      label.textContent  = `${idx + 1} / ${allResults.length}`;
+      prevBtn.disabled   = idx === 0;
+      nextBtn.disabled   = idx === allResults.length - 1;
+    } else {
+      nav.style.display = 'none';
+    }
+    displayResults(allResults[idx]);
+  }
+
+  function handleDragOver(e) {
+    e.preventDefault();
+    document.getElementById('uploadZone').classList.add('drag-over');
+  }
+  function handleDragLeave(e) {
+    document.getElementById('uploadZone').classList.remove('drag-over');
+  }
+  function handleDrop(e) {
+    e.preventDefault();
+    document.getElementById('uploadZone').classList.remove('drag-over');
+    addFiles(e.dataTransfer.files);
+  }
+  function handleFileSelect(e) {
+    addFiles(e.target.files);
+  }
+
+  // ── 에러 표시 ──
+  function showError(msg) {
+    const box = document.getElementById('errorBox');
+    document.getElementById('errorText').textContent = msg;
+    box.style.display = 'flex';
+    document.getElementById('uploadProgress').style.display = 'none';
+  }
+
+  // ── 진행 표시 ──
+  function setProgress(pct, text) {
+    document.getElementById('uploadProgress').style.display = 'block';
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressText').textContent = text;
+  }
+
+  // ── PDF 파싱 (결과 반환 방식 — runAnalysis에서 호출) ──
+  async function processPDF(file, fileIdx, fileTotal) {
+    const prefix = fileTotal > 1 ? `[${fileIdx+1}/${fileTotal}] ` : '';
+
+    // PDF.js 로드 확인
+    if (typeof pdfjsLib === 'undefined') {
+      showError('PDF 분석 라이브러리를 불러오지 못했습니다. 인터넷 연결을 확인하고 페이지를 새로고침 해주세요.');
+      return null;
+    }
+
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      setProgress(5, `${prefix}🔍 텍스트 추출 중...`);
+
+      const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+      const pdf = await loadingTask.promise;
+      let rawLines = [];
+      const totalPages = pdf.numPages;
+      const maxPages = Math.min(totalPages, 20);
+
+      for (let i = 1; i <= maxPages; i++) {
+        const page = await pdf.getPage(i);
+        const content = await page.getTextContent();
+        // Y 좌표 기반 줄 구분 + X좌표 기반 컬럼 간격 보존
+        const items = content.items;
+        const lineMap = {};
+        for (const item of items) {
+          if (!item.str || !item.str.trim()) continue;
+          const y = Math.round(item.transform[5]);
+          if (!lineMap[y]) lineMap[y] = [];
+          lineMap[y].push({ text: item.str, x: item.transform[4], w: item.width || 0 });
+        }
+        const sortedYs = Object.keys(lineMap).sort((a, b) => b - a);
+        for (const y of sortedYs) {
+          const chunks = lineMap[y].sort((a, b) => a.x - b.x);
+          // X좌표 기반 간격 계산: 큰 갭(컬럼 경계)이면 탭/다중공백 삽입
+          let lineStr = '';
+          for (let ci = 0; ci < chunks.length; ci++) {
+            if (ci > 0) {
+              const gap = chunks[ci].x - (chunks[ci-1].x + chunks[ci-1].w);
+              // 갭이 15pt 이상이면 컬럼 경계 → 탭 삽입 (당기/전기 구분)
+              lineStr += gap > 15 ? '\t' : ' ';
+            }
+            lineStr += chunks[ci].text;
+          }
+          rawLines.push(lineStr);
+        }
+        const filePct = fileTotal > 1
+          ? Math.round((fileIdx / fileTotal + (i / maxPages) / fileTotal) * 80) + 5
+          : Math.round(i / maxPages * 70) + 10;
+        setProgress(filePct, `${prefix}📑 ${i}/${maxPages} 페이지 분석 중...`);
+      }
+
+      const fullText = rawLines.join('\n');
+      const flatText = rawLines.join(' ');
+
+      setProgress(90, `${prefix}🤖 재무 지표 분석 중...`);
+      const result = parseFinancials(fullText, flatText, file.name);
+      return result;
+
+    } catch (err) {
+      showError(`${file.name} 분석 오류: ${err.message}`);
+      return null;
+    }
+  }
+
+  // ══════════════════════════════════════════
+  // ── 재무 지표 파싱 (v3 — 낱자공백 전처리 + 테이블/음수/단위 강화) ──
+  // ══════════════════════════════════════════
+
+  // ── [0] PDF.js 낱자 공백 정규화 ──
+  // PDF.js는 재무제표를 "매   출   액   9 , 1 8 3 , 1 7 2 , 8 5 6" 처럼
+  // 한글/숫자/쉼표 사이에 불필요한 공백을 삽입하므로 전처리 필수.
+  function normalizePdfText(raw) {
+    let t = raw;
+    // (A) 한글 낱자 공백 제거: "매   출   액" → "매출액"
+    //     한글 + 공백 + 한글 반복 패턴을 축약
+    t = t.replace(/([\uAC00-\uD7AF])\s+([\uAC00-\uD7AF])/g, '$1$2');
+    // 2회 반복 (3글자 이상 연속 처리: "매 출 액" → 1차 "매출 액" → 2차 "매출액")
+    t = t.replace(/([\uAC00-\uD7AF])\s+([\uAC00-\uD7AF])/g, '$1$2');
+    t = t.replace(/([\uAC00-\uD7AF])\s+([\uAC00-\uD7AF])/g, '$1$2');
+
+    // (B) 탭 → 다중공백 변환 (X좌표 기반 컬럼 경계 보존)
+    t = t.replace(/\t/g, '   ');  // 탭 → 3칸 공백 (당기/전기 경계)
+
+    // (C) 숫자 내부 공백 제거: "9 , 1 8 3 , 1 7 2" → "9,183,172"
+    // C-1: 쉼표 주변 공백 제거
+    t = t.replace(/(\d) *, *(\d)/g, '$1,$2');
+    // C-2: 숫자 사이 단일공백(1칸)만 제거 — 다중공백(컬럼 경계)은 보존
+    t = t.replace(/(\d) (\d)/g, '$1$2');
+    t = t.replace(/(\d) (\d)/g, '$1$2');
+    t = t.replace(/(\d) (\d)/g, '$1$2');
+
+    // (C) 로마 숫자/번호 접두어 정리: "Ⅰ ." → "Ⅰ."
+    t = t.replace(/([ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩⅺⅻ])\s*\.\s*/g, '$1. ');
+
+    // (D) 괄호 내부 정리: "( 단위 : 원 )" → "(단위 : 원)"
+    t = t.replace(/\(\s+/g, '(').replace(/\s+\)/g, ')');
+
+    // (E) 마이너스 부호와 숫자 사이 공백: "- 189,689" → "-189,689"
+    t = t.replace(/([-−△▲])\s+(\d)/g, '$1$2');
+
+    return t;
+  }
+
+  function parseFinancials(text, flatText, filename) {
+
+    // ── 전처리: 낱자 공백 정규화 ──
+    text = normalizePdfText(text);
+    flatText = normalizePdfText(flatText);
+
+    // ── [1] 숫자 추출 (음수 부호 보존: -, △, ▲, (숫자)) ──
+    function extractNumSigned(pattern, t) {
+      const match = t.match(pattern);
+      if (!match) return null;
+      const raw = match[1].replace(/,/g, '').replace(/\s/g, '');
+      const n = parseFloat(raw);
+      if (isNaN(n) || Math.abs(n) < 10) return null;
+      // 자릿수 검증: 원 단위 최대 13자리(조), 쉼표 제거 후 14자리 이상이면 합체 의심 → 스킵
+      if (raw.replace(/-/g,'').length > 13) return null;
+      // 부호 감지: 패턴 매치 앞쪽의 문맥 확인
+      const idx = t.indexOf(match[0]);
+      const prefix = idx > 0 ? t.substring(Math.max(0, idx - 10), idx) : '';
+      const isNeg = /[-−△▲]\s*$/.test(prefix) ||      // 앞에 마이너스/삼각
+                    /^\(/.test(match[1].trim()) ||       // (숫자) 형태
+                    /[-−]$/.test(match[0].split(match[1])[0]); // 패턴 내부 마이너스
+      return isNeg ? -Math.abs(n) : n;
+    }
+
+    // ── [2] 단위 감지 강화 ──
+    const allText = (text + ' ' + flatText);
+    // 단위 감지: "단위 : 백만원" 또는 "(백만원)" 같은 명시적 패턴만 매칭
+    // 주의: "단위.*백만" 같은 broad 패턴은 본문에 "백만원"이 포함되면 오탐 발생
+    const isMillionUnit = /단위\s*[:：]\s*백만\s*원|\(단위\s*[:：]?\s*백만\s*원\)|백만원\s*단위|\(백만원\)|unit\s*[:：]\s*million|millions?\s+of\s+krw/i.test(allText);
+    const isThousandUnit = /단위\s*[:：]\s*천\s*원|\(단위\s*[:：]?\s*천\s*원\)|천원\s*단위|\(천원\)|단위\s*[:：]\s*천원/i.test(allText);
+    // divisor: 추출된 원시값 × divisor = 백만원
+    let divisor = isMillionUnit ? 1 : isThousandUnit ? 0.001 : 0.000001;
+
+    // ── [3] 기업명 추출 ──
+    let company = '분석 대상 기업';
+    const coMatch = text.match(/주식회사\s*([\w가-힣]+)|([가-힣\w]{2,})\s*주식회사|([\w가-힣]{2,})\(주\)|\(주\)\s*([\w가-힣]{2,})/);
+    if (coMatch) company = (coMatch[1]||coMatch[2]||coMatch[3]||coMatch[4]||'').trim() || company;
+    if (company === '분석 대상 기업' && filename) {
+      const fn = filename.replace(/\.pdf$/i,'').replace(/재무제표|감사보고서|사업보고서|결산서/g,'').trim();
+      if (fn.length > 1 && fn.length < 20) company = fn;
+    }
+
+    // ── [4] 회계연도 추출 ──
+    let year = new Date().getFullYear() - 1 + '년도';
+    const yearMatch = text.match(/(\d{4})[.\s\-]*(?:년\s*)?(?:12월\s*31일|사업연도|회계연도|1월\s*1일|결산)/);
+    if (yearMatch) year = yearMatch[1] + '년도';
+
+    // ── [5] 기존 방식: 라벨+숫자 인접 패턴 (기존 GAP 패턴) ──
+    const GAP = '[^0-9\\n]{0,80}?';  // GAP 확장 (80자)
+    // 음수 접두어도 캡처: -숫자, △숫자
+    // 숫자 캡처: 최대 16자(쉼표 포함) — 당기+전기 합체 방지
+    const NUM = '(-?[0-9][0-9,]{2,15})';
+
+    const patterns = {
+      revenue:     [
+        new RegExp('매\\s*출\\s*액' + GAP + NUM),
+        new RegExp('수\\s*익\\s*\\(?매출액\\)?' + GAP + NUM),
+        new RegExp('영\\s*업\\s*수\\s*익' + GAP + NUM),
+      ],
+      cogs:        [ new RegExp('매\\s*출\\s*원\\s*가' + GAP + NUM) ],
+      material:    [
+        new RegExp('원\\s*재\\s*료' + GAP + NUM),
+        new RegExp('재\\s*료\\s*비' + GAP + NUM),
+        new RegExp('원\\s*자\\s*재' + GAP + NUM),
+      ],
+      grossProfit: [ new RegExp('매\\s*출\\s*총\\s*이\\s*익' + GAP + NUM) ],
+      operIncome:  [ new RegExp('영\\s*업\\s*이\\s*익' + GAP + NUM) ],
+      netIncome:   [
+        new RegExp('당\\s*기\\s*순\\s*이\\s*익\\s*\\(?손\\s*실\\)?' + GAP + NUM),
+        new RegExp('당\\s*기\\s*순\\s*이\\s*익' + GAP + NUM),
+        new RegExp('당\\s*기\\s*순\\s*손\\s*익' + GAP + NUM),
+        new RegExp('법인세차감후.*?순이익' + GAP + NUM),
+        new RegExp('순\\s*이\\s*익' + GAP + NUM),
+      ],
+      stBorrow:    [ new RegExp('단\\s*기\\s*차\\s*입\\s*금' + GAP + NUM) ],
+      curLiab:     [ new RegExp('유\\s*동\\s*부\\s*채' + GAP + NUM) ],
+      totalAssets: [ new RegExp('(?:자\\s*산\\s*)?총\\s*(?:자\\s*산|계)' + GAP + NUM), new RegExp('총\\s*자\\s*산' + GAP + NUM) ],
+      totalEquity: [ new RegExp('자\\s*본\\s*총\\s*계' + GAP + NUM) ],
+      paidCapital: [ new RegExp('납\\s*입\\s*자\\s*본\\s*금' + GAP + NUM) ],
+      ar:          [
+        new RegExp('매\\s*출\\s*채\\s*권' + GAP + NUM),
+        new RegExp('외\\s*상\\s*매\\s*출\\s*금' + GAP + NUM),
+      ],
+      interest:    [ new RegExp('이\\s*자\\s*비\\s*용' + GAP + NUM) ],
+    };
+
+    // 기존 GAP 패턴으로 추출
+    const data = {};
+    for (const [key, pats] of Object.entries(patterns)) {
+      for (const pat of pats) {
+        let val = extractNumSigned(pat, flatText);
+        if (val === null) val = extractNumSigned(pat, text);
+        if (val !== null) {
+          data[key] = Math.round(val * divisor);
+          break;
+        }
+      }
+    }
+
+    // ── [6] 가로 테이블 파싱 (헤더행 + 데이터행 분리 구조) ──
+    // 스크린샷 예: 헤더행 "결산기준일자 총자산 납입자본금 자본총계 매출액 영업이익 순이익"
+    //             데이터행 "2025-12-31  3,881,932  50,000  2,797,080  12,162,997  -189,689  188,497"
+    const headerKeywords = {
+      '매출액': 'revenue', '매출': 'revenue', '영업수익': 'revenue',
+      '영업이익': 'operIncome', '영업손익': 'operIncome',
+      '순이익': 'netIncome', '당기순이익': 'netIncome', '당기순손익': 'netIncome',
+      '총자산': 'totalAssets', '자산총계': 'totalAssets',
+      '자본총계': 'totalEquity', '납입자본금': 'paidCapital',
+      '유동부채': 'curLiab', '단기차입금': 'stBorrow',
+      '매출채권': 'ar', '외상매출금': 'ar',
+      '매출원가': 'cogs', '매출총이익': 'grossProfit',
+      '이자비용': 'interest',
+    };
+
+    function tryTableParse(src) {
+      const lines = src.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        // 헤더행 후보: 재무 키워드 2개 이상 포함
+        const foundHeaders = [];
+        for (const kw of Object.keys(headerKeywords)) {
+          const pos = line.indexOf(kw);
+          if (pos >= 0) foundHeaders.push({ kw, pos, key: headerKeywords[kw] });
+        }
+        if (foundHeaders.length < 2) continue;
+
+        // 헤더 컬럼 위치 기준 정렬
+        foundHeaders.sort((a, b) => a.pos - b.pos);
+
+        // 아래 데이터행들 파싱 (최대 5행)
+        for (let j = i + 1; j < Math.min(i + 6, lines.length); j++) {
+          const dataLine = lines[j];
+          // 숫자 토큰 추출 (음수 포함: -1,234,567 또는 △1,234,567)
+          const numTokens = [];
+          const numRx = /[-−△]?\s*([0-9][0-9,]*)/g;
+          let m;
+          while ((m = numRx.exec(dataLine)) !== null) {
+            const raw = m[0].replace(/[,\s]/g, '');
+            const n = parseFloat(raw.replace(/[△▲]/g, '-'));
+            if (!isNaN(n) && Math.abs(n) >= 10) {
+              numTokens.push({ val: n, pos: m.index });
+            }
+          }
+          if (numTokens.length < 2) continue;
+
+          // 첫 번째 데이터행만 사용 (최신 결산)
+          // 헤더-숫자 위치 매핑: 가장 가까운 위치의 숫자를 매칭
+          for (const hdr of foundHeaders) {
+            let best = null, bestDist = 9999;
+            for (const nt of numTokens) {
+              const dist = Math.abs(nt.pos - hdr.pos);
+              if (dist < bestDist) { bestDist = dist; best = nt; }
+            }
+            // 위치 기반 매핑이 부정확할 수 있으므로, 순서 기반도 시도
+            if (best && !data[hdr.key]) {
+              data[hdr.key] = Math.round(best.val * divisor);
+            }
+          }
+
+          // 순서 기반 매핑 보완: 헤더 순서 = 숫자 순서
+          if (numTokens.length >= foundHeaders.length) {
+            for (let k = 0; k < foundHeaders.length && k < numTokens.length; k++) {
+              const key = foundHeaders[k].key;
+              if (!data[key]) {
+                data[key] = Math.round(numTokens[k].val * divisor);
+              }
+            }
+          }
+
+          break; // 첫 데이터행만
+        }
+
+        if (Object.keys(data).length >= 3) break; // 충분히 추출됨
+      }
+    }
+
+    // GAP 패턴으로 매출액을 못 찾았거나 3개 미만이면 테이블 파싱 시도
+    if (!data.revenue || Object.keys(data).length < 3) {
+      tryTableParse(text);
+      if (!data.revenue || Object.keys(data).length < 3) {
+        tryTableParse(flatText);
+      }
+    }
+
+    // ── [7] 값 크기 기반 자동 단위 보정 ──
+    // 매출액이 100 미만이면 이미 백만원 단위 → 보정 불필요
+    // 매출액이 100~999,999 → 백만원으로 적절
+    // 매출액이 1,000,000 이상이면 천원이 원 단위로 오인된 경우 → ÷1000 보정
+    if (data.revenue) {
+      if (Math.abs(data.revenue) > 500000 && !isMillionUnit) {
+        // 아마 천원 단위를 원 단위로 오인 → 모든 값을 ÷1000 보정
+        const correction = isThousandUnit ? 1 : 1000;
+        if (correction > 1) {
+          for (const k of Object.keys(data)) {
+            if (data[k] !== null && data[k] !== undefined) data[k] = Math.round(data[k] / correction);
+          }
+        }
+      }
+    }
+
+    // ── [8] 없는 항목 추정 ──
+    if (!data.material && data.cogs) data.material = Math.round(data.cogs * 0.65);
+    if (!data.material && data.revenue) data.material = Math.round(Math.abs(data.revenue) * 0.45);
+    if (!data.revenue && data.cogs) data.revenue = Math.round(data.cogs * 1.2);
+
+    // ── [9] 건당 평균 (연간 6회 기준, 백만원) ──
+    const orderPerDeal = data.revenue ? Math.round(Math.abs(data.revenue) / 6) : 200;
+    const materialPerDeal = data.material ? Math.round(Math.abs(data.material) / 6) : 120;
+
+    // ── [10] FlowPay 적합도 점수 ──
+    let score = 50;
+    if (data.stBorrow && data.stBorrow > 500) score += 15;
+    if (data.curLiab && data.curLiab > 1000) score += 10;
+    if (data.revenue && Math.abs(data.revenue) > 500) score += 10;
+    if (data.operIncome && data.operIncome < 0) score += 15; // 영업적자 = FlowPay 니즈 높음
+    else if (data.operIncome && data.interest && data.interest > data.operIncome * 0.3) score += 15;
+    if (data.ar && data.revenue && (data.ar / Math.abs(data.revenue)) > 0.3) score += 10;
+    score = Math.min(score, 98);
+
+    return { company, year, data, orderPerDeal, materialPerDeal, score, isMillionUnit, isThousandUnit };
+  }
+
+  // ── 결과 표시 ──
+  function displayResults(r) {
+    const card = document.getElementById('extractedCard');
+    document.getElementById('ext_company').textContent = r.company;
+    document.getElementById('ext_year').textContent = r.year + ' 재무제표 기반 분석';
+    document.getElementById('ext_badge_text').textContent = Object.keys(r.data).length + '개 지표 추출 완료';
+
+    // 데이터 그리드
+    const items = [
+      { key: 'revenue',      label: '연간 매출액',         cls: 'highlight' },
+      { key: 'cogs',         label: '매출원가',             cls: '' },
+      { key: 'material',     label: '원재료·재료비',        cls: 'highlight' },
+      { key: 'operIncome',   label: '영업이익',             cls: '' },
+      { key: 'netIncome',    label: '당기순이익',           cls: '' },
+      { key: 'totalAssets',  label: '총자산',               cls: '' },
+      { key: 'totalEquity',  label: '자본총계',             cls: '' },
+      { key: 'stBorrow',     label: '단기차입금',           cls: 'warn' },
+      { key: 'curLiab',      label: '유동부채',             cls: 'warn' },
+      { key: 'ar',           label: '매출채권',             cls: '' },
+      { key: 'interest',     label: '이자비용',             cls: 'warn' },
+    ];
+
+    const grid = document.getElementById('dataGrid');
+    grid.innerHTML = items.map(it => {
+      const val = r.data[it.key];
+      const prefix = val != null && val < 0 ? '▼ ' : '';
+      const display = val != null ? prefix + fmt(Math.abs(val)) + ' 백만원' : '—';
+      const found = val != null ? '✓ 추출됨' : '미확인';
+      const negClass = val != null && val < 0 ? ' style="color:#DC2626;"' : '';
+      return `<div class="data-item ${it.cls}">
+        <div class="dl">${it.label}</div>
+        <div class="dv"${negClass}>${display}</div>
+        <div class="dc">${found}</div>
+      </div>`;
+    }).join('');
+
+    // 적합도 점수
+    const scoreColor = r.score >= 75 ? '#059669' : r.score >= 55 ? '#D97706' : '#94A3B8';
+    const scoreLabel = r.score >= 75 ? '높음 — 즉시 컨택 권장' : r.score >= 55 ? '보통 — 추가 확인 필요' : '낮음';
+    document.getElementById('scoreSection').innerHTML = `
+      <div class="score-bar">
+        <div class="score-label">
+          <span>FlowPay 도입 적합도</span>
+          <span style="color:${scoreColor};font-size:14px;font-weight:900;">${r.score}점 · ${scoreLabel}</span>
+        </div>
+        <div class="score-track">
+          <div class="score-fill" id="scoreFill" style="width:0%;background:${scoreColor};"></div>
+        </div>
+      </div>`;
+    setTimeout(() => {
+      const el = document.getElementById('scoreFill');
+      if (el) el.style.width = r.score + '%';
+    }, 100);
+
+    // 인사이트 (음수 값 처리 포함)
+    const insights = [];
+    if (r.data.stBorrow && r.data.stBorrow > 500) insights.push(`💡 단기차입금 <strong>${fmt(r.data.stBorrow)}백만원</strong> — 은행 한도 압박, FlowPay가 대체 가능`);
+    if (r.data.operIncome && r.data.operIncome < 0) insights.push(`🚨 <strong>영업적자 ${fmt(Math.abs(r.data.operIncome))}백만원</strong> — 비용 구조 개선 시급, FlowPay 도입으로 이자비용 절감 가능`);
+    else if (r.data.interest && r.data.operIncome && r.data.operIncome > 0 && r.data.interest > r.data.operIncome * 0.3) insights.push(`⚠️ 이자비용이 영업이익의 <strong>${Math.round(r.data.interest/r.data.operIncome*100)}%</strong> — 추가 대출 부담, 유통 방식이 적합`);
+    if (r.data.ar && r.data.revenue && r.data.ar/Math.abs(r.data.revenue) > 0.25) insights.push(`📌 매출채권이 연매출의 <strong>${Math.round(r.data.ar/Math.abs(r.data.revenue)*100)}%</strong> — 수금 지연으로 운전자금 압박`);
+    if (r.data.revenue && Math.abs(r.data.revenue) > 3000) insights.push(`🚀 연매출 <strong>${fmt(Math.abs(r.data.revenue))}백만원</strong> 규모 — 건당 평균 약 <strong>${fmt(r.orderPerDeal)}백만원</strong> 수주 추정`);
+
+    document.getElementById('insightSection').innerHTML = insights.length
+      ? `<div style="background:#F8FAFD;border:1px solid #E8EEF6;border-radius:12px;padding:16px;margin-bottom:14px;">
+          <div style="font-size:11px;font-weight:800;color:#566480;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">🔍 AI 분석 인사이트</div>
+          ${insights.map(i => `<div style="font-size:13px;color:#3A4F6A;line-height:1.8;padding:4px 0;border-bottom:1px dashed #F1F5F9;">${i}</div>`).join('')}
+         </div>`
+      : '';
+
+    // 전역에 결과 저장
+    window._extracted = r;
+    card.style.display = 'block';
+    card.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  // ── 시뮬레이터에 적용 (재무 리스크 가감 포함) ──
+  function applyToSimulator() {
+    const r = window._extracted;
+    if (!r) return;
+    // 재무분석 결과(백만원) → 시뮬레이터(천만원) 변환
+    if (r.orderPerDeal) document.getElementById('order_amt').value = Math.round(r.orderPerDeal / 10);
+    if (r.materialPerDeal) document.getElementById('material_amt').value = Math.round(r.materialPerDeal / 10);
+    if (r.company) document.getElementById('co_name').value = r.company;
+
+    // 재무제표 리스크 가감 적용
+    if (r.data) {
+      riskAdjustment = calcRiskAdjustment({
+        revenue: r.data.revenue, arTotal: r.data.ar, otherAr: r.data.other_ar,
+        liabilities: r.data.liabilities, netIncome: r.data.netIncome
+      });
+    }
+
+    calc();
+    showTab('sim', document.querySelectorAll('.nav button')[1]);
+  }
+
+  // ── 결제 주기 → 기본 마진율 선형 보간 ──
+  // 30일=3%, 60일=6%, 90일=9% 기준
+  function calcBaseFeeRate(cycle) {
+    cycle = Math.max(30, Math.min(90, cycle));
+    if (cycle <= 60) return 0.03 + (cycle - 30) / 30 * 0.03; // 3% → 6%
+    else             return 0.06 + (cycle - 60) / 30 * 0.03; // 6% → 9%
+  }
+
+  // ── 재무제표 리스크 가감 ──
+  // 재무분석 후 저장된 리스크 데이터로 마진율 추가 조정
+  let riskAdjustment = 0; // 재무제표 분석 시 설정됨
+
+  function calcRiskAdjustment(fin) {
+    let adj = 0;
+    const revenue = fin.revenue || 0;
+    const totalAr = (fin.arTotal || 0) + (fin.otherAr || 0);
+    const liabilities = fin.liabilities || 0;
+    const netIncome = fin.netIncome || 0;
+    const dso = revenue > 0 ? Math.round(totalAr / revenue * 365) : 0;
+    const arRatio = revenue > 0 ? totalAr / revenue * 100 : 0;
+
+    // 채권비율: 50% 초과 +0.5%, 80% 초과 +1.0%
+    if (arRatio > 80) adj += 1.0;
+    else if (arRatio > 50) adj += 0.5;
+
+    // DSO: 60일 초과 +0.5%, 90일 초과 +1.0%
+    if (dso > 90) adj += 1.0;
+    else if (dso > 60) adj += 0.5;
+
+    // 유동부채/매출: 50% 초과 +0.5%
+    if (revenue > 0 && liabilities / revenue > 0.5) adj += 0.5;
+
+    // 순이익률: 3% 미만 +0.5%, 적자 +1.0%
+    if (revenue > 0) {
+      const npm = netIncome / revenue;
+      if (npm < 0) adj += 1.0;
+      else if (npm < 0.03) adj += 0.5;
+    }
+
+    return adj;
+  }
+
+  function calcFeeRate(cycle) {
+    const base = calcBaseFeeRate(cycle);
+    const adjusted = base + riskAdjustment / 100;
+    return Math.max(0.03, Math.min(0.12, adjusted)); // 최소 3%, 최대 12%
+  }
+
+  // ── 마진 시뮬레이터 ──
+  function calc() {
+    const order    = parseFloat(document.getElementById('order_amt').value) || 0;
+    const material = parseFloat(document.getElementById('material_amt').value) || 0;
+    const cycle    = parseInt(document.getElementById('pay_cycle').value) || 30;
+
+    // ① 결제주기 → 연간 이용 횟수 자동 계산 (소수점 버림)
+    const useCnt = Math.floor(365 / cycle);
+    document.getElementById('use_count').value = useCnt;
+    document.getElementById('use_cnt_disp').textContent  = useCnt;
+    document.getElementById('use_cnt_label').textContent = useCnt;
+
+    // ② 선형 보간 마진율
+    const feeRate = calcFeeRate(cycle);
+    document.getElementById('fee_rate').value = feeRate.toFixed(4);
+
+    // 마진율 표시 업데이트
+    const baseRate = calcBaseFeeRate(cycle);
+    document.getElementById('fee_rate_display').textContent = (feeRate * 100).toFixed(1) + '%';
+    document.getElementById('pay_cycle_val').textContent = cycle + '일';
+    // 리스크 가감 정보
+    const riEl = document.getElementById('riskAdjInfo');
+    if (riskAdjustment > 0) {
+      riEl.style.display = '';
+      riEl.innerHTML = `⚠️ 기본 ${(baseRate*100).toFixed(1)}% + 재무 리스크 +${riskAdjustment.toFixed(1)}% = <strong>${(feeRate*100).toFixed(1)}%</strong>`;
+    } else { riEl.style.display = 'none'; }
+
+    // 마커 위치 (30=0%, 90=100%) + 색상
+    const markerPct = ((cycle - 30) / 60 * 100).toFixed(1);
+    const marker = document.getElementById('fee_marker');
+    marker.style.left = markerPct + '%';
+    if (cycle <= 45)      marker.style.borderColor = '#059669';
+    else if (cycle <= 65) marker.style.borderColor = '#D97706';
+    else                  marker.style.borderColor = '#DC2626';
+
+    // ③ 핵심 계산 (단위: 천만원)
+    const feeExact  = material * feeRate;           // 천만원 (소수 보존)
+    const fee       = Math.round(feeExact);          // 천만원 정수 (이익 계산용)
+    const feeWan    = Math.round(feeExact * 1000);   // 만원 (마진 총액 표시)
+
+    const profit    = order - material - feeExact;    // 건당 순이익 (천만원, 소수 보존)
+    const profitWan = Math.round(profit * 1000);     // 건당 순이익 (만원)
+
+    // 연간 추가 매출 = 수주 금액 × 연간 이용 횟수 (억원)
+    const annualSalesT = order * useCnt; // 천만원
+    const annualSalesEok = (annualSalesT / 10).toFixed(1); // 억원 (천만원÷10)
+
+    // ④ 결과 표시
+    document.getElementById('no_flowpay').textContent = '0 원 (수주 포기)';
+
+    document.getElementById('with_flowpay').textContent =
+      (profitWan >= 0 ? '' : '▼ ') + fmt(Math.abs(profitWan)) + ' 만원';
+    document.getElementById('with_flowpay_desc').textContent =
+      `수주 ${fmt(order)}천만 − 원자재 ${fmt(material)}천만 − 마진 ${fmt(feeWan)}만원`;
+
+    document.getElementById('annual_benefit').textContent = annualSalesEok + ' 억원 / 년';
+    document.getElementById('annual_desc').textContent =
+      `수주 ${fmt(order)}천만 × 연 ${useCnt}회 = ${annualSalesEok}억원`;
+
+    document.getElementById('fee_total').textContent = fmt(feeWan) + ' 만원';
+    document.getElementById('fee_desc').textContent =
+      `원자재 ${fmt(material)}천만 × ${(feeRate*100).toFixed(1)}% (${cycle}일) = ${fmt(feeWan)}만원`;
+  }
+
+  // ── 영업담당자 데이터 ──
+  const SALES_REPS = {
+    yeh:  { name: '예충희', title: '영업이사', phone: '010-4815-1411', email: 'appler@276holdings.com' },
+    park: { name: '박진용', title: '전략이사', phone: '010-9600-1630', email: 'eddie@276holdings.com' }
   };
 
-  function updateGradeUI() {
-    const grade = document.getElementById('prop_grade').value;
-    const t = GRADE_TEMPLATES[grade] || GRADE_TEMPLATES['B'];
-    const badge = document.getElementById('grade_template_badge');
-    badge.style.background = t.bg;
-    badge.style.borderColor = t.border;
-    badge.querySelector('#template_name').style.color = t.color;
-    document.getElementById('template_name').textContent = t.name;
-    document.getElementById('template_desc').textContent = t.desc;
+  // ── 제안서 생성 (McKinsey Style) ──
+  function genProposal() {
+    const order    = parseFloat(document.getElementById('order_amt').value) || 20;  // 천만원
+    const material = parseFloat(document.getElementById('material_amt').value) || 12; // 천만원
+    const feeRate  = parseFloat(document.getElementById('fee_rate').value) || 0.04;
+    const cycle    = parseInt(document.getElementById('pay_cycle').value) || 28;
+    const useCnt   = parseInt(document.getElementById('use_count').value) || 6;
+
+    const co       = document.getElementById('co_name').value;
+    const contact  = document.getElementById('co_contact').value;
+    const industry = document.getElementById('co_industry').value;
+    const pain     = document.getElementById('co_pain').value;
+
+    const repKey   = document.getElementById('sales_rep').value;
+    const rep      = SALES_REPS[repKey];
+
+    const feeExact      = material * feeRate;          // 천만원
+    const fee           = Math.round(feeExact);
+    const feeWan        = Math.round(feeExact * 1000); // 만원
+    const profit        = order - material - fee;       // 천만원
+    const profitWan     = Math.round(profit * 1000);    // 만원
+    const annualSalesT  = order * useCnt;               // 천만원
+    const annualSalesEok = (annualSalesT / 10).toFixed(1); // 억원
+    const annualFeeWan  = Math.round(feeExact * 1000 * useCnt);
+    const annualProfitWan = Math.round(profit * 1000 * useCnt);
+    const dateStr = new Date().toLocaleDateString('ko-KR', { year:'numeric', month:'long', day:'numeric' });
+
+    // ── Cover ──
+    document.getElementById('mck_title').innerHTML = `FlowPay-Proposal<span class="mck-sub">by FlowBizAi</span>`;
+    document.getElementById('mck_date').innerHTML = `📅 ${dateStr}`;
+    document.getElementById('mck_rep').innerHTML = `👤 ${rep.title} ${rep.name}`;
+    document.getElementById('mck_corp').innerHTML = `🏢 ${co}`;
+
+    // ── Section 1: Executive Summary ──
+    document.getElementById('mck_s1').innerHTML =
+      `<strong>${co}</strong> (${industry})는 현재 <em>'${pain}'</em>이라는 핵심 과제에 직면해 있습니다. 수주 기반 사업에서 원자재 선구매 자금의 부재는 매출 기회의 직접적 손실로 이어지며, 기존 금융 차입은 재무 부담 가중 및 신용도 훼손의 리스크를 수반합니다. 본 제안서는 FlowPay의 <strong>선공급·후결제(Supply Now, Pay Later)</strong> 모델을 통해 이 구조적 문제를 해결하는 방안을 제시합니다.`;
+
+    // KPI Row
+    const fin = window._extracted;
+    let kpiHtml = '';
+    if (fin && fin.data) {
+      const d = fin.data;
+      if (d.revenue)       kpiHtml += `<div class="mck-kpi"><div class="kv">${fmt(Math.round(d.revenue))}백만</div><div class="kl">매출액</div></div>`;
+      if (d.receivables)   kpiHtml += `<div class="mck-kpi"><div class="kv">${fmt(Math.round(d.receivables))}백만</div><div class="kl">매출채권</div></div>`;
+      if (d.currentDebt)   kpiHtml += `<div class="mck-kpi"><div class="kv">${fmt(Math.round(d.currentDebt))}백만</div><div class="kl">유동부채</div></div>`;
+    } else {
+      kpiHtml = `<div class="mck-kpi"><div class="kv">${fmt(order)}천만</div><div class="kl">건당 수주금액</div></div>`
+              + `<div class="mck-kpi"><div class="kv">${fmt(material)}천만</div><div class="kl">원자재 비용</div></div>`
+              + `<div class="mck-kpi"><div class="kv">${cycle}일</div><div class="kl">정산 주기</div></div>`;
+    }
+    document.getElementById('mck_kpi_row').innerHTML = kpiHtml;
+
+    // ── Section 2: Solution ──
+    document.getElementById('mck_s2').innerHTML =
+      `FlowPay는 ${co}의 원자재 <strong>${fmt(material)}천만원</strong>을 먼저 구매하여 즉시 납품합니다. ${contact}은 매출처로부터 대금 회수 후 FlowPay에 정산하는 구조로, <strong>은행 대출이 아닌 유통 거래</strong>이므로 재무제표상 부채로 계상되지 않습니다. 마진율은 원자재 금액 대비 <strong>${(feeRate*100).toFixed(1)}% (${cycle}일 기준)</strong>으로 책정됩니다.`;
+    document.getElementById('mck_s2_amt').textContent = `건당 순이익: ${fmt(profitWan)}만원`;
+    document.getElementById('mck_s2_label').textContent = `수주 ${fmt(order)}천만 − 원자재 ${fmt(material)}천만 − 마진 ${fmt(feeWan)}만원 = 순이익 ${fmt(profitWan)}만원`;
+
+    // ── Section 3: ROI ──
+    document.getElementById('mck_s3').innerHTML =
+      `연간 <strong>${useCnt}회</strong> FlowPay를 활용할 경우, 기존에 자금 부족으로 포기했던 수주를 모두 완수하여 <strong>연간 추가 매출 ${annualSalesEok}억원</strong>을 실현할 수 있습니다. FlowPay 도입 기업의 평균 매출 증가율은 <strong>358%</strong>이며, 초기 운전자금 부담 없이 성장 모멘텀을 확보하는 것이 핵심 가치입니다.`;
+
+    const roiHtml = `<div class="mck-kpi"><div class="kv">${annualSalesEok}억원</div><div class="kl">연간 추가 매출</div></div>`
+                  + `<div class="mck-kpi"><div class="kv">${fmt(annualProfitWan)}만원</div><div class="kl">연간 추가 순이익</div></div>`
+                  + `<div class="mck-kpi"><div class="kv">358%</div><div class="kl">도입 기업 평균 성장률</div></div>`;
+    document.getElementById('mck_roi_row').innerHTML = roiHtml;
+
+    // ── Section 4: CTA ──
+    document.getElementById('mck_s4').innerHTML =
+      `flowpay.kr에서 기업 회원 가입 후 발주서를 제출하시면 <strong>7~10일 내 한도가 확정</strong>됩니다.<br/>이후 매 건 당일 또는 익일 즉시 원자재가 납품됩니다.`;
+    document.getElementById('mck_cta_contact').innerHTML =
+      `<strong>${rep.title} ${rep.name}</strong> · ${rep.phone} · ${rep.email}`;
+
+    // ── 이메일 템플릿 생성 ──
+    const emailBody = `제목: [FlowPay] ${co} 원자재 선공급 도입 제안
+
+${contact}께,
+
+안녕하세요, 276홀딩스 FlowPay 사업부 ${rep.title} ${rep.name}입니다.
+
+${co}의 최근 사업 현황을 검토하던 중, 귀사가 직면한 운전자금 관련 과제에 대해 실질적인 솔루션을 제안드리고자 연락 드립니다.
+
+FlowPay는 B2B 원자재 선공급·후결제(Supply Now, Pay Later) 서비스로, 귀사가 수주를 확보한 시점에 원자재를 즉시 조달하고, 매출처 대금 회수 후 정산하는 구조입니다. 은행 차입과 달리 재무제표에 부채로 계상되지 않으며, 기존 신용 한도에 영향을 주지 않습니다.
+
+[핵심 제안 요약]
+• 건당 원자재 조달: ${fmt(material)}천만원 (마진율 ${(feeRate*100).toFixed(1)}%)
+• 건당 순이익: ${fmt(profitWan)}만원
+• 연간 추가 매출 전망: ${annualSalesEok}억원 (연 ${useCnt}회 기준)
+
+간략한 미팅을 통해 귀사의 구체적 니즈에 맞는 한도 설계와 도입 프로세스를 안내드리겠습니다. 편하신 일정을 회신해 주시면 감사하겠습니다.
+
+감사합니다.
+
+${rep.name} 드림
+${rep.title} | 276홀딩스 FlowPay 사업부
+Tel: ${rep.phone}
+Email: ${rep.email}
+Web: flowpay.kr`;
+
+    document.getElementById('email_body').textContent = emailBody;
+
+    // Show
+    document.getElementById('prop_out').style.display = 'block';
+    document.getElementById('prop_out').scrollIntoView({ behavior: 'smooth' });
   }
 
-  // ─── PROPOSAL GENERATOR ───
-  function generateProposal() {
-    const revenue = parseFloat(document.getElementById('p_revenue').value) || 12075;
-    const ar = parseFloat(document.getElementById('p_ar').value) || 2030;
-    const grade = document.getElementById('prop_grade').value;
-    const company = document.getElementById('company_name').value;
-    const contact = document.getElementById('contact_name').value;
-    const industry = document.getElementById('industry').value;
-    const t = GRADE_TEMPLATES[grade] || GRADE_TEMPLATES['B'];
-
-    // Margin by grade
-    const margins = { 'A': 2.5, 'BBB': 5.0, 'BB': 6.5, 'B': 7.5, 'CCC': 9.0, 'CC': 12.0, 'D': 15.0 };
-    const margin = margins[grade] || 7.5;
-    const freed = Math.round(ar * 39 / 40);
-    const interest = Math.round(freed * 0.04);
-
-    document.getElementById('proposal_title').textContent =
-      `[FlowPay] ${company} 현금흐름 최적화 제안서 — ${t.name}`;
-    document.getElementById('proposal_date').textContent =
-      `생성일: ${new Date().toLocaleDateString('ko-KR')} | 신용등급: ${grade} | 적용 템플릿: ${t.name}`;
-
-    document.getElementById('section1_content').innerHTML =
-      `${company} (${industry}) 재무 분석 결과, 채권 ${ar}백만원이 연간 매출(${revenue}백만원) 대비 <strong>${(ar/revenue*100).toFixed(1)}% 수준</strong>으로 집중되어 있습니다. 신용등급 <strong>${grade}</strong> 기준으로 분석 시, ${t.desc} 전략이 적합합니다.`;
-
-    document.getElementById('section2_content').innerHTML =
-      `현재 채권 회수 구조를 FlowPay T+1 정산으로 전환할 경우:`;
-    document.getElementById('section2_amount').textContent =
-      `약 ${freed.toLocaleString()}백만원 즉시 유동화 가능`;
-
-    document.getElementById('section3_content').innerHTML =
-      `확보 자금 재투자 시 연 이자비용 <strong>${interest}백만원 절감</strong> + 마케팅 재투자 사이클 가속이 가능합니다. 권장 마진은 <strong>${margin}%</strong>이며, 단계적 한도 상향을 통해 장기 파트너십을 구축할 수 있습니다.`;
-
-    document.getElementById('section4_content').innerHTML =
-      `${contact}, 지금 바로 FlowPay ${grade}등급 맞춤 조건으로 시작하세요. 적용 마진 <strong>${margin}%</strong> · 초기 한도 설정 후 3개월 실적 기반 한도 상향 검토. 담당 매니저에게 연락하시면 10분 내 한도 조회가 가능합니다.`;
-
-    document.getElementById('proposal_output').style.display = 'block';
-    document.getElementById('proposal_output').scrollIntoView({ behavior: 'smooth' });
+  // ── PDF 다운로드 (html2canvas + jsPDF) ──
+  async function downloadProposalPDF() {
+    const report = document.getElementById('mck_report');
+    // 동적 로드 html2canvas & jsPDF
+    if (!window.html2canvas) {
+      const s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+      document.head.appendChild(s);
+      await new Promise(r => s.onload = r);
+    }
+    if (!window.jspdf) {
+      const s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+      document.head.appendChild(s);
+      await new Promise(r => s.onload = r);
+    }
+    try {
+      const canvas = await html2canvas(report, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jspdf.jsPDF('p', 'mm', 'a4');
+      const pageW = pdf.internal.pageSize.getWidth();
+      const pageH = pdf.internal.pageSize.getHeight();
+      const imgW = pageW;
+      const imgH = (canvas.height * imgW) / canvas.width;
+      let y = 0;
+      while (y < imgH) {
+        if (y > 0) pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, -y, imgW, imgH);
+        y += pageH;
+      }
+      const co = document.getElementById('co_name').value || 'Company';
+      pdf.save(`FlowPay_Proposal_${co}.pdf`);
+    } catch(e) {
+      // 폴백: 브라우저 인쇄
+      const printWin = window.open('', '_blank');
+      printWin.document.write('<html><head><title>FlowPay Proposal</title></head><body>');
+      printWin.document.write(report.outerHTML);
+      printWin.document.write('</body></html>');
+      printWin.document.close();
+      printWin.print();
+    }
   }
 
-  // ─── INIT ───
-  recalculate();
-  updateGradeUI();
+  // ── 제안서 텍스트 복사 ──
+  function copyProposal() {
+    const report = document.getElementById('mck_report');
+    const text = report.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = event.target;
+      const orig = btn.textContent;
+      btn.textContent = '✅ 복사 완료!';
+      setTimeout(() => btn.textContent = orig, 2000);
+    }).catch(() => {
+      // 폴백
+      const ta = document.createElement('textarea');
+      ta.value = report.innerText;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    });
+  }
+
+  // ── 이메일 템플릿 토글 ──
+  function toggleEmailTemplate() {
+    const wrap = document.getElementById('email_template_wrap');
+    wrap.style.display = wrap.style.display === 'none' ? '' : 'none';
+    if (wrap.style.display !== 'none') wrap.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  // ── 이메일 템플릿 복사 ──
+  function copyEmailTemplate() {
+    const text = document.getElementById('email_body').textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = event.target;
+      const orig = btn.textContent;
+      btn.textContent = '✅ 복사됨!';
+      setTimeout(() => btn.textContent = orig, 2000);
+    }).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    });
+  }
+
+  calc();
+
+  // ── 제안서 이동 ──
+  function goToProposal() {
+    showTab('proposal', document.querySelectorAll('.nav button')[2]);
+    setTimeout(genProposal, 300);
+  }
+
+  // ══════════════════════════════════════════
+  // ── DART 전자공시 API 연동 ──
+  // ══════════════════════════════════════════
+  const DART_KEY = '9017bdcbc6b17272814a66e99fa15f068cfaa61a';
+  const CORS_PROXIES = [
+    url => 'https://corsproxy.io/?' + encodeURIComponent(url),
+    url => 'https://api.allorigins.win/get?url=' + encodeURIComponent(url),
+  ];
+
+  // 연도 셀렉트 초기화
+  (function initYears() {
+    const sel = document.getElementById('dartYear');
+    const cur = new Date().getFullYear();
+    for (let y = cur - 1; y >= cur - 5; y--) {
+      const opt = document.createElement('option');
+      opt.value = y; opt.textContent = y + '년';
+      if (y === cur - 1) opt.selected = true;
+      sel.appendChild(opt);
+    }
+  })();
+
+  // 소스 전환 (PDF ↔ DART)
+  function switchSource(mode) {
+    const isPdf = mode === 'pdf';
+    document.getElementById('pdfSection').style.display   = isPdf ? '' : 'none';
+    document.getElementById('dartSection').style.display  = isPdf ? 'none' : '';
+    document.getElementById('srcTabPdf').classList.toggle('active', isPdf);
+    document.getElementById('srcTabDart').classList.toggle('active', !isPdf);
+    if (!isPdf && !document.getElementById('dartYear').options.length) initYears();
+  }
+
+  // DART API 호출 (CORS 프록시 순차 시도)
+  async function dartFetch(url) {
+    // 1) 직접 시도
+    try {
+      const r = await fetch(url, { signal: AbortSignal.timeout(5000) });
+      if (r.ok) { const d = await r.json(); if (d.status !== undefined) return d; }
+    } catch(e) {}
+    // 2) 프록시 순차 시도
+    for (const makeProxy of CORS_PROXIES) {
+      try {
+        const r = await fetch(makeProxy(url), { signal: AbortSignal.timeout(8000) });
+        if (!r.ok) continue;
+        const wrapper = await r.json();
+        // allorigins는 {contents:'...'} 래핑
+        const raw = wrapper.contents !== undefined ? wrapper.contents : JSON.stringify(wrapper);
+        return JSON.parse(raw);
+      } catch(e) {}
+    }
+    throw new Error('API 연결 실패');
+  }
+
+  function setDartStatus(type, msg) {
+    const el = document.getElementById('dartStatus');
+    el.style.display = msg ? '' : 'none';
+    el.className = 'dart-status ' + type;
+    el.innerHTML = msg;
+  }
+
+  // 회사 검색
+  async function searchDart() {
+    const name = (document.getElementById('dartCorpName').value || '').trim();
+    if (!name) { setDartStatus('error', '회사명을 입력하세요.'); return; }
+
+    document.getElementById('dartCorpList').innerHTML = '';
+    setDartStatus('info', `🔍 "<strong>${name}</strong>" 검색 중...`);
+
+    try {
+      // list.json으로 최근 사업보고서 공시 검색
+      const year = document.getElementById('dartYear').value;
+      const url = `https://opendart.fss.or.kr/api/list.json?crtfc_key=${DART_KEY}&corp_name=${encodeURIComponent(name)}&pblntf_ty=A&bgn_de=${year}0101&end_de=${year}1231&page_no=1&page_count=20`;
+      const data = await dartFetch(url);
+
+      if (data.status !== '000' || !data.list || data.list.length === 0) {
+        // 연도 범위 확장해서 재시도
+        const url2 = `https://opendart.fss.or.kr/api/list.json?crtfc_key=${DART_KEY}&corp_name=${encodeURIComponent(name)}&pblntf_ty=A&page_no=1&page_count=20`;
+        const data2 = await dartFetch(url2);
+        if (data2.status !== '000' || !data2.list || data2.list.length === 0) {
+          setDartStatus('error', `"${name}"에 해당하는 사업보고서 공시를 찾을 수 없습니다.<br><small>상장사/공시의무법인만 조회 가능합니다.</small>`);
+          return;
+        }
+        renderDartCorpList(data2.list);
+      } else {
+        renderDartCorpList(data.list);
+      }
+    } catch(e) {
+      setDartStatus('error', 'DART 서버 연결에 실패했습니다. 잠시 후 다시 시도해주세요.');
+    }
+  }
+
+  function renderDartCorpList(list) {
+    const seen = new Set();
+    const corps = list.filter(d => {
+      if (seen.has(d.corp_code)) return false;
+      seen.add(d.corp_code); return true;
+    });
+
+    setDartStatus('success', `${corps.length}개 기업 검색됨 — 조회할 기업을 선택하세요`);
+    const wrap = document.getElementById('dartCorpList');
+    wrap.innerHTML = corps.map(c => `
+      <div class="dart-corp-item" onclick="fetchDartFinancials('${c.corp_code}','${c.corp_name.replace(/'/g,"\\'")}')">
+        <div>
+          <div class="dart-corp-name">${c.corp_name}</div>
+          <div class="dart-corp-meta">${c.stock_code ? '📈 ' + c.stock_code : '비상장'} · 최근공시: ${c.rcept_dt ? c.rcept_dt.slice(0,4)+'년' : ''}</div>
+        </div>
+        <button class="dart-corp-btn">조회 →</button>
+      </div>`).join('');
+  }
+
+  // 재무제표 조회
+  async function fetchDartFinancials(corp_code, corp_name) {
+    const year = document.getElementById('dartYear').value;
+    document.getElementById('dartCorpList').innerHTML = '';
+    setDartStatus('info', `📊 <strong>${corp_name}</strong> ${year}년 재무제표 조회 중...`);
+
+    try {
+      let result = null;
+      let fsType = '';
+      for (const fs_div of ['OFS', 'CFS']) {
+        const url = `https://opendart.fss.or.kr/api/fnlttSinglAcntAll.json?crtfc_key=${DART_KEY}&corp_code=${corp_code}&bsns_year=${year}&reprt_code=11011&fs_div=${fs_div}`;
+        const data = await dartFetch(url);
+        if (data.status === '000' && data.list && data.list.length > 0) {
+          result = data.list; fsType = fs_div === 'OFS' ? '별도' : '연결'; break;
+        }
+      }
+      if (!result) {
+        setDartStatus('error', `${year}년 사업보고서 데이터가 없습니다. 연도를 변경해 보세요.`);
+        return;
+      }
+
+      const fin = parseDartFinancials(result);
+      displayDartResult(fin, corp_name, year, fsType);
+      setDartStatus('success', `✅ <strong>${corp_name}</strong> ${year}년 재무제표(${fsType}) 로드 완료`);
+    } catch(e) {
+      setDartStatus('error', '재무제표 조회 중 오류가 발생했습니다.');
+    }
+  }
+
+  // 재무항목 파싱 (원 → 백만원 변환, 음수 부호 보존)
+  function parseDartFinancials(list) {
+    function findAmt(keywords, keepSign) {
+      for (const kw of keywords) {
+        const item = list.find(d =>
+          (d.sj_div === 'IS' || d.sj_div === 'BS' || d.sj_div === 'CIS') &&
+          d.account_nm.replace(/\s/g,'').includes(kw.replace(/\s/g,'')) &&
+          d.thstrm_amount && d.thstrm_amount.trim() !== '-' && d.thstrm_amount.trim() !== ''
+        );
+        if (item) {
+          const n = parseInt(item.thstrm_amount.replace(/[,\s]/g,''));
+          if (isNaN(n)) continue;
+          // keepSign=true: 영업이익/순이익 등 음수 가능 항목
+          return keepSign ? Math.round(n / 1000000) : Math.round(Math.abs(n) / 1000000);
+        }
+      }
+      return null;
+    }
+    return {
+      revenue:     findAmt(['매출액','수익(매출액)','영업수익','매출'], false),
+      operIncome:  findAmt(['영업이익','영업손익'], true),        // 음수 보존
+      netIncome:   findAmt(['당기순이익','당기순손익'], true),     // 음수 보존
+      arTotal:     findAmt(['매출채권및기타채권','매출채권','외상매출금','매출채권및기타수취채권'], false),
+      otherAr:     findAmt(['미수금','기타수취채권'], false),
+      liabilities: findAmt(['유동부채'], false),
+      totalAssets: findAmt(['자산총계','자산총계'], false),
+    };
+  }
+
+  // DART 결과를 기존 displayResults 형식으로 변환해서 표시
+  function displayDartResult(fin, corp_name, year, fsType) {
+    const revenue     = fin.revenue     || 0;
+    const operIncome  = fin.operIncome  || 0;
+    const netIncome   = fin.netIncome   || 0;
+    const ar          = fin.arTotal     || 0;
+    const otherAr     = fin.otherAr     || 0;
+    const liabilities = fin.liabilities || 0;
+    const totalAssets = fin.totalAssets || 0;
+    const totalAr     = ar + otherAr;
+    const dso         = revenue > 0 ? Math.round(totalAr / revenue * 365) : 0;
+    const freed       = revenue > 0 ? Math.round(totalAr * (dso - 1) / dso) : 0;
+    const interest    = Math.round(liabilities * 0.05);
+
+    // 기존 결과 카드 채우기
+    document.getElementById('ext_company').textContent = corp_name;
+    document.getElementById('ext_year').textContent = `${year}년 사업보고서 (${fsType}) · DART 전자공시`;
+    document.getElementById('ext_badge_text').textContent = 'DART 자동조회 완료';
+
+    const items = [
+      { label:'매출액',         val: revenue,     unit:'백만원', color:'#1B4FD8' },
+      { label:'영업이익',       val: operIncome,  unit:'백만원', color: operIncome >= 0 ? '#059669' : '#DC2626' },
+      { label:'당기순이익',     val: netIncome,   unit:'백만원', color: netIncome >= 0 ? '#059669' : '#DC2626' },
+      { label:'매출채권+미수금',val: totalAr,     unit:'백만원', color:'#D97706' },
+      { label:'유동부채',       val: liabilities, unit:'백만원', color:'#7C3AED' },
+      { label:'총자산',         val: totalAssets, unit:'백만원', color:'#0369A1' },
+      { label:'DSO(채권회전)',  val: dso,         unit:'일',     color:'#DC2626' },
+    ];
+
+    document.getElementById('dataGrid').innerHTML = items.map(it => {
+      const displayVal = it.val != null && it.val !== 0 ? it.val.toLocaleString() : '—';
+      const prefix = it.val < 0 ? '▼ ' : '';
+      return `<div class="data-item">
+        <div class="di-label">${it.label}</div>
+        <div class="di-val" style="color:${it.color};">${prefix}${displayVal}<span class="di-unit">${it.unit}</span></div>
+      </div>`;
+    }).join('');
+
+    // 적합도 점수 계산 (기존 로직 재활용)
+    const ratio = revenue > 0 ? totalAr / revenue * 100 : 0;
+    let score = 0;
+    if (ratio > 50) score += 40; else if (ratio > 25) score += 20;
+    if (dso > 60) score += 30; else if (dso > 30) score += 15;
+    if (liabilities > revenue * 0.5) score += 20;
+    if (netIncome < revenue * 0.03) score += 10;
+    score = Math.min(score, 100);
+    const grade = score >= 80 ? '매우 높음' : score >= 60 ? '높음' : score >= 40 ? '보통' : '낮음';
+    const gradeColor = score >= 80 ? '#DC2626' : score >= 60 ? '#D97706' : score >= 40 ? '#059669' : '#94A3B8';
+
+    document.getElementById('scoreSection').innerHTML = `
+      <div style="background:#F8FAFD;border:1.5px solid #E2EAF4;border-radius:12px;padding:16px;margin-bottom:14px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <div style="font-size:13px;font-weight:800;color:#1A2332;">FlowPay 도입 적합도</div>
+          <div style="font-size:22px;font-weight:900;color:${gradeColor};">${grade} (${score}점)</div>
+        </div>
+        <div style="height:8px;border-radius:999px;background:#E2EAF4;">
+          <div style="height:100%;width:${score}%;background:${gradeColor};border-radius:999px;transition:width 0.5s;"></div>
+        </div>
+        <div style="font-size:11px;color:#94A3B8;margin-top:6px;">채권비율 ${ratio.toFixed(1)}% · DSO ${dso}일 · T+1 전환 시 ${freed.toLocaleString()}백만원 즉시 유동화</div>
+      </div>`;
+
+    document.getElementById('insightSection').innerHTML = `
+      <div style="background:#F0FDF4;border:1.5px solid #A7F3D0;border-radius:12px;padding:16px;">
+        <div style="font-size:12px;font-weight:800;color:#065F46;margin-bottom:6px;">💡 영업 인사이트</div>
+        <div style="font-size:13px;color:#134E4A;line-height:1.7;">
+          <strong>${corp_name}</strong>은 매출채권 ${totalAr.toLocaleString()}백만원이 연간 매출(${revenue.toLocaleString()}백만원) 대비
+          <strong>${ratio.toFixed(1)}%</strong> 수준입니다.
+          T+1 전환 시 <strong>${freed.toLocaleString()}백만원</strong>을 즉시 유동화할 수 있으며,
+          유동부채 이자 절감 효과는 연간 <strong>${interest.toLocaleString()}백만원</strong>으로 추산됩니다.
+        </div>
+      </div>`;
+
+    document.getElementById('extractedCard').style.display = '';
+    document.getElementById('extractedCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+    // DART 데이터를 _extracted 형식으로 저장 (시뮬레이터 적용 시 사용)
+    window._extracted = {
+      company: corp_name,
+      orderPerDeal: revenue > 0 ? Math.round(revenue / 12 / 100) * 100 || 200 : 200,
+      materialPerDeal: revenue > 0 ? Math.round(revenue / 12 / 100 * 0.7) * 100 || 120 : 120,
+      data: { revenue, ar, other_ar: otherAr, liabilities, netIncome, operIncome }
+    };
+
+    // 리스크 가감 미리 계산
+    riskAdjustment = calcRiskAdjustment(fin);
+  }
 </script>
 </body>
 </html>
