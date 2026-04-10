@@ -1,0 +1,236 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://bizai.276holdings.com/schema/financial_statement/v1.json",
+  "title": "BizAI Standard Financial Statement",
+  "description": "표준 재무제표 JSON 스키마 v1. PDF OCR / DART API 모두 동일 형태로 저장.",
+  "type": "object",
+  "required": ["schema_version", "company", "statements"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "JSON 생성 시각 (ISO 8601)"
+    },
+
+    "company": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name":        { "type": "string", "description": "회사명" },
+        "business_no": { "type": ["string", "null"], "pattern": "^[0-9]{3}-?[0-9]{2}-?[0-9]{5}$", "description": "사업자등록번호" },
+        "corporate_no":{ "type": ["string", "null"], "description": "법인등록번호" },
+        "stock_code":  { "type": ["string", "null"], "description": "주식코드 (상장사)" },
+        "dart_code":   { "type": ["string", "null"], "description": "DART 고유번호" },
+        "listed":      { "type": "boolean", "default": false },
+
+        "ksic_code":   { "type": ["string", "null"], "description": "한국표준산업분류 코드 (예: C262)" },
+        "ksic_name":   { "type": ["string", "null"], "description": "KSIC 명칭" },
+        "size_code":   { "type": ["string", "null"], "enum": [null, "L", "J", "D", "M", "S", "A"], "description": "ECOS 기업규모 코드" },
+        "size_label":  { "type": ["string", "null"], "description": "대기업/중견/중소 등 라벨" },
+
+        "ceo":         { "type": ["string", "null"] },
+        "established": { "type": ["string", "null"], "format": "date" },
+        "employees":   { "type": ["integer", "null"], "minimum": 0 },
+        "address":     { "type": ["string", "null"] },
+        "website":     { "type": ["string", "null"] }
+      }
+    },
+
+    "statements": {
+      "type": "array",
+      "minItems": 1,
+      "description": "시계열 재무제표 (각 항목 = 1 회계기간)",
+      "items": { "$ref": "#/definitions/Statement" }
+    }
+  },
+
+  "definitions": {
+
+    "Statement": {
+      "type": "object",
+      "required": [
+        "fiscal_year", "period_end", "report_type",
+        "accounting_standard", "currency", "unit",
+        "balance_sheet", "income_statement", "cash_flow", "quality"
+      ],
+      "properties": {
+
+        "fiscal_year":  { "type": "integer", "minimum": 1990, "maximum": 2100 },
+        "period_start": { "type": ["string", "null"], "format": "date" },
+        "period_end":   { "type": "string", "format": "date" },
+
+        "report_type": {
+          "type": "string",
+          "enum": ["consolidated", "separate", "unknown"],
+          "description": "연결(consolidated) / 별도(separate) / 불명"
+        },
+        "accounting_standard": {
+          "type": "string",
+          "enum": ["K-IFRS", "K-GAAP", "unknown"]
+        },
+
+        "audit": {
+          "type": "object",
+          "properties": {
+            "opinion":     { "type": ["string", "null"], "enum": [null, "적정", "한정", "부적정", "의견거절", "unaudited"] },
+            "auditor":     { "type": ["string", "null"] },
+            "report_date": { "type": ["string", "null"], "format": "date" },
+            "going_concern_doubt": { "type": ["boolean", "null"] }
+          }
+        },
+
+        "currency": { "type": "string", "default": "KRW" },
+        "unit": {
+          "type": "string",
+          "enum": ["원"],
+          "description": "모든 금액은 원 단위로 정규화 저장 (PDF의 백만원/천원 등은 파싱시 변환)"
+        },
+
+        "balance_sheet":    { "$ref": "#/definitions/BalanceSheet" },
+        "income_statement": { "$ref": "#/definitions/IncomeStatement" },
+        "cash_flow":        { "$ref": "#/definitions/CashFlow" },
+        "quality":          { "$ref": "#/definitions/Quality" }
+      }
+    },
+
+    "BalanceSheet": {
+      "type": "object",
+      "description": "재무상태표. Tier1 = 필수, Tier2 = 권장 세부항목.",
+      "required": [
+        "current_assets", "non_current_assets", "total_assets",
+        "current_liabilities", "non_current_liabilities", "total_liabilities",
+        "total_equity"
+      ],
+      "properties": {
+
+        "current_assets":         { "type": "number", "description": "유동자산" },
+        "non_current_assets":     { "type": "number", "description": "비유동자산" },
+        "total_assets":           { "type": "number", "description": "자산총계" },
+
+        "current_liabilities":    { "type": "number", "description": "유동부채" },
+        "non_current_liabilities":{ "type": "number", "description": "비유동부채" },
+        "total_liabilities":      { "type": "number", "description": "부채총계" },
+
+        "total_equity":           { "type": "number", "description": "자본총계" },
+
+        "cash_and_equivalents":   { "type": ["number", "null"], "description": "[T2] 현금및현금성자산" },
+        "short_term_investments": { "type": ["number", "null"], "description": "[T2] 단기금융상품" },
+        "trade_receivables":      { "type": ["number", "null"], "description": "[T2] 매출채권" },
+        "other_receivables":      { "type": ["number", "null"], "description": "[T2] 기타채권" },
+        "inventories":            { "type": ["number", "null"], "description": "[T2] 재고자산" },
+        "prepaid_expenses":       { "type": ["number", "null"], "description": "[T2] 선급비용/선급금" },
+
+        "ppe":                    { "type": ["number", "null"], "description": "[T2] 유형자산(순액)" },
+        "intangibles":            { "type": ["number", "null"], "description": "[T2] 무형자산" },
+        "investments":            { "type": ["number", "null"], "description": "[T2] 투자자산" },
+
+        "short_term_debt":        { "type": ["number", "null"], "description": "[T2] 단기차입금" },
+        "current_portion_of_ltd": { "type": ["number", "null"], "description": "[T2] 유동성 장기부채" },
+        "long_term_debt":         { "type": ["number", "null"], "description": "[T2] 장기차입금" },
+        "trade_payables":         { "type": ["number", "null"], "description": "[T2] 매입채무" },
+        "lease_liabilities":      { "type": ["number", "null"], "description": "[T2] 리스부채" },
+
+        "paid_in_capital":        { "type": ["number", "null"], "description": "[T2] 자본금" },
+        "capital_surplus":        { "type": ["number", "null"], "description": "[T2] 자본잉여금" },
+        "retained_earnings":      { "type": ["number", "null"], "description": "[T2] 이익잉여금" },
+        "treasury_stock":         { "type": ["number", "null"], "description": "[T2] 자기주식 (음수)" },
+        "non_controlling_interest":{"type": ["number", "null"], "description": "[T2] 비지배지분 (연결 한정)" }
+      }
+    },
+
+    "IncomeStatement": {
+      "type": "object",
+      "required": [
+        "revenue", "operating_profit", "profit_before_tax", "net_profit"
+      ],
+      "properties": {
+
+        "revenue":            { "type": "number", "description": "매출액" },
+        "cost_of_sales":      { "type": ["number", "null"], "description": "[T2] 매출원가" },
+        "gross_profit":       { "type": ["number", "null"], "description": "[T2] 매출총이익" },
+        "sga":                { "type": ["number", "null"], "description": "[T2] 판관비" },
+
+        "operating_profit":   { "type": "number", "description": "영업이익" },
+
+        "other_income":       { "type": ["number", "null"], "description": "[T2] 영업외수익/기타수익" },
+        "other_expense":      { "type": ["number", "null"], "description": "[T2] 영업외비용/기타비용" },
+        "finance_income":     { "type": ["number", "null"], "description": "[T2] 금융수익" },
+        "finance_cost":       { "type": ["number", "null"], "description": "[T2] 금융원가 (이자비용 포함)" },
+        "interest_expense":   { "type": ["number", "null"], "description": "[T2] 이자비용 (이자보상배율용)" },
+
+        "profit_before_tax":  { "type": "number", "description": "법인세차감전이익" },
+        "income_tax":         { "type": ["number", "null"], "description": "[T2] 법인세비용" },
+        "net_profit":         { "type": "number", "description": "당기순이익" },
+
+        "depreciation":       { "type": ["number", "null"], "description": "[T2] 감가상각비 (EBITDA용)" },
+        "amortization":       { "type": ["number", "null"], "description": "[T2] 무형자산상각비" },
+
+        "rnd_expense":        { "type": ["number", "null"], "description": "[T2] 연구개발비" }
+      }
+    },
+
+    "CashFlow": {
+      "type": "object",
+      "required": ["operating_cf", "investing_cf", "financing_cf"],
+      "properties": {
+        "operating_cf":     { "type": "number", "description": "영업활동현금흐름" },
+        "investing_cf":     { "type": "number", "description": "투자활동현금흐름" },
+        "financing_cf":     { "type": "number", "description": "재무활동현금흐름" },
+        "net_cf":           { "type": ["number", "null"], "description": "현금및현금성자산의 증감" },
+        "fx_effect":        { "type": ["number", "null"], "description": "[T2] 환율변동효과" },
+
+        "capex":            { "type": ["number", "null"], "description": "[T2] 유·무형자산 취득 (FCF용)" },
+        "depreciation_cf":  { "type": ["number", "null"], "description": "[T2] CF상 감가상각비 가산액" },
+
+        "interest_paid":    { "type": ["number", "null"], "description": "[T2] 이자지급액" },
+        "dividends_paid":   { "type": ["number", "null"], "description": "[T2] 배당지급액" },
+        "tax_paid":         { "type": ["number", "null"], "description": "[T2] 법인세납부액" }
+      }
+    },
+
+    "Quality": {
+      "type": "object",
+      "description": "데이터 품질 메타. 스코어링 엔진은 이 값을 보고 신뢰도 가중을 적용.",
+      "required": ["source"],
+      "properties": {
+        "source": {
+          "type": "string",
+          "enum": ["pdf", "dart", "manual", "excel"],
+          "description": "데이터 출처"
+        },
+        "source_file": {
+          "type": ["string", "null"],
+          "description": "원본 파일명 또는 DART rcp_no"
+        },
+        "extraction_confidence": {
+          "type": ["number", "null"],
+          "minimum": 0.0, "maximum": 1.0,
+          "description": "0~1 OCR/파싱 신뢰도 (manual은 1.0, dart는 1.0)"
+        },
+        "missing_fields": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Tier1 필수인데 확보 못 한 필드 목록"
+        },
+        "low_confidence_fields": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "OCR 신뢰도 낮은 필드"
+        },
+        "warnings": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "파싱 과정에서 감지된 경고 (단위 변환, 음수 처리 등)"
+        },
+        "extracted_at": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        }
+      }
+    }
+  }
+}

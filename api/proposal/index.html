@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BizAI Phase 4 — 제안서 자동 생성 엔진</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --navy:#0f172a;--blue:#1b4fd8;--blue-l:#3b82f6;--blue-bg:#eff6ff;
+  --green:#059669;--green-l:#10b981;--green-bg:#ecfdf5;
+  --amber:#d97706;--amber-bg:#fef3c7;
+  --red:#dc2626;--red-bg:#fef2f2;
+  --gray-1:#f8fafc;--gray-2:#f1f5f9;--gray-3:#e2e8f0;--gray-4:#94a3b8;--gray-5:#64748b;--gray-6:#334155;--gray-7:#1e293b;
+  --radius:14px;--shadow:0 2px 12px rgba(0,0,0,.06);
+}
+body{font-family:'Apple SD Gothic Neo','Pretendard','Noto Sans KR',-apple-system,sans-serif;background:#f0f4f8;color:var(--gray-7);-webkit-font-smoothing:antialiased;line-height:1.6;}
+
+/* ── HEADER ── */
+.hdr{background:linear-gradient(135deg,var(--navy) 0%,#1e3a5f 50%,var(--blue) 100%);color:#fff;padding:40px 40px 36px;position:relative;overflow:hidden;}
+.hdr::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;}
+.hdr-in{position:relative;z-index:1;max-width:1200px;margin:0 auto;}
+.badge{display:inline-block;background:rgba(99,102,241,.3);border:1px solid rgba(99,102,241,.55);color:#a5b4fc;padding:5px 14px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:1px;margin-bottom:14px;}
+.hdr h1{font-size:28px;font-weight:900;letter-spacing:-.5px;margin-bottom:4px;}
+.hdr h1 em{font-style:normal;color:#60a5fa;}
+.hdr .sub{font-size:13px;opacity:.6;margin-bottom:18px;}
+/* pipeline */
+.pipe{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+.pipe-s{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.13);padding:6px 13px;border-radius:8px;font-size:11px;font-weight:600;transition:all .2s;cursor:default;}
+.pipe-s.done{background:rgba(74,222,128,.12);border-color:rgba(74,222,128,.3);color:#86efac;}
+.pipe-s.now{background:rgba(251,191,36,.15);border-color:rgba(251,191,36,.35);color:#fde68a;box-shadow:0 0 12px rgba(251,191,36,.15);}
+.pipe-arr{color:rgba(255,255,255,.25);font-size:13px;}
+
+/* ── STATS BAR ── */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;padding:18px 40px;background:#fff;border-bottom:1px solid var(--gray-3);}
+.st{text-align:center;padding:12px 6px;border-radius:10px;background:var(--gray-1);}
+.st .v{font-size:21px;font-weight:900;}
+.st .l{font-size:10.5px;color:var(--gray-4);margin-top:2px;font-weight:600;}
+
+/* ── MAIN ── */
+.main{max-width:1200px;margin:0 auto;padding:28px 20px 60px;}
+
+/* ── NAV TABS ── */
+.tabs{display:flex;gap:4px;border-bottom:2px solid var(--gray-3);margin-bottom:24px;overflow-x:auto;}
+.tab{padding:11px 20px;font-size:13px;font-weight:700;color:var(--gray-4);background:none;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;transition:all .15s;white-space:nowrap;font-family:inherit;}
+.tab:hover{color:var(--gray-6);}
+.tab.on{color:var(--blue);border-bottom-color:var(--blue);}
+.panel{display:none;}.panel.on{display:block;}
+
+/* ── SECTION ── */
+.sec-t{font-size:13px;font-weight:800;color:var(--gray-5);letter-spacing:.8px;margin:28px 0 14px;padding-bottom:7px;border-bottom:2px solid var(--gray-3);text-transform:uppercase;}
+
+/* ── CARD ── */
+.card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:18px;overflow:hidden;border:1px solid var(--gray-3);}
+.card-h{padding:18px 24px;display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--gray-2);}
+.card-h h3{font-size:15px;font-weight:800;}
+.card-b{padding:20px 24px;}
+
+/* ── GRADE BADGE ── */
+.gbadge{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:11px;font-size:15px;font-weight:900;flex-shrink:0;}
+.gbadge.gp{background:#d1fae5;color:#065f46;border:2px solid #a7f3d0;}
+.gbadge.gs{background:#dbeafe;color:#1e40af;border:2px solid #bfdbfe;}
+.gbadge.gc{background:var(--amber-bg);color:#92400e;border:2px solid #fde68a;}
+.gbadge.gr{background:#fee2e2;color:#991b1b;border:2px solid #fecaca;}
+
+/* ── TIER BADGE ── */
+.tbadge{display:inline-block;padding:3px 11px;border-radius:18px;font-size:10.5px;font-weight:800;white-space:nowrap;}
+.tbadge.tp{background:#d1fae5;color:#065f46;}.tbadge.ts{background:#dbeafe;color:#1e40af;}
+.tbadge.tc{background:var(--amber-bg);color:#92400e;}.tbadge.tr{background:#fee2e2;color:#991b1b;}
+
+/* ── METRICS ── */
+.mg{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:11px;margin-bottom:16px;}
+.mx{border-radius:10px;padding:14px;text-align:center;background:var(--gray-1);border:1px solid var(--gray-3);}
+.mx .v{font-size:19px;font-weight:900;margin-bottom:3px;}
+.mx .l{font-size:10.5px;font-weight:600;color:var(--gray-5);}
+
+/* ── PROPOSAL SECTIONS ── */
+.psec{border:1px solid var(--gray-3);border-radius:12px;margin-bottom:12px;overflow:hidden;}
+.psec-h{padding:12px 18px;background:var(--gray-1);border-bottom:1px solid var(--gray-3);display:flex;align-items:center;gap:10px;}
+.psec-h .n{width:26px;height:26px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0;}
+.psec-h h4{font-size:13px;font-weight:700;}
+.psec-b{padding:14px 18px;font-size:12.5px;line-height:1.8;color:var(--gray-6);white-space:pre-wrap;}
+.ssec{margin-top:10px;padding:9px 12px;background:var(--blue-bg);border-radius:7px;border-left:3px solid var(--blue-l);}
+.ssec .st-t{font-size:11px;font-weight:700;color:#1e40af;margin-bottom:3px;}
+.ssec .st-c{font-size:11px;color:var(--gray-6);}
+
+/* ── EMAIL PREVIEW ── */
+.eml{background:#fafafa;border:1px solid #d1d5db;border-radius:12px;overflow:hidden;}
+.eml-h{background:#f3f4f6;padding:14px 18px;border-bottom:1px solid #d1d5db;}
+.eml-f{display:flex;gap:6px;margin-bottom:5px;font-size:11.5px;}
+.eml-f .k{font-weight:700;color:#6b7280;min-width:42px;}
+.eml-f .val{color:#1f2937;}
+.eml-subj{font-size:13.5px;font-weight:800;color:#111827;margin-top:4px;}
+.eml-body{padding:18px;font-size:12.5px;line-height:1.8;color:#374151;white-space:pre-wrap;max-height:380px;overflow-y:auto;}
+
+/* ── TABLE ── */
+.tbl{width:100%;border-collapse:collapse;margin:12px 0;}
+.tbl th{background:var(--gray-1);padding:9px 13px;text-align:left;font-size:11px;font-weight:700;color:var(--gray-5);border-bottom:2px solid var(--gray-3);}
+.tbl td{padding:9px 13px;border-bottom:1px solid var(--gray-2);font-size:12.5px;}
+.tbl tr.rec{background:var(--blue-bg);}
+.tbl tr.rec td{font-weight:700;color:#1e40af;}
+.star{color:#f59e0b;margin-right:3px;}
+
+/* ── COMPARE GRID ── */
+.cmp{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;}
+.ccard{background:#fff;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--gray-3);}
+.ccard-h{padding:14px 18px;display:flex;align-items:center;gap:11px;border-bottom:1px solid var(--gray-2);}
+.ccard-b{padding:14px 18px;font-size:11.5px;line-height:1.7;color:var(--gray-6);}
+.ccard-b .row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--gray-1);}
+.ccard-b .row:last-child{border:none;}
+.ccard-b .row .k{font-weight:600;color:var(--gray-5);}
+.ccard-b .row .val{font-weight:700;}
+
+/* ── FORM ── */
+.fg{margin-bottom:12px;}
+.fg label{display:block;font-size:11.5px;font-weight:700;color:var(--gray-6);margin-bottom:4px;}
+.fg input,.fg select,.fg textarea{width:100%;padding:9px 13px;border:1.5px solid var(--gray-3);border-radius:9px;font-size:13px;font-weight:600;color:var(--gray-7);font-family:inherit;background:var(--gray-1);transition:border-color .2s;}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--blue);background:#fff;}
+.fg textarea{resize:vertical;min-height:60px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+
+/* ── BUTTONS ── */
+.btn{padding:11px 26px;border-radius:9px;border:none;cursor:pointer;font-size:13px;font-weight:800;font-family:inherit;transition:all .2s;}
+.btn-p{background:linear-gradient(135deg,var(--blue),#2563eb);color:#fff;box-shadow:0 4px 14px rgba(27,79,216,.3);}
+.btn-p:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(27,79,216,.4);}
+.btn-g{background:linear-gradient(135deg,var(--green),var(--green-l));color:#fff;}
+.btn-o{background:var(--gray-1);color:var(--gray-6);border:1.5px solid var(--gray-3);}
+.btn-o:hover{border-color:var(--blue);color:var(--blue);}
+
+/* ── INFO ── */
+.info{background:var(--blue-bg);border:1px solid #bfdbfe;border-radius:10px;padding:12px 16px;display:flex;gap:9px;align-items:flex-start;margin-bottom:16px;font-size:12px;color:#1e40af;line-height:1.6;}
+.info .ic{font-size:15px;flex-shrink:0;}
+
+/* ── FOOTER ── */
+.ftr{text-align:center;padding:28px;font-size:11.5px;color:var(--gray-4);}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  .hdr{padding:28px 18px;}
+  .stats{grid-template-columns:repeat(3,1fr);padding:14px 18px;}
+  .main{padding:20px 12px;}
+  .mg{grid-template-columns:1fr 1fr;}
+  .cmp{grid-template-columns:1fr;}
+  .grid2,.grid3{grid-template-columns:1fr;}
+  .tabs{gap:2px;}.tab{padding:10px 12px;font-size:12px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══ -->
+<div class="hdr">
+  <div class="hdr-in">
+    <div class="badge">PHASE 4 COMPLETE — PROPOSAL ENGINE v1.0</div>
+    <h1>Biz<em>AI</em> 제안서 자동 생성 엔진</h1>
+    <div class="sub">Phase 1~4 파이프라인 통합 데모 | 테스트전자부품(주) | 2026-04-10</div>
+    <div class="pipe">
+      <div class="pipe-s done"><span style="color:#4ade80">&#10003;</span> P1 벤치마크</div>
+      <div class="pipe-arr">&#8250;</div>
+      <div class="pipe-s done"><span style="color:#4ade80">&#10003;</span> P2 분석엔진</div>
+      <div class="pipe-arr">&#8250;</div>
+      <div class="pipe-s done"><span style="color:#4ade80">&#10003;</span> P3 시뮬레이션</div>
+      <div class="pipe-arr">&#8250;</div>
+      <div class="pipe-s now"><span style="color:#fbbf24">&#9733;</span> P4 제안서</div>
+      <div class="pipe-arr">&#8250;</div>
+      <div class="pipe-s"><span style="opacity:.4">&#9675;</span> P5 트리거</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ STATS ═══ -->
+<div class="stats" id="statsBar">
+  <div class="st"><div class="v" style="color:var(--red)">CC</div><div class="l">종합 등급</div></div>
+  <div class="st"><div class="v">36.2</div><div class="l">종합 점수</div></div>
+  <div class="st"><div class="v">29.4</div><div class="l">재무 스코어</div></div>
+  <div class="st"><div class="v">62.0</div><div class="l">비재무 스코어</div></div>
+  <div class="st"><div class="v" style="color:var(--red)">+12.0%p</div><div class="l">리스크 프리미엄</div></div>
+  <div class="st"><div class="v">17.90%</div><div class="l">권장 마진</div></div>
+  <div class="st"><div class="v" style="color:var(--green)">8,950만</div><div class="l">예상 이익</div></div>
+</div>
+
+<div class="main">
+
+<!-- ═══ TABS ═══ -->
+<div class="tabs">
+  <button class="tab on" onclick="sw(0,this)">&#9654; 분석 결과</button>
+  <button class="tab" onclick="sw(1,this)">&#9733; 제안서 생성</button>
+  <button class="tab" onclick="sw(2,this)">&#9993; 이메일 미리보기</button>
+  <button class="tab" onclick="sw(3,this)">&#9878; 등급별 비교</button>
+  <button class="tab" onclick="sw(4,this)">&#10004; 테스트 결과</button>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PANEL 0: 분석 결과 (Phase 1~3)
+     ═══════════════════════════════════════════ -->
+<div id="p0" class="panel on">
+
+<div class="card">
+  <div class="card-h">
+    <div class="gbadge gr">CC</div>
+    <div>
+      <h3>테스트전자부품(주) — 종합 분석</h3>
+      <div style="font-size:11px;color:var(--gray-4);margin-top:2px;">C26 전자부품 | 중기업 | 2022~2024 3개년</div>
+    </div>
+  </div>
+  <div class="card-b">
+
+    <div class="sec-t">재무 스코어 (Phase 2)</div>
+    <div class="mg">
+      <div class="mx" style="border-left:3px solid #f59e0b;"><div class="v" style="color:var(--amber)">20.6</div><div class="l">성장성 (15%)</div></div>
+      <div class="mx" style="border-left:3px solid var(--red);"><div class="v" style="color:var(--red)">21.5</div><div class="l">수익성 (25%)</div></div>
+      <div class="mx" style="border-left:3px solid var(--red);"><div class="v" style="color:var(--red)">21.6</div><div class="l">안정성 (30%)</div></div>
+      <div class="mx" style="border-left:3px solid var(--blue-l);"><div class="v" style="color:var(--blue)">46.6</div><div class="l">활동성 (15%)</div></div>
+      <div class="mx" style="border-left:3px solid var(--blue-l);"><div class="v" style="color:var(--blue)">49.8</div><div class="l">생산성 (15%)</div></div>
+      <div class="mx" style="border-left:3px solid #6366f1;background:#f5f3ff;"><div class="v" style="color:#4f46e5">29.4</div><div class="l">종합 재무</div></div>
+    </div>
+
+    <div class="sec-t">비재무 스코어 (Phase 2)</div>
+    <div class="mg" style="grid-template-columns:repeat(auto-fill,minmax(140px,1fr));">
+      <div class="mx"><div class="v">7.0</div><div class="l">경영진 (25%)</div></div>
+      <div class="mx"><div class="v">6.0</div><div class="l">사업모델 (20%)</div></div>
+      <div class="mx"><div class="v">5.0</div><div class="l">고객집중 (15%)</div></div>
+      <div class="mx"><div class="v">7.0</div><div class="l">자금용도 (10%)</div></div>
+      <div class="mx"><div class="v">5.0</div><div class="l">상환계획 (10%)</div></div>
+      <div class="mx"><div class="v">6.0</div><div class="l">리스크인지 (10%)</div></div>
+      <div class="mx"><div class="v">7.0</div><div class="l">일관성 (10%)</div></div>
+      <div class="mx" style="background:#f5f3ff;border-left:3px solid #6366f1;"><div class="v" style="color:#4f46e5">62.0</div><div class="l">종합 비재무</div></div>
+    </div>
+
+    <div class="sec-t">Red Flags (Phase 2)</div>
+    <div style="padding:14px;background:var(--red-bg);border-radius:10px;border-left:3px solid var(--red);margin-bottom:16px;">
+      <div style="font-size:12px;font-weight:800;color:var(--red);margin-bottom:8px;">Red Flag 4건 감지</div>
+      <table style="width:100%;font-size:11.5px;line-height:1.8;">
+        <tr><td style="width:50px;font-weight:700;color:var(--red)">RF01</td><td><strong>이자보상배율 &lt; 1x</strong></td><td style="text-align:right;font-weight:700;color:var(--red)">CRITICAL</td></tr>
+        <tr><td style="font-weight:700;color:var(--amber)">RF03</td><td><strong>수익성 하락</strong></td><td style="text-align:right;font-weight:700;color:var(--amber)">HIGH</td></tr>
+        <tr><td style="font-weight:700;color:var(--amber)">RF04</td><td><strong>높은 부채비율</strong></td><td style="text-align:right;font-weight:700;color:var(--amber)">HIGH</td></tr>
+        <tr><td style="font-weight:700;color:var(--amber)">RF06</td><td><strong>적자 지속</strong></td><td style="text-align:right;font-weight:700;color:var(--amber)">HIGH</td></tr>
+      </table>
+    </div>
+
+    <div class="sec-t">마진 시뮬레이션 (Phase 3)</div>
+    <div class="mg" style="grid-template-columns:repeat(3,1fr);">
+      <div class="mx"><div class="v">3.0%</div><div class="l">기본 마진 (제조업)</div></div>
+      <div class="mx" style="background:var(--red-bg);border-left:3px solid var(--red);"><div class="v" style="color:var(--red)">+12.0%p</div><div class="l">리스크 프리미엄</div></div>
+      <div class="mx" style="background:#f5f3ff;border-left:3px solid #6366f1;"><div class="v" style="color:#4f46e5">5억원</div><div class="l">거래 규모</div></div>
+    </div>
+    <table class="tbl">
+      <thead><tr><th>시나리오</th><th>마진율</th><th>예상 이익</th><th>전략</th></tr></thead>
+      <tbody>
+        <tr><td>Min (보수적)</td><td>14.50%</td><td style="text-align:right">72,500,000원</td><td>경쟁 대응 최소 마진</td></tr>
+        <tr><td>Likely (권장)</td><td>15.00%</td><td style="text-align:right">75,000,000원</td><td>리스크 대비 적정 마진</td></tr>
+        <tr class="rec"><td><span class="star">&#9733;</span>Max (공격적)</td><td>17.90%</td><td style="text-align:right">89,500,000원</td><td>리스크 보전 최대 마진</td></tr>
+      </tbody>
+    </table>
+    <div style="font-size:11px;color:var(--gray-4);">* CC등급 고위험 → Max 권장 | 선급금 70% + 잔금 인도 시 | 담보/보증 필요</div>
+
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PANEL 1: 제안서 생성 (Phase 4)
+     ═══════════════════════════════════════════ -->
+<div id="p1" class="panel">
+
+<div class="info">
+  <span class="ic">&#128161;</span>
+  <span>Phase 4 제안서 엔진은 <strong>template_selector</strong>(등급별 템플릿 분기) + <strong>proposal_generator</strong>(4섹션 자동 생성) + <strong>email_drafter</strong>(이메일 초안)로 구성됩니다.</span>
+</div>
+
+<!-- 입력 폼 -->
+<div class="card">
+  <div class="card-h"><h3>제안서 입력 정보</h3></div>
+  <div class="card-b">
+    <div class="grid2" style="margin-bottom:14px;">
+      <div>
+        <div class="fg"><label>기업명</label><input type="text" id="inp_co" value="테스트전자부품(주)"/></div>
+        <div class="fg"><label>수신자명</label><input type="text" id="inp_to" value="김영업"/></div>
+        <div class="fg"><label>수신자 이메일</label><input type="text" id="inp_email" value="kim@company.com"/></div>
+      </div>
+      <div>
+        <div class="fg"><label>종합 등급</label>
+          <select id="inp_grade" onchange="updateDemo()">
+            <option value="AAA">AAA — 최우량</option>
+            <option value="AA">AA — 우량</option>
+            <option value="A">A — 양호</option>
+            <option value="BBB">BBB — 보통상위</option>
+            <option value="BB">BB — 보통</option>
+            <option value="B">B — 보통하위</option>
+            <option value="CCC">CCC — 주의</option>
+            <option value="CC" selected>CC — 경계</option>
+            <option value="C">C — 위험</option>
+            <option value="D">D — 부적격</option>
+          </select>
+        </div>
+        <div class="fg"><label>발신자명</label><input type="text" id="inp_from" value="박플로우"/></div>
+        <div class="fg"><label>거래규모 (원)</label><input type="number" id="inp_amt" value="500000000"/></div>
+      </div>
+    </div>
+    <div style="text-align:center;">
+      <button class="btn btn-p" onclick="generateDemo()" style="min-width:240px;">&#9733; 제안서 생성하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- 생성된 제안서 -->
+<div id="proposalOutput" style="display:none;">
+  <div class="sec-t" id="proposalTitle">&#9733; 자동 생성 제안서</div>
+
+  <div class="card">
+    <div class="card-h">
+      <div class="gbadge gr" id="propGbadge">CC</div>
+      <div>
+        <h3 id="propHeading">테스트전자부품(주) — FlowPay 맞춤 제안서</h3>
+        <div style="display:flex;gap:8px;margin-top:5px;">
+          <span class="tbadge tr" id="propTier">제한 (CC~D급)</span>
+          <span style="font-size:10.5px;color:var(--gray-4);padding:3px 0;" id="propMeta">2026-04-10</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-b" id="propSections">
+      <!-- JS로 동적 생성 -->
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PANEL 2: 이메일 미리보기
+     ═══════════════════════════════════════════ -->
+<div id="p2" class="panel">
+<div class="sec-t">&#9993; 이메일 초안 미리보기</div>
+<div class="eml" id="emailPreview">
+  <div class="eml-h">
+    <div class="eml-f"><div class="k">To:</div><div class="val">김영업 &lt;kim@company.com&gt;</div></div>
+    <div class="eml-f"><div class="k">From:</div><div class="val">박플로우 &lt;park@flowpay.co.kr&gt;</div></div>
+    <div class="eml-f"><div class="k">CC:</div><div class="val">team@flowpay.co.kr</div></div>
+    <div class="eml-subj" id="emailSubj">[FlowPay] 테스트전자부품(주) — 거래 검토 결과 안내</div>
+  </div>
+  <div class="eml-body" id="emailBody">김영업 담당자님께,
+
+안녕하세요. FlowPay 박플로우입니다.
+귀사에 대한 검토 결과를 안내드립니다.
+
+──────────────────────────────────────────────────
+&#9632; 요약
+
+  &middot; 종합등급: CC
+  &middot; 종합점수: 36.2
+  &middot; 재무스코어: 29.4
+  &middot; 비재무스코어: 62.0
+  &middot; RedFlag: 4건
+  &middot; 리스크프리미엄: +12.0%p
+  &middot; 권장마진: 17.90%
+  &middot; 결제조건: 선급금 70% + 잔금 인도 시
+
+──────────────────────────────────────────────────
+
+&#9632; 1. 현황진단
+
+  테스트전자부품(주)의 종합 평가 등급은 CC (36.2점)입니다.
+  경계 — 소액 시범 거래만
+
+&#9632; 2. 맞춤 제안
+
+  현 시점에서는 특별 조건 하의 제한적 거래만 가능하며,
+  재무 상태 개선 시 조건 재검토를 약속드립니다.
+
+&#9632; 3. 거래 조건
+
+  적용 마진율: 17.90%
+  결제 조건: 선급금 70% + 잔금 인도 시
+  예상 거래이익: 89,500,000원
+
+&#9632; 4. Next Action
+
+  내부 심사 후 조건부 거래 검토
+  1. 내부 리스크 심사위원회 검토 (2주 소요)
+  2. 추가 재무 자료 요청 가능
+
+──────────────────────────────────────────────────
+추가 문의사항이 있으시면 연락 부탁드립니다.
+
+감사합니다.
+FlowPay 박플로우 드림</div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PANEL 3: 등급별 비교
+     ═══════════════════════════════════════════ -->
+<div id="p3" class="panel">
+<div class="sec-t">&#9878; 등급별 제안서 템플릿 비교</div>
+<div class="cmp">
+  <div class="ccard">
+    <div class="ccard-h"><div class="gbadge gp">AAA</div><div><div style="font-weight:800;font-size:13px;">프리미엄</div><span class="tbadge tp">A급 이상</span></div></div>
+    <div class="ccard-b">
+      <div class="row"><span class="k">톤</span><span class="val">파트너십 지향</span></div>
+      <div class="row"><span class="k">가격전략</span><span class="val">최소 마진</span></div>
+      <div class="row"><span class="k">결제조건</span><span class="val">T+30~60일 후불</span></div>
+      <div class="row"><span class="k">CTA</span><span class="val">파트너십 미팅</span></div>
+      <div class="row"><span class="k">담보</span><span class="val" style="color:var(--green)">불필요</span></div>
+      <div class="row"><span class="k">선급금</span><span class="val" style="color:var(--green)">불필요</span></div>
+    </div>
+  </div>
+  <div class="ccard">
+    <div class="ccard-h"><div class="gbadge gs">BBB</div><div><div style="font-weight:800;font-size:13px;">표준</div><span class="tbadge ts">BBB~BB급</span></div></div>
+    <div class="ccard-b">
+      <div class="row"><span class="k">톤</span><span class="val">전문적, 균형</span></div>
+      <div class="row"><span class="k">가격전략</span><span class="val">적정 마진</span></div>
+      <div class="row"><span class="k">결제조건</span><span class="val">T+15~30일</span></div>
+      <div class="row"><span class="k">CTA</span><span class="val">실무 미팅</span></div>
+      <div class="row"><span class="k">담보</span><span class="val" style="color:var(--green)">불필요</span></div>
+      <div class="row"><span class="k">선급금</span><span class="val" style="color:var(--green)">불필요</span></div>
+    </div>
+  </div>
+  <div class="ccard">
+    <div class="ccard-h"><div class="gbadge gc">B</div><div><div style="font-weight:800;font-size:13px;">주의</div><span class="tbadge tc">B~CCC급</span></div></div>
+    <div class="ccard-b">
+      <div class="row"><span class="k">톤</span><span class="val">신중, 조건 중심</span></div>
+      <div class="row"><span class="k">가격전략</span><span class="val">리스크 반영</span></div>
+      <div class="row"><span class="k">결제조건</span><span class="val">COD / 선급금 30%</span></div>
+      <div class="row"><span class="k">CTA</span><span class="val">시범 거래 협의</span></div>
+      <div class="row"><span class="k">담보</span><span class="val" style="color:var(--amber)">필요</span></div>
+      <div class="row"><span class="k">선급금</span><span class="val" style="color:var(--amber)">필요</span></div>
+    </div>
+  </div>
+  <div class="ccard" style="border-color:#fecaca;">
+    <div class="ccard-h" style="background:var(--red-bg);">
+      <div class="gbadge gr">CC</div>
+      <div><div style="font-weight:800;font-size:13px;">제한 <span style="font-size:10px;color:var(--red);">(현재)</span></div><span class="tbadge tr">CC~D급</span></div>
+    </div>
+    <div class="ccard-b">
+      <div class="row"><span class="k">톤</span><span class="val">보수적, 조건부</span></div>
+      <div class="row"><span class="k">가격전략</span><span class="val">최대 마진</span></div>
+      <div class="row"><span class="k">결제조건</span><span class="val">선급금 70~100%</span></div>
+      <div class="row"><span class="k">CTA</span><span class="val">내부 심사 후 검토</span></div>
+      <div class="row"><span class="k">담보</span><span class="val" style="color:var(--red)">필수</span></div>
+      <div class="row"><span class="k">선급금</span><span class="val" style="color:var(--red)">필수</span></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PANEL 4: 테스트 결과
+     ═══════════════════════════════════════════ -->
+<div id="p4" class="panel">
+<div class="sec-t">&#10004; Phase 4 통합 테스트 결과</div>
+<div class="card">
+  <div class="card-b">
+    <table class="tbl">
+      <thead><tr><th>단계</th><th>모듈</th><th>결과</th><th style="text-align:center">상태</th></tr></thead>
+      <tbody>
+        <tr><td style="font-weight:700">Step 1</td><td>ratio_calculator</td><td>25개 재무비율 계산</td><td style="text-align:center;color:var(--green);font-weight:800">&#10003; PASS</td></tr>
+        <tr><td style="font-weight:700">Step 2</td><td>financial_scorer</td><td>ECOS peer 비교 → 29.4점</td><td style="text-align:center;color:var(--green);font-weight:800">&#10003; PASS</td></tr>
+        <tr><td style="font-weight:700">Step 3</td><td>red_flag_detector</td><td>4건 탐지 (1 critical)</td><td style="text-align:center;color:var(--green);font-weight:800">&#10003; PASS</td></tr>
+        <tr><td style="font-weight:700">Step 4</td><td>consultation_analyzer</td><td>비재무 62.0점</td><td style="text-align:center;color:var(--green);font-weight:800">&#10003; PASS</td></tr>
+        <tr><td style="font-weight:700">Step 5</td><td>cross_validator</td><td>교차검증 완료</td><td style="text-align:center;color:var(--green);font-weight:800">&#10003; PASS</td></tr>
+        <tr><td style="font-weight:700">Step 6</td><td>grade_calculator</td><td>CC등급 (36.2점)</td><td style="text-align:center;color:var(--green);font-weight:800">&#10003; PASS</td></tr>
+        <tr><td style="font-weight:700">Step 7</td><td>risk_premium</td><td>+12.0%p 프리미엄</td><td style="text-align:center;color:var(--green);font-weight:800">&#10003; PASS</td></tr>
+        <tr><td style="font-weight:700">Step 8</td><td>margin_simulator</td><td>3 시나리오 (Max 권장)</td><td style="text-align:center;color:var(--green);font-weight:800">&#10003; PASS</td></tr>
+        <tr style="background:var(--blue-bg);"><td style="font-weight:700">Step 9</td><td style="font-weight:700">template_selector</td><td>restricted 템플릿</td><td style="text-align:center;color:var(--green);font-weight:800">&#10003; PASS</td></tr>
+        <tr style="background:var(--blue-bg);"><td style="font-weight:700">Step 10</td><td style="font-weight:700">proposal_generator</td><td>4섹션 제안서 (952자)</td><td style="text-align:center;color:var(--green);font-weight:800">&#10003; PASS</td></tr>
+        <tr style="background:var(--blue-bg);"><td style="font-weight:700">Step 11</td><td style="font-weight:700">email_drafter</td><td>이메일 초안 (1,189자)</td><td style="text-align:center;color:var(--green);font-weight:800">&#10003; PASS</td></tr>
+      </tbody>
+    </table>
+    <div style="margin-top:18px;padding:16px;background:var(--green-bg);border-radius:10px;text-align:center;">
+      <div style="font-size:17px;font-weight:900;color:var(--green);">&#10003; Phase 4 통합 테스트 전체 통과</div>
+      <div style="font-size:11.5px;color:var(--gray-5);margin-top:5px;">11개 단계 | 재무분석 &#8594; 등급 &#8594; 시뮬레이션 &#8594; 제안서 &#8594; 이메일</div>
+    </div>
+  </div>
+</div>
+
+<!-- 아키텍처 -->
+<div class="sec-t">&#9881; Phase 4 모듈 아키텍처</div>
+<div class="card">
+  <div class="card-b">
+    <div class="mg" style="grid-template-columns:repeat(3,1fr);">
+      <div class="mx" style="background:var(--blue-bg);border:1.5px solid #bfdbfe;">
+        <div style="font-size:14px;font-weight:900;color:var(--blue);margin-bottom:4px;">template_selector.py</div>
+        <div class="l">등급 &#8594; 4단계 템플릿 분기<br>premium / standard / cautious / restricted</div>
+      </div>
+      <div class="mx" style="background:var(--blue-bg);border:1.5px solid #bfdbfe;">
+        <div style="font-size:14px;font-weight:900;color:var(--blue);margin-bottom:4px;">proposal_generator.py</div>
+        <div class="l">4섹션 제안서 자동 생성<br>현황진단 / 맞춤제안 / 거래조건 / Next Action</div>
+      </div>
+      <div class="mx" style="background:var(--blue-bg);border:1.5px solid #bfdbfe;">
+        <div style="font-size:14px;font-weight:900;color:var(--blue);margin-bottom:4px;">email_drafter.py</div>
+        <div class="l">이메일 초안 생성<br>등급별 톤/인사말 차별화, Gmail MCP 대비</div>
+      </div>
+    </div>
+    <div style="text-align:center;font-size:12px;color:var(--gray-4);margin-top:8px;">
+      <code style="background:var(--gray-1);padding:4px 10px;border-radius:6px;font-size:11px;">cd api && python3 -m proposal.test_proposal</code>
+    </div>
+  </div>
+</div>
+</div>
+
+</div><!-- main -->
+
+<div class="ftr">
+  BizAI &copy; 2026 276홀딩스 &middot; Phase 4 제안서 엔진 v1.0 &middot; Powered by FlowPay
+</div>
+
+<script>
+// ── 탭 전환 ──
+function sw(idx, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+  document.getElementById('p'+idx).classList.add('on');
+  btn.classList.add('on');
+}
+
+// ── 등급 데이터 ──
+const TIERS = {
+  AAA:{tier:'premium',label:'프리미엄 (A급 이상)',cls:'gp',tcls:'tp',tone:'파트너십 지향',payment:'T+30~60일 후불',cta:'파트너십 미팅 일정 조율'},
+  AA:{tier:'premium',label:'프리미엄 (A급 이상)',cls:'gp',tcls:'tp',tone:'파트너십 지향',payment:'T+30~60일 후불',cta:'파트너십 미팅 일정 조율'},
+  A:{tier:'premium',label:'프리미엄 (A급 이상)',cls:'gp',tcls:'tp',tone:'파트너십 지향',payment:'T+30일 후불',cta:'파트너십 미팅 일정 조율'},
+  BBB:{tier:'standard',label:'표준 (BBB~BB급)',cls:'gs',tcls:'ts',tone:'전문적, 균형',payment:'T+15~30일 후불',cta:'조건 협의 실무 미팅'},
+  BB:{tier:'standard',label:'표준 (BBB~BB급)',cls:'gs',tcls:'ts',tone:'전문적, 균형',payment:'T+7~15일',cta:'조건 협의 실무 미팅'},
+  B:{tier:'cautious',label:'주의 (B~CCC급)',cls:'gc',tcls:'tc',tone:'신중, 조건 중심',payment:'COD 또는 선급금 30%',cta:'시범 거래 조건 협의'},
+  CCC:{tier:'cautious',label:'주의 (B~CCC급)',cls:'gc',tcls:'tc',tone:'신중, 리스크 관리',payment:'선급금 50% + 잔금',cta:'시범 거래 조건 협의'},
+  CC:{tier:'restricted',label:'제한 (CC~D급)',cls:'gr',tcls:'tr',tone:'보수적, 조건부',payment:'선급금 70% + 잔금',cta:'내부 심사 후 조건부 검토'},
+  C:{tier:'restricted',label:'제한 (CC~D급)',cls:'gr',tcls:'tr',tone:'보수적',payment:'선급금 100%',cta:'내부 심사 후 검토'},
+  D:{tier:'restricted',label:'제한 (CC~D급)',cls:'gr',tcls:'tr',tone:'거래 보류 권고',payment:'거래 보류',cta:'거래 불가'},
+};
+
+const PROPOSALS = {
+  premium: {
+    s1:'귀사의 종합 평가 등급은 최우량으로, 우수한 재무 건전성이 확인되었습니다.\n\n장기 파트너십 프레임워크를 통해 최적의 거래 조건을 제공해 드릴 수 있습니다.',
+    s2:'FlowPay는 귀사의 우수한 재무 건전성을 기반으로\n장기 파트너십 프레임워크를 제안드립니다.\n\n귀사의 사업 확장에 맞춘 유연한 결제 솔루션으로\nTrapped Cash를 최적화하여 운영 효율을 극대화할 수 있습니다.',
+    s4:'1. 파트너십 제안 검토 (본 제안서)\n2. 임원급 미팅 일정 조율 (1주 내)\n3. 세부 조건 협의 및 계약 체결\n4. 첫 거래 시작 + 전담팀 배정'
+  },
+  standard: {
+    s1:'귀사의 종합 평가 등급은 양호한 수준으로,\n안정적 사업 기반이 확인되었습니다.\n\n단계적 거래 확대를 통해 양사 모두에게 이로운 관계를 구축할 수 있습니다.',
+    s2:'FlowPay는 귀사의 안정적 사업 기반을 고려하여\n단계적으로 확대 가능한 거래 구조를 제안드립니다.\n\n초기 거래 실적을 기반으로 조건을 점진적으로 개선하여\n양사 모두에게 이로운 관계를 구축할 수 있습니다.',
+    s4:'1. 제안서 검토 및 내부 논의\n2. 실무 담당자 미팅 (2주 내)\n3. 시범 거래 조건 확정\n4. 시범 거래 진행 → 정식 계약 전환'
+  },
+  cautious: {
+    s1:'귀사의 현재 재무 상황에 일부 리스크 요인이 확인되었습니다.\n\n리스크를 관리하면서도 거래 기회를 모색하는 시범 거래 중심의 접근이 적합합니다.',
+    s2:'FlowPay는 귀사의 현재 상황을 고려하여\n리스크를 관리하면서도 거래 기회를 모색하는\n시범 거래 중심의 접근법을 제안드립니다.\n\n시범 거래 성공 시 단계적 조건 완화가 가능합니다.',
+    s4:'1. 제안서 검토 및 추가 자료 제출\n2. 담보/보증 관련 서류 협의\n3. 소규모 시범 거래 (1건)\n4. 결과 검토 후 거래 규모 조정'
+  },
+  restricted: {
+    s1:'귀사의 현재 재무 상황에 대한 면밀한 검토를 진행하였습니다.\n\n현 시점에서는 특별 조건 하의 제한적 거래만 가능하며,\n재무 상태 개선 시 조건 재검토를 약속드립니다.',
+    s2:'FlowPay는 귀사의 현재 재무 상황에 대한\n면밀한 검토를 진행하였습니다.\n\n현 시점에서는 특별 조건 하의 제한적 거래만 가능하며,\n재무 상태 개선 시 조건 재검토를 약속드립니다.',
+    s4:'1. 내부 리스크 심사위원회 검토 (2주 소요)\n2. 추가 재무 자료 요청 가능\n3. 심사 결과에 따른 조건부 거래 검토\n4. 재무 상태 개선 시 재평가 (6개월 후)'
+  }
+};
+
+// ── 제안서 동적 생성 ──
+function generateDemo() {
+  const grade = document.getElementById('inp_grade').value;
+  const co = document.getElementById('inp_co').value || '대상기업';
+  const info = TIERS[grade] || TIERS.CC;
+  const tier = info.tier;
+  const tmpl = PROPOSALS[tier];
+  const amt = parseInt(document.getElementById('inp_amt').value) || 500000000;
+
+  // 배지 업데이트
+  const gb = document.getElementById('propGbadge');
+  gb.textContent = grade;
+  gb.className = 'gbadge ' + info.cls;
+
+  document.getElementById('propHeading').textContent = co + ' — FlowPay 맞춤 제안서';
+  const tierEl = document.getElementById('propTier');
+  tierEl.textContent = info.label;
+  tierEl.className = 'tbadge ' + info.tcls;
+  document.getElementById('propMeta').textContent = '2026-04-10 | ' + info.tone;
+
+  // 섹션 생성
+  const sections = [
+    {n:1, title:'현황진단', body:tmpl.s1},
+    {n:2, title:'맞춤 제안', body:tmpl.s2},
+    {n:3, title:'거래 조건', body:'[권장 거래 조건]\n\n  결제 조건: ' + info.payment + '\n  CTA: ' + info.cta + '\n  거래 규모: ' + amt.toLocaleString() + '원'},
+    {n:4, title:'Next Action', body:info.cta + '\n\n' + tmpl.s4},
+  ];
+
+  const container = document.getElementById('propSections');
+  container.innerHTML = sections.map(s => `
+    <div class="psec">
+      <div class="psec-h"><div class="n">${s.n}</div><h4>${s.title}</h4></div>
+      <div class="psec-b">${s.body}</div>
+    </div>
+  `).join('');
+
+  document.getElementById('proposalOutput').style.display = 'block';
+
+  // 이메일도 업데이트
+  updateEmail(grade, co, info, tier);
+}
+
+function updateEmail(grade, co, info, tier) {
+  const toName = document.getElementById('inp_to').value || '담당자';
+  const fromName = document.getElementById('inp_from').value || '박플로우';
+  const subjMap = {
+    premium: '[FlowPay] ' + co + ' — 장기 파트너십 맞춤 제안',
+    standard: '[FlowPay] ' + co + ' — 결제 솔루션 제안',
+    cautious: '[FlowPay] ' + co + ' — 거래 조건 제안',
+    restricted: '[FlowPay] ' + co + ' — 거래 검토 결과 안내',
+  };
+  document.getElementById('emailSubj').textContent = subjMap[tier] || subjMap.standard;
+
+  const greetMap = {
+    premium: '귀사와의 장기적 파트너십을 위해 맞춤 제안을 드리게 되어 기쁩니다.',
+    standard: '귀사에 적합한 결제 솔루션을 제안드리고자 연락드립니다.',
+    cautious: '귀사와의 거래 가능성을 검토하여 아래와 같이 제안드립니다.',
+    restricted: '귀사에 대한 검토 결과를 안내드립니다.',
+  };
+
+  const body = `${toName} 담당자님께,
+
+안녕하세요. FlowPay ${fromName}입니다.
+${greetMap[tier]}
+
+──────────────────────────────────────────────────
+\u25A0 요약
+
+  \u00B7 종합등급: ${grade}
+  \u00B7 결제조건: ${info.payment}
+  \u00B7 CTA: ${info.cta}
+
+──────────────────────────────────────────────────
+
+상세 내용은 첨부 제안서를 참조해 주시기 바랍니다.
+
+──────────────────────────────────────────────────
+감사합니다.
+FlowPay ${fromName} 드림`;
+
+  document.getElementById('emailBody').textContent = body;
+}
+
+function updateDemo() { /* optional: live update on grade change */ }
+
+// 초기 로드 시 기본 제안서 생성
+generateDemo();
+</script>
+</body>
+</html>
