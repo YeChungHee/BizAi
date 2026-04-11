@@ -1353,14 +1353,14 @@
       return isNeg ? -Math.abs(n) : n;
     }
 
-    // ── [2] 단위 감지 강화 ──
+    // ── [2] 단위 감지 강화 (wide-spacing PDF 대응) ──
     const allText = (text + ' ' + flatText);
-    // 단위 감지: "단위 : 백만원" 또는 "(백만원)" 같은 명시적 패턴만 매칭
-    // 주의: "단위.*백만" 같은 broad 패턴은 본문에 "백만원"이 포함되면 오탐 발생
-    const isMillionUnit = /단위\s*[:：]\s*백만\s*원|\(단위\s*[:：]?\s*백만\s*원\)|백만원\s*단위|\(백만원\)|unit\s*[:：]\s*million|millions?\s+of\s+krw/i.test(allText);
-    const isThousandUnit = /단위\s*[:：]\s*천\s*원|\(단위\s*[:：]?\s*천\s*원\)|천원\s*단위|\(천원\)|단위\s*[:：]\s*천원/i.test(allText);
+    // \s*를 글자 사이에 삽입하여 넓은 자간 PDF도 매칭
+    const isMillionUnit = /단\s*위\s*[:：]\s*백\s*만\s*원|\(\s*단\s*위\s*[:：]?\s*백\s*만\s*원\s*\)|백\s*만\s*원\s*단\s*위|\(\s*백\s*만\s*원\s*\)|unit\s*[:：]\s*million|millions?\s+of\s+krw/i.test(allText);
+    const isThousandUnit = /단\s*위\s*[:：]\s*천\s*원|\(\s*단\s*위\s*[:：]?\s*천\s*원\s*\)|천\s*원\s*단\s*위|\(\s*천\s*원\s*\)|단\s*위\s*[:：]\s*천\s*원/i.test(allText);
     // divisor: 추출된 원시값 × divisor = 백만원
     let divisor = isMillionUnit ? 1 : isThousandUnit ? 0.001 : 0.000001;
+    let unitDetected = isMillionUnit || isThousandUnit; // 명시적 단위 감지 여부
 
     // ── [3] 기업명 추출 ──
     let company = '분석 대상 기업';
@@ -1415,15 +1415,43 @@
       interest:    [ new RegExp('이\\s*자\\s*비\\s*용' + GAP + NUM) ],
     };
 
-    // 기존 GAP 패턴으로 추출
+    // 기존 GAP 패턴으로 추출 (raw값 보존하여 나중에 단위 추론 가능)
     const data = {};
+    const rawData = {};  // divisor 적용 전 원시값 보존
     for (const [key, pats] of Object.entries(patterns)) {
       for (const pat of pats) {
         let val = extractNumSigned(pat, flatText);
         if (val === null) val = extractNumSigned(pat, text);
         if (val !== null) {
+          rawData[key] = val;
           data[key] = Math.round(val * divisor);
           break;
+        }
+      }
+    }
+
+    // ── [5-b] 매그니튜드 기반 단위 자동 추론 ──
+    // 명시적 단위를 못 찾았을 때 raw 숫자 크기로 판단
+    if (!unitDetected) {
+      const refRaw = Math.abs(rawData.revenue || rawData.totalAssets || 0);
+      if (refRaw > 0) {
+        let inferredDivisor;
+        if (refRaw < 100000) {
+          // 매출 10만 미만 → 이미 백만원 단위
+          inferredDivisor = 1;
+        } else if (refRaw < 100000000) {
+          // 10만~1억 → 천원 단위
+          inferredDivisor = 0.001;
+        } else {
+          // 1억 이상 → 원 단위
+          inferredDivisor = 0.000001;
+        }
+        if (inferredDivisor !== divisor) {
+          divisor = inferredDivisor;
+          // 추론된 divisor로 재적용
+          for (const k of Object.keys(rawData)) {
+            data[k] = Math.round(rawData[k] * divisor);
+          }
         }
       }
     }
@@ -1515,17 +1543,22 @@
     }
 
     // ── [7] 값 크기 기반 자동 단위 보정 ──
-    // 매출액이 100 미만이면 이미 백만원 단위 → 보정 불필요
-    // 매출액이 100~999,999 → 백만원으로 적절
-    // 매출액이 1,000,000 이상이면 천원이 원 단위로 오인된 경우 → ÷1000 보정
-    if (data.revenue) {
-      if (Math.abs(data.revenue) > 500000 && !isMillionUnit) {
-        // 아마 천원 단위를 원 단위로 오인 → 모든 값을 ÷1000 보정
-        const correction = isThousandUnit ? 1 : 1000;
-        if (correction > 1) {
-          for (const k of Object.keys(data)) {
-            if (data[k] !== null && data[k] !== undefined) data[k] = Math.round(data[k] / correction);
-          }
+    // 백만원 기준: 일반 중소기업 매출 100~999,999 범위가 정상
+    const refVal = Math.abs(data.revenue || data.totalAssets || 0);
+    if (refVal > 0 && !unitDetected) {
+      if (refVal > 500000) {
+        // 50만 초과 → 천원 단위가 원 단위로 오인된 경우 → ÷1000
+        for (const k of Object.keys(data)) {
+          if (data[k] !== null && data[k] !== undefined) data[k] = Math.round(data[k] / 1000);
+        }
+      } else if (refVal < 1) {
+        // 1 미만 → divisor가 과도하게 적용됨 → rawData 기반 재추론
+        const rawRef = Math.abs(rawData.revenue || rawData.totalAssets || 0);
+        let fixDivisor = 1;
+        if (rawRef >= 100000000) fixDivisor = 0.000001;
+        else if (rawRef >= 100000) fixDivisor = 0.001;
+        for (const k of Object.keys(rawData)) {
+          data[k] = Math.round(rawData[k] * fixDivisor);
         }
       }
     }
