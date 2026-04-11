@@ -1046,6 +1046,20 @@
     if (n >= 10000)  return (n / 10000).toFixed(1) + '만원';
     return n.toLocaleString() + '원';
   }
+  // 만원 단위 → 억/만 자동 변환 (1억 이상 → 억원, 미만 → 만원)
+  function fmtMan(wan) {
+    const abs = Math.abs(wan);
+    const sign = wan < 0 ? '▼ ' : '';
+    if (abs >= 10000) return sign + (abs / 10000).toFixed(1) + '억원';
+    return sign + fmt(abs) + '만원';
+  }
+  // 천만원 단위 → 억/만 자동 변환
+  function fmtChunman(v) {
+    const abs = Math.abs(v);
+    const sign = v < 0 ? '▼ ' : '';
+    if (abs >= 10) return sign + (abs / 10).toFixed(1) + '억원';
+    return sign + fmt(abs * 1000) + '만원';
+  }
 
   // ── 파일 드래그 ──
   // ── 다중 파일 관리 ──
@@ -2004,21 +2018,24 @@
     const annualSalesT = order * useCnt; // 천만원
     const annualSalesEok = (annualSalesT / 10).toFixed(1); // 억원 (천만원÷10)
 
-    // ④ 결과 표시
+    // 연간 순이익
+    const annualProfitWan = Math.round(profitWan * useCnt);
+    const annualFeeWan = Math.round(feeWan * useCnt);
+
+    // ④ 결과 표시 (1억 이상 → 억원, 미만 → 만원 자동 변환)
     document.getElementById('no_flowpay').textContent = '0 원 (수주 포기)';
 
-    document.getElementById('with_flowpay').textContent =
-      (profitWan >= 0 ? '' : '▼ ') + fmt(Math.abs(profitWan)) + ' 만원';
+    document.getElementById('with_flowpay').textContent = fmtMan(profitWan);
     document.getElementById('with_flowpay_desc').textContent =
-      `수주 ${fmt(order)}천만 − 원자재 ${fmt(material)}천만 − 마진 ${fmt(feeWan)}만원`;
+      `수주 ${fmtChunman(order)} − 원자재 ${fmtChunman(material)} − 마진 ${fmtMan(feeWan)}`;
 
-    document.getElementById('annual_benefit').textContent = annualSalesEok + ' 억원 / 년';
+    document.getElementById('annual_benefit').textContent = fmtChunman(annualSalesT) + ' / 년';
     document.getElementById('annual_desc').textContent =
-      `수주 ${fmt(order)}천만 × 연 ${useCnt}회 = ${annualSalesEok}억원`;
+      `수주 ${fmtChunman(order)} × 연 ${useCnt}회 = ${fmtChunman(annualSalesT)}`;
 
-    document.getElementById('fee_total').textContent = fmt(feeWan) + ' 만원';
+    document.getElementById('fee_total').textContent = fmtMan(feeWan);
     document.getElementById('fee_desc').textContent =
-      `원자재 ${fmt(material)}천만 × ${(feeRate*100).toFixed(1)}% (${cycle}일) = ${fmt(feeWan)}만원`;
+      `원자재 ${fmtChunman(material)} × ${(feeRate*100).toFixed(1)}% (${cycle}일) = ${fmtMan(feeWan)}`;
   }
 
   // ── 영업담당자 데이터 ──
@@ -2073,24 +2090,24 @@
       if (d.receivables)   kpiHtml += `<div class="mck-kpi"><div class="kv">${fmt(Math.round(d.receivables))}백만</div><div class="kl">매출채권</div></div>`;
       if (d.currentDebt)   kpiHtml += `<div class="mck-kpi"><div class="kv">${fmt(Math.round(d.currentDebt))}백만</div><div class="kl">유동부채</div></div>`;
     } else {
-      kpiHtml = `<div class="mck-kpi"><div class="kv">${fmt(order)}천만</div><div class="kl">건당 수주금액</div></div>`
-              + `<div class="mck-kpi"><div class="kv">${fmt(material)}천만</div><div class="kl">원자재 비용</div></div>`
+      kpiHtml = `<div class="mck-kpi"><div class="kv">${fmtChunman(order)}</div><div class="kl">건당 수주금액</div></div>`
+              + `<div class="mck-kpi"><div class="kv">${fmtChunman(material)}</div><div class="kl">원자재 비용</div></div>`
               + `<div class="mck-kpi"><div class="kv">${cycle}일</div><div class="kl">정산 주기</div></div>`;
     }
     document.getElementById('mck_kpi_row').innerHTML = kpiHtml;
 
     // ── Section 2: Solution ──
     document.getElementById('mck_s2').innerHTML =
-      `FlowPay는 ${co}의 원자재 <strong>${fmt(material)}천만원</strong>을 먼저 구매하여 즉시 납품합니다. ${contact}은 매출처로부터 대금 회수 후 FlowPay에 정산하는 구조로, <strong>은행 대출이 아닌 유통 거래</strong>이므로 재무제표상 부채로 계상되지 않습니다. 마진율은 원자재 금액 대비 <strong>${(feeRate*100).toFixed(1)}% (${cycle}일 기준)</strong>으로 책정됩니다.`;
-    document.getElementById('mck_s2_amt').textContent = `건당 순이익: ${fmt(profitWan)}만원`;
-    document.getElementById('mck_s2_label').textContent = `수주 ${fmt(order)}천만 − 원자재 ${fmt(material)}천만 − 마진 ${fmt(feeWan)}만원 = 순이익 ${fmt(profitWan)}만원`;
+      `FlowPay는 ${co}의 원자재 <strong>${fmtChunman(material)}</strong>을 먼저 구매하여 즉시 납품합니다. ${contact}은 매출처로부터 대금 회수 후 FlowPay에 정산하는 구조로, <strong>은행 대출이 아닌 유통 거래</strong>이므로 재무제표상 부채로 계상되지 않습니다. 마진율은 원자재 금액 대비 <strong>${(feeRate*100).toFixed(1)}% (${cycle}일 기준)</strong>으로 책정됩니다.`;
+    document.getElementById('mck_s2_amt').textContent = `건당 순이익: ${fmtMan(profitWan)}`;
+    document.getElementById('mck_s2_label').textContent = `수주 ${fmtChunman(order)} − 원자재 ${fmtChunman(material)} − 마진 ${fmtMan(feeWan)} = 순이익 ${fmtMan(profitWan)}`;
 
     // ── Section 3: ROI ──
     document.getElementById('mck_s3').innerHTML =
-      `연간 <strong>${useCnt}회</strong> FlowPay를 활용할 경우, 기존에 자금 부족으로 포기했던 수주를 모두 완수하여 <strong>연간 추가 매출 ${annualSalesEok}억원</strong>을 실현할 수 있습니다. FlowPay 도입 기업의 평균 매출 증가율은 <strong>358%</strong>이며, 초기 운전자금 부담 없이 성장 모멘텀을 확보하는 것이 핵심 가치입니다.`;
+      `연간 <strong>${useCnt}회</strong> FlowPay를 활용할 경우, 기존에 자금 부족으로 포기했던 수주를 모두 완수하여 <strong>연간 추가 매출 ${fmtChunman(annualSalesT)}</strong>을 실현할 수 있습니다. FlowPay 도입 기업의 평균 매출 증가율은 <strong>358%</strong>이며, 초기 운전자금 부담 없이 성장 모멘텀을 확보하는 것이 핵심 가치입니다.`;
 
-    const roiHtml = `<div class="mck-kpi"><div class="kv">${annualSalesEok}억원</div><div class="kl">연간 추가 매출</div></div>`
-                  + `<div class="mck-kpi"><div class="kv">${fmt(annualProfitWan)}만원</div><div class="kl">연간 추가 순이익</div></div>`
+    const roiHtml = `<div class="mck-kpi"><div class="kv">${fmtChunman(annualSalesT)}</div><div class="kl">연간 추가 매출</div></div>`
+                  + `<div class="mck-kpi"><div class="kv">${fmtMan(annualProfitWan)}</div><div class="kl">연간 추가 순이익</div></div>`
                   + `<div class="mck-kpi"><div class="kv">358%</div><div class="kl">도입 기업 평균 성장률</div></div>`;
     document.getElementById('mck_roi_row').innerHTML = roiHtml;
 
@@ -2112,9 +2129,9 @@ ${co}의 최근 사업 현황을 검토하던 중, 귀사가 직면한 운전자
 FlowPay는 B2B 원자재 선공급·후결제(Supply Now, Pay Later) 서비스로, 귀사가 수주를 확보한 시점에 원자재를 즉시 조달하고, 매출처 대금 회수 후 정산하는 구조입니다. 은행 차입과 달리 재무제표에 부채로 계상되지 않으며, 기존 신용 한도에 영향을 주지 않습니다.
 
 [핵심 제안 요약]
-• 건당 원자재 조달: ${fmt(material)}천만원 (마진율 ${(feeRate*100).toFixed(1)}%)
-• 건당 순이익: ${fmt(profitWan)}만원
-• 연간 추가 매출 전망: ${annualSalesEok}억원 (연 ${useCnt}회 기준)
+• 건당 원자재 조달: ${fmtChunman(material)} (마진율 ${(feeRate*100).toFixed(1)}%)
+• 건당 순이익: ${fmtMan(profitWan)}
+• 연간 추가 매출 전망: ${fmtChunman(annualSalesT)} (연 ${useCnt}회 기준)
 
 간략한 미팅을 통해 귀사의 구체적 니즈에 맞는 한도 설계와 도입 프로세스를 안내드리겠습니다. 편하신 일정을 회신해 주시면 감사하겠습니다.
 
