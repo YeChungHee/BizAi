@@ -438,8 +438,8 @@
 
 <!-- ══ NAV ══ -->
 <div class="nav">
-  <button onclick="showTab('upload', this)">📂 재무제표 분석</button>
-  <button class="active" onclick="showTab('sim', this)">💰 마진 시뮬레이터</button>
+  <button class="active" onclick="showTab('upload', this)">📂 재무제표 분석</button>
+  <button onclick="showTab('sim', this)">💰 AI 마진율 평가</button>
   <button onclick="showTab('proposal', this)">📋 제안서 자동 생성</button>
   <button onclick="showTab('trigger', this)">🚨 영업 트리거</button>
   <button onclick="showTab('about', this)">ℹ️ 서비스 소개</button>
@@ -448,13 +448,13 @@
 <div class="main">
 
   <!-- ══ TAB 0: 재무제표 업로드 분석 ══ -->
-  <div id="upload" class="section">
+  <div id="upload" class="section active">
 
     <div class="ib">
       <span class="ii">📌</span>
       <span class="it">
         재무제표 PDF를 업로드하면 <strong>핵심 재무 지표를 자동 추출</strong>하고,
-        FlowPay 도입 적합도를 분석한 뒤 <strong>마진 시뮬레이터와 제안서에 자동 반영</strong>합니다.
+        FlowPay 도입 적합도를 분석한 뒤 <strong>AI 마진율 평가와 제안서에 자동 반영</strong>합니다.
         지원 형식: <strong>PDF</strong> (감사보고서, 재무제표, 사업보고서)
       </span>
     </div>
@@ -550,10 +550,28 @@
       <!-- 인사이트 -->
       <div id="insightSection" style="margin-bottom:16px;"></div>
 
+      <!-- ═══ 신용 리스크 평가 결과 ═══ -->
+      <div id="creditRiskSection" style="display:none;">
+        <div style="font-size:12px;font-weight:800;color:#566480;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:12px;">🏦 AI 신용 리스크 평가</div>
+
+        <!-- 핵심 지표 4개 -->
+        <div class="grid2" style="grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;" id="crKpiRow"></div>
+
+        <!-- PD 조정 인자 -->
+        <div id="crFactors" style="background:#F8FAFD;border:1px solid #E8EEF6;border-radius:12px;padding:16px;margin-bottom:14px;"></div>
+
+        <!-- 결제조건별 가격 테이블 -->
+        <div style="font-size:12px;font-weight:800;color:#566480;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:10px;margin-top:16px;">💳 결제조건별 적용 마진율 (래더)</div>
+        <div id="crPricingTable" style="margin-bottom:14px;"></div>
+
+        <!-- 안전 납품 규모 -->
+        <div id="crCeiling" style="background:#F0FDF4;border:1.5px solid #6EE7B7;border-radius:12px;padding:14px 16px;margin-bottom:16px;"></div>
+      </div>
+
       <!-- 적용 버튼 (시뮬레이터로 이동만) -->
       <div>
         <button class="btn btn-green" onclick="applyToSimulator()" style="width:100%;padding:14px;font-size:15px;">
-          💰 마진 시뮬레이터에 적용하기 →
+          💰 AI 마진율 평가에 적용하기 →
         </button>
       </div>
     </div>
@@ -566,8 +584,8 @@
 
   </div>
 
-  <!-- ══ TAB 1: 마진 시뮬레이터 ══ -->
-  <div id="sim" class="section active">
+  <!-- ══ TAB 1: AI 마진율 평가 ══ -->
+  <div id="sim" class="section">
 
     <div class="ib">
       <span class="ii">💡</span>
@@ -580,7 +598,7 @@
     </div>
 
     <div class="card">
-      <h2>💰 FlowPay 도입 효과 시뮬레이터</h2>
+      <h2>💰 FlowBizAi 도입 평가</h2>
       <p class="sub">수주 정보를 입력하면 FlowPay 이용 시 순이익과 수주 포기 대비 효과를 자동 계산합니다</p>
 
       <div class="grid2">
@@ -744,7 +762,7 @@
 
       <div class="ib">
         <span class="ii">💡</span>
-        <span class="it">재무제표 분석 → 마진 시뮬레이터 → 제안서 순서로 진행하면 <strong>실제 수치가 자동 반영</strong>됩니다.</span>
+        <span class="it">재무제표 분석 → AI 마진율 평가 → 제안서 순서로 진행하면 <strong>실제 수치가 자동 반영</strong>됩니다.</span>
       </div>
 
       <div class="grid2" style="margin-bottom:16px;">
@@ -1001,7 +1019,7 @@
 </div>
 
 <div class="footer">
-  <strong>FlowBizAi</strong> — FlowPay 영업 인텔리전스 플랫폼 &nbsp;|&nbsp; 276홀딩스 © 2026
+  <strong>FlowBizAi</strong> v2.1.0 — FlowPay 영업 인텔리전스 플랫폼 &nbsp;|&nbsp; 276홀딩스 © 2026
   &nbsp;|&nbsp; 02-785-7080 &nbsp;|&nbsp; contact@276holdings.com
   <div class="disc">
     본 시뮬레이션은 실제 거래 조건에 따라 달라질 수 있으며 참고용입니다. FlowPay는 대출 상품이 아닌 유통/구매 대행 서비스입니다.<br>
@@ -1197,16 +1215,43 @@
           if (!lineMap[y]) lineMap[y] = [];
           lineMap[y].push({ text: item.str, x: item.transform[4], w: item.width || 0 });
         }
+
+        // ── 적응형 gap 임계값 계산 ──
+        // PDF마다 글자 간격이 다름: 일반 PDF ~5pt, 낱자 PDF ~45pt, 컬럼 경계 ~140pt
+        // 양수 gap을 정렬한 뒤, 하위 75%에서 가장 큰 점프를 찾아 컬럼 경계로 사용
+        const allGaps = [];
+        for (const y of Object.keys(lineMap)) {
+          const chunks = lineMap[y].sort((a, b) => a.x - b.x);
+          for (let ci = 1; ci < chunks.length; ci++) {
+            const gap = chunks[ci].x - (chunks[ci-1].x + chunks[ci-1].w);
+            if (gap > 2) allGaps.push(gap);   // 2pt 이하(겹침/인접)는 제외
+          }
+        }
+        let gapThreshold = 15;  // 기본값
+        if (allGaps.length > 10) {
+          allGaps.sort((a, b) => a - b);
+          // 하위 75%까지만 탐색 → 텍스트↔컬럼 경계 점프를 찾음
+          // (상위 25%는 컬럼 경계 내부 변동이라 무시)
+          const searchLimit = Math.floor(allGaps.length * 0.75);
+          let maxJump = 0, jumpIdx = -1;
+          for (let g = 1; g < searchLimit; g++) {
+            const jump = allGaps[g] - allGaps[g - 1];
+            if (jump > maxJump) { maxJump = jump; jumpIdx = g; }
+          }
+          if (jumpIdx > 0 && maxJump > 10) {
+            gapThreshold = Math.round((allGaps[jumpIdx] + allGaps[jumpIdx - 1]) / 2);
+          }
+        }
+
         const sortedYs = Object.keys(lineMap).sort((a, b) => b - a);
         for (const y of sortedYs) {
           const chunks = lineMap[y].sort((a, b) => a.x - b.x);
-          // X좌표 기반 간격 계산: 큰 갭(컬럼 경계)이면 탭/다중공백 삽입
+          // X좌표 기반 간격 계산: 적응형 임계값 이상이면 컬럼 경계 → 탭 삽입
           let lineStr = '';
           for (let ci = 0; ci < chunks.length; ci++) {
             if (ci > 0) {
               const gap = chunks[ci].x - (chunks[ci-1].x + chunks[ci-1].w);
-              // 갭이 15pt 이상이면 컬럼 경계 → 탭 삽입 (당기/전기 구분)
-              lineStr += gap > 15 ? '\t' : ' ';
+              lineStr += gap > gapThreshold ? '\t' : ' ';
             }
             lineStr += chunks[ci].text;
           }
@@ -1566,6 +1611,281 @@
     window._extracted = r;
     card.style.display = 'block';
     card.scrollIntoView({ behavior: 'smooth' });
+
+    // ── 신용 리스크 평가 자동 실행 ──
+    runCreditRiskAssessment(r);
+  }
+
+  // ═══════════════════════════════════════════
+  // ── 신용 리스크 평가 엔진 (credit_risk.py → JS)
+  // ═══════════════════════════════════════════
+
+  const GRADE_BASE_PD = {
+    AAA:0.03, AA:0.10, A:0.30, BBB:1.00, BB:3.00, 'BB-':4.50,
+    'B+':5.00, B:7.00, 'B-':9.00, CCC:12.0, CC:18.0, C:25.0, D:50.0,
+  };
+
+  function altmanZPrime(ca, cl, ta, re, op, eq, tl, rev) {
+    if (ta <= 0 || tl <= 0) return { score: 0, zone: 'distress' };
+    const X1 = (ca - cl) / ta, X2 = re / ta, X3 = op / ta;
+    const X4 = eq / tl, X5 = rev / ta;
+    const z = 0.717*X1 + 0.847*X2 + 3.107*X3 + 0.420*X4 + 0.998*X5;
+    const zone = z > 2.9 ? 'safe' : z > 1.23 ? 'grey' : 'distress';
+    return { score: Math.round(z * 1000) / 1000, zone };
+  }
+
+  function assessCreditRisk(d) {
+    // d = parseFinancials 결과의 data (백만원 단위)
+    const ta = d.totalAssets || 0;
+    const ca = d.currentAssets || (d.ar || 0) + (d.stBorrow ? ta * 0.4 : ta * 0.5);
+    const cl = d.curLiab || 0;
+    const tl = d.totalLiabilities || (ta - (d.totalEquity || 0));
+    const eq = d.totalEquity || (ta - tl);
+    const re = d.retainedEarnings != null ? d.retainedEarnings : (eq > 0 ? eq * 0.3 : 0);
+    const rev = Math.abs(d.revenue || 0);
+    const cogs = Math.abs(d.cogs || 0);
+    const op = d.operIncome || 0;
+    const ni = d.netIncome || 0;
+    const stDebt = d.stBorrow || 0;
+    const ltDebt = d.longTermDebt || 0;
+    const cash = d.cash || 0;
+    const ar = d.ar || 0;
+    const interest = d.interest || 0;
+    const material = d.material || 0;
+
+    // 비율 계산
+    const currentRatio = cl > 0 ? ca / cl : null;
+    const debtRatio = eq > 0 ? tl / eq * 100 : null;
+    const cashRatio = cl > 0 ? cash / cl * 100 : null;
+    const totalDebt = stDebt + ltDebt;
+    const loanDep = ta > 0 ? totalDebt / ta * 100 : null;
+    const arDays = rev > 0 ? 365 / (rev / ar) : null;
+    const opMargin = rev > 0 ? op / rev * 100 : null;
+    const stDebtCL = cl > 0 ? stDebt / cl * 100 : null;
+
+    // Z' Score
+    const z = altmanZPrime(ca, cl, ta, re, op, eq, tl, rev);
+
+    // 등급 추정 (점수 기반 간이)
+    let gradeScore = 50;
+    if (opMargin != null) gradeScore += opMargin > 5 ? 10 : opMargin > 0 ? 5 : -10;
+    if (currentRatio != null) gradeScore += currentRatio > 1.5 ? 8 : currentRatio > 1.0 ? 3 : -8;
+    if (debtRatio != null) gradeScore += debtRatio < 100 ? 8 : debtRatio < 200 ? 3 : -8;
+    if (z.zone === 'safe') gradeScore += 15;
+    else if (z.zone === 'grey') gradeScore += 0;
+    else gradeScore -= 15;
+    if (ni > 0) gradeScore += 5;
+    if (ni < 0) gradeScore -= 10;
+    gradeScore = Math.max(0, Math.min(100, gradeScore));
+
+    let grade;
+    if (gradeScore >= 85) grade = 'AA';
+    else if (gradeScore >= 75) grade = 'A';
+    else if (gradeScore >= 65) grade = 'BBB';
+    else if (gradeScore >= 55) grade = 'BB';
+    else if (gradeScore >= 45) grade = 'BB-';
+    else if (gradeScore >= 35) grade = 'B';
+    else if (gradeScore >= 25) grade = 'CCC';
+    else grade = 'CC';
+
+    // PD 계산
+    const basePD = GRADE_BASE_PD[grade] || 10.0;
+    const factors = [];
+
+    function addFactor(name, delta, reason) {
+      if (delta !== 0) factors.push({ name, delta, reason });
+    }
+
+    // Z-Score
+    if (z.zone === 'distress') addFactor('Altman Z\' 위험지대', 4.0, `Z'=${z.score} < 1.23`);
+    else if (z.zone === 'grey') addFactor('Altman Z\' 회색지대', 1.0, `Z'=${z.score}`);
+
+    // 유동비율
+    if (currentRatio != null && currentRatio < 1.0) addFactor('유동비율 미달', 2.0, `${currentRatio.toFixed(2)}배`);
+
+    // 부채비율
+    if (debtRatio != null && debtRatio > 200) addFactor(`부채비율 ${Math.round(debtRatio)}%`, debtRatio > 300 ? 2.0 : 1.0, '과도한 레버리지');
+
+    // 차입금의존도
+    if (loanDep != null && loanDep > 50) addFactor(`차입금의존도 ${Math.round(loanDep)}%`, 2.0, '차입금 과다');
+
+    // 현금비율
+    if (cashRatio != null && cashRatio < 10) addFactor(`현금비율 ${cashRatio.toFixed(1)}%`, 2.0, '즉시 현금 지급력 부족');
+
+    // 단기차입금 집중
+    if (stDebtCL != null && stDebtCL > 80) addFactor(`단기차입금 집중 ${Math.round(stDebtCL)}%`, 2.0, '만기 집중 리스크');
+
+    // 영업적자
+    if (op < 0) addFactor('영업적자', 3.0, '본업 수익 창출 불능');
+
+    // 선납금 없음
+    addFactor('선납금 없음', 2.0, '전액 신용 노출');
+
+    // 양호 요인
+    if (ni > 0 && rev > 0) addFactor('당기순이익 흑자', -1.0, '이익 창출');
+    if (opMargin != null && opMargin > 5) addFactor(`영업이익률 ${opMargin.toFixed(1)}%`, -1.0, '양호한 수익성');
+    if (re > 0) addFactor('이익잉여금 양수', -1.0, '자본 축적');
+
+    const totalAdj = factors.reduce((s, f) => s + f.delta, 0);
+    const adjustedPD = Math.max(0.5, Math.min(60.0, Math.round((basePD + totalAdj) * 10) / 10));
+
+    // LGD
+    let lgd = 60;
+    const lgdParts = ['기본 60%'];
+    if (re > 0 && op > 0) { lgd -= 10; lgdParts.push('이익잉여금+영업흑자 → -10%p'); }
+    if (debtRatio != null && debtRatio > 300) { lgd += 10; lgdParts.push(`부채비율 ${Math.round(debtRatio)}% → +10%p`); }
+    lgd = Math.max(20, Math.min(90, lgd));
+
+    const annualEL = Math.round(adjustedPD * lgd / 100 * 100) / 100;
+
+    return {
+      grade, gradeScore, basePD, adjustedPD, factors,
+      z, lgd, lgdBasis: lgdParts.join(' | '), annualEL,
+      currentRatio, debtRatio, cashRatio, loanDep, arDays, opMargin,
+      cashAvailable: cash, annualRevenue: rev,
+    };
+  }
+
+  // ═══════════════════════════════════════════
+  // ── 결제조건 가격결정 엔진 (payment_pricer.py → JS)
+  // ═══════════════════════════════════════════
+
+  const MARGIN_LADDER = { 3: 3.0, 60: 6.0, 90: 9.0 };
+  const EMBEDDED_RISK = 0.5;
+
+  function ladderInterpolate(days) {
+    const pts = Object.entries(MARGIN_LADDER).map(([d,m]) => [+d, m]).sort((a,b) => a[0]-b[0]);
+    if (days <= pts[0][0]) return pts[0][1];
+    if (days >= pts[pts.length-1][0]) return pts[pts.length-1][1];
+    for (let i = 0; i < pts.length - 1; i++) {
+      if (pts[i][0] <= days && days <= pts[i+1][0]) {
+        const t = (days - pts[i][0]) / (pts[i+1][0] - pts[i][0]);
+        return Math.round((pts[i][1] + t * (pts[i+1][1] - pts[i][1])) * 100) / 100;
+      }
+    }
+    return pts[pts.length-1][1];
+  }
+
+  function periodPD(annualPD_pct, days) {
+    return Math.round((1 - Math.pow(1 - annualPD_pct / 100, days / 365)) * 100 * 10000) / 10000;
+  }
+
+  function quoteForDays(days, annualPD, lgd) {
+    const base = ladderInterpolate(days);
+    const pdN = periodPD(annualPD, days);
+    const el = Math.round(pdN * lgd / 100 * 10000) / 10000;
+    const premium = Math.round(Math.max(0, el - EMBEDDED_RISK) * 100) / 100;
+    const final_ = Math.round((base + premium) * 100) / 100;
+    return { days, base, pdN, el, premium, final: final_ };
+  }
+
+  function calculateCeiling(elPct, cashAvail, annualRev, grade, maxLoss) {
+    maxLoss = maxLoss || 3000000;
+    const elBased = elPct > 0 ? Math.round(maxLoss / (elPct / 100)) : Infinity;
+    const cashBased = cashAvail > 0 ? Math.round(cashAvail * 1000000 * 0.30) : null;
+    const revPctMap = { AAA:0.15, AA:0.12, A:0.08, BBB:0.05, BB:0.03, 'BB-':0.02, B:0.015, CCC:0.008, CC:0.005 };
+    const revBased = annualRev > 0 ? Math.round(annualRev * 1000000 * (revPctMap[grade] || 0.01)) : null;
+
+    const candidates = [{ label: '기대손실 역산', value: elBased }];
+    if (cashBased != null) candidates.push({ label: '현금 기반(30%)', value: cashBased });
+    if (revBased != null) candidates.push({ label: '매출 대비', value: revBased });
+    candidates.sort((a, b) => a.value - b.value);
+
+    return { elBased, cashBased, revBased, recommended: candidates[0].value, basis: candidates[0].label };
+  }
+
+  // ═══════════════════════════════════════════
+  // ── 신용리스크 평가 실행 & UI 렌더링
+  // ═══════════════════════════════════════════
+
+  function runCreditRiskAssessment(r) {
+    const d = r.data;
+    if (!d.revenue && !d.totalAssets) return; // 데이터 부족
+
+    const cr = assessCreditRisk(d);
+    window._creditRisk = cr;
+
+    // ── KPI 카드 ──
+    const zoneLabel = { safe: '안전', grey: '회색', distress: '위험' };
+    const zoneColor = { safe: '#059669', grey: '#D97706', distress: '#DC2626' };
+    document.getElementById('crKpiRow').innerHTML = `
+      <div style="background:white;border:1.5px solid #E8EEF6;border-radius:12px;padding:14px;text-align:center;">
+        <div style="font-size:11px;color:#94A3B8;font-weight:700;">등급</div>
+        <div style="font-size:24px;font-weight:900;color:#1B4FD8;">${cr.grade}</div>
+      </div>
+      <div style="background:white;border:1.5px solid #E8EEF6;border-radius:12px;padding:14px;text-align:center;">
+        <div style="font-size:11px;color:#94A3B8;font-weight:700;">부도확률(PD)</div>
+        <div style="font-size:24px;font-weight:900;color:${cr.adjustedPD > 10 ? '#DC2626' : cr.adjustedPD > 5 ? '#D97706' : '#059669'};">${cr.adjustedPD}%</div>
+      </div>
+      <div style="background:white;border:1.5px solid #E8EEF6;border-radius:12px;padding:14px;text-align:center;">
+        <div style="font-size:11px;color:#94A3B8;font-weight:700;">손실률(LGD)</div>
+        <div style="font-size:24px;font-weight:900;color:#566480;">${cr.lgd}%</div>
+      </div>
+      <div style="background:white;border:1.5px solid #E8EEF6;border-radius:12px;padding:14px;text-align:center;">
+        <div style="font-size:11px;color:#94A3B8;font-weight:700;">Z' Score</div>
+        <div style="font-size:24px;font-weight:900;color:${zoneColor[cr.z.zone]};">${cr.z.score}</div>
+        <div style="font-size:10px;color:${zoneColor[cr.z.zone]};font-weight:700;">${zoneLabel[cr.z.zone]}</div>
+      </div>`;
+
+    // ── PD 조정 인자 ──
+    let factorHtml = '<div style="font-size:11px;font-weight:800;color:#566480;margin-bottom:8px;">PD 조정 인자 (기본 ' + cr.basePD + '%)</div>';
+    cr.factors.forEach(f => {
+      const color = f.delta > 0 ? '#DC2626' : '#059669';
+      const sign = f.delta > 0 ? '+' : '';
+      factorHtml += `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px dashed #F1F5F9;font-size:12px;">
+        <span style="color:#3A4F6A;">${f.name}</span>
+        <span style="font-weight:800;color:${color};">${sign}${f.delta.toFixed(1)}%p <span style="font-weight:400;color:#94A3B8;font-size:10px;">${f.reason}</span></span>
+      </div>`;
+    });
+    factorHtml += `<div style="display:flex;justify-content:space-between;padding:8px 0 0;font-size:13px;font-weight:900;border-top:2px solid #E8EEF6;margin-top:6px;">
+      <span>최종 PD</span><span style="color:#1B4FD8;">${cr.adjustedPD}% → 연간 EL ${cr.annualEL}%</span>
+    </div>`;
+    document.getElementById('crFactors').innerHTML = factorHtml;
+
+    // ── 결제조건별 가격 테이블 ──
+    const compareDays = [3, 30, 60, 90];
+    const quotes = compareDays.map(d => quoteForDays(d, cr.adjustedPD, cr.lgd));
+    let tableHtml = '<table style="width:100%;border-collapse:collapse;font-size:12px;">';
+    tableHtml += '<tr style="background:#F1F5F9;font-weight:800;color:#566480;">' +
+      '<td style="padding:8px;border-radius:8px 0 0 0;">결제일</td>' +
+      '<td style="padding:8px;text-align:right;">래더기준</td>' +
+      '<td style="padding:8px;text-align:right;">기간PD</td>' +
+      '<td style="padding:8px;text-align:right;">기대손실</td>' +
+      '<td style="padding:8px;text-align:right;">프리미엄</td>' +
+      '<td style="padding:8px;text-align:right;border-radius:0 8px 0 0;">적용마진</td></tr>';
+    quotes.forEach(q => {
+      const highlight = q.days === 60 ? 'background:#EFF6FF;font-weight:800;' : '';
+      const marker = q.days === 60 ? ' ◀' : '';
+      tableHtml += `<tr style="${highlight}">
+        <td style="padding:7px 8px;">${q.days}일</td>
+        <td style="padding:7px 8px;text-align:right;">${q.base.toFixed(1)}%</td>
+        <td style="padding:7px 8px;text-align:right;">${q.pdN.toFixed(2)}%</td>
+        <td style="padding:7px 8px;text-align:right;">${q.el.toFixed(2)}%</td>
+        <td style="padding:7px 8px;text-align:right;color:#D97706;">+${q.premium.toFixed(2)}%</td>
+        <td style="padding:7px 8px;text-align:right;font-weight:900;color:#1B4FD8;">${q.final.toFixed(2)}%${marker}</td>
+      </tr>`;
+    });
+    tableHtml += '</table>';
+    document.getElementById('crPricingTable').innerHTML = tableHtml;
+
+    // ── 안전 납품 규모 ──
+    const q60 = quoteForDays(60, cr.adjustedPD, cr.lgd);
+    const ceiling = calculateCeiling(q60.el, cr.cashAvailable, cr.annualRevenue, cr.grade);
+    const ceilFmt = ceiling.recommended >= 100000000
+      ? (ceiling.recommended / 100000000).toFixed(1) + '억원'
+      : ceiling.recommended >= 10000
+        ? fmt(Math.round(ceiling.recommended / 10000)) + '만원'
+        : fmt(ceiling.recommended) + '원';
+    document.getElementById('crCeiling').innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div style="font-size:11px;font-weight:700;color:#065F46;margin-bottom:4px;">🛡️ 안전 납품 규모 (1회)</div>
+          <div style="font-size:11px;color:#94A3B8;">산출 근거: ${ceiling.basis}</div>
+        </div>
+        <div style="font-size:28px;font-weight:900;color:#059669;">${ceilFmt}</div>
+      </div>`;
+
+    document.getElementById('creditRiskSection').style.display = 'block';
   }
 
   // ── 시뮬레이터에 적용 (재무 리스크 가감 포함) ──
@@ -1637,7 +1957,7 @@
     return Math.max(0.03, Math.min(0.12, adjusted)); // 최소 3%, 최대 12%
   }
 
-  // ── 마진 시뮬레이터 ──
+  // ── AI 마진율 평가 ──
   function calc() {
     const order    = parseFloat(document.getElementById('order_amt').value) || 0;
     const material = parseFloat(document.getElementById('material_amt').value) || 0;

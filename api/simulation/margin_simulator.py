@@ -25,9 +25,12 @@ ARCHITECTURE.md §3.3:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
 from .risk_premium import RiskPremium
+
+if TYPE_CHECKING:
+    from .macro_adjuster import MacroAdjustment
 
 
 # ─────────────────────────────────────────────────────────────
@@ -77,7 +80,12 @@ class MarginSimulation:
     risk_premium_total: float
     base_margin: float
     transaction_amount: float | None
-    recommended: str         # min | likely | max
+    recommended: str                 # min | likely | max
+
+    # 거시경제 조정 (선택)
+    macro_margin_delta: float = 0.0          # 거시 기인 마진 조정 (%p)
+    macro_credit_limit_factor: float = 1.0   # 거시 기인 한도 배수
+    macro_rationale: str = ""                # 거시 조정 근거
 
     def scenarios(self) -> list[ScenarioResult]:
         return [self.min_scenario, self.likely, self.max_scenario]
@@ -89,6 +97,11 @@ class MarginSimulation:
             "base_margin": self.base_margin,
             "transaction_amount": self.transaction_amount,
             "recommended": self.recommended,
+            "macro": {
+                "margin_delta": self.macro_margin_delta,
+                "credit_limit_factor": self.macro_credit_limit_factor,
+                "rationale": self.macro_rationale,
+            },
             "scenarios": [
                 {
                     "label": s.label,
@@ -114,6 +127,7 @@ def simulate_margin(
     industry_code: str | None = None,
     transaction_amount: float | None = None,
     competition_factor: float = 0.0,  # -1.0 (치열) ~ +1.0 (독점)
+    macro_adjustment: "MacroAdjustment | None" = None,
 ) -> MarginSimulation:
     """
     3가지 시나리오의 마진율을 시뮬레이션.
@@ -124,6 +138,9 @@ def simulate_margin(
         industry_code: KSIC 업종 코드 (base_margin 추정용)
         transaction_amount: 거래 규모 (원, 선택)
         competition_factor: 경쟁 조정 (-1~+1)
+        macro_adjustment: 거시경제 기반 조정값 (선택).
+            MacroAdjustment.margin_delta → base_margin에 가산
+            MacroAdjustment.credit_limit_factor → MarginSimulation에 기록
 
     Returns:
         MarginSimulation (3 시나리오)
@@ -135,6 +152,16 @@ def simulate_margin(
             base_margin = DEFAULT_BASE_MARGINS.get(prefix, DEFAULT_MARGIN)
         else:
             base_margin = DEFAULT_MARGIN
+
+    # 거시경제 조정: base_margin에 margin_delta 반영
+    macro_delta = 0.0
+    macro_clf = 1.0
+    macro_note = ""
+    if macro_adjustment is not None:
+        macro_delta = macro_adjustment.margin_delta
+        macro_clf = macro_adjustment.credit_limit_factor
+        macro_note = macro_adjustment.rationale
+        base_margin = round(base_margin + macro_delta, 2)
 
     rp = risk_premium.total_premium
     grade = risk_premium.grade
@@ -213,6 +240,9 @@ def simulate_margin(
         base_margin=base_margin,
         transaction_amount=transaction_amount,
         recommended=recommended,
+        macro_margin_delta=macro_delta,
+        macro_credit_limit_factor=macro_clf,
+        macro_rationale=macro_note,
     )
 
 
@@ -252,6 +282,13 @@ def margin_summary(sim: MarginSimulation) -> str:
         f"═══ 마진 시뮬레이션 (등급: {sim.grade}) ═══\n",
         f"  기본 마진: {sim.base_margin:.1f}%  |  리스크 프리미엄: +{sim.risk_premium_total:.1f}%p",
     ]
+    if sim.macro_margin_delta != 0 or sim.macro_credit_limit_factor != 1.0:
+        lines.append(
+            f"  거시조정: 마진 {sim.macro_margin_delta:+.2f}%p  |  "
+            f"한도 배수 ×{sim.macro_credit_limit_factor:.2f}"
+        )
+        if sim.macro_rationale:
+            lines.append(f"    └ {sim.macro_rationale}")
     if sim.transaction_amount:
         lines.append(f"  거래 규모: {sim.transaction_amount:,.0f}원\n")
     else:
@@ -271,3 +308,46 @@ def margin_summary(sim: MarginSimulation) -> str:
     lines.append(f"\n  ★ 권장: {rec_labels[sim.recommended]}")
 
     return "\n".join(lines)
+
+
+# ─────────────────────────────────────────────────────────────
+# CreditRiskProfile → 마진 시뮬레이션 원스톱 함수
+# ─────────────────────────────────────────────────────────────
+
+def simulate_from_credit_risk(
+    credit_risk: "CreditRiskProfile",
+    transaction_amount: float | None = None,
+    industry_code: str | None = None,
+    competition_factor: float = 0.0,
+    macro_adjustment: "MacroAdjustment | None" = None,
+) -> MarginSimulation:
+    """
+    CreditRiskProfile → RiskPremium → MarginSimulation 원스톱 변환.
+
+    credit_risk 모듈의 assess_credit_risk() 결과를 받아
+    기존 margin_simulator 파이프라인을 자동으로 실행합니다.
+
+    Args:
+        credit_risk: CreditRiskProfile (simulation.credit_risk 모듈)
+        transaction_amount: 거래 규모 (원)
+        industry_code: KSIC 업종 코드
+        competition_factor: 경쟁 조정 (-1~+1)
+        macro_adjustment: 거시경제 조정값 (선택)
+
+    Returns:
+        MarginSimulation (3 시나리오)
+    """
+    from .risk_premium import calculate_risk_premium
+
+    rp = calculate_risk_premium(
+        grade=credit_risk.grade,
+        red_flag_count=credit_risk.red_flag_count,
+    )
+
+    return simulate_margin(
+        risk_premium=rp,
+        industry_code=industry_code,
+        transaction_amount=transaction_amount,
+        competition_factor=competition_factor,
+        macro_adjustment=macro_adjustment,
+    )
