@@ -438,8 +438,8 @@
 
 <!-- ══ NAV ══ -->
 <div class="nav">
-  <button onclick="showTab('upload', this)">📂 재무제표 분석</button>
-  <button class="active" onclick="showTab('sim', this)">💰 마진 시뮬레이터</button>
+  <button class="active" onclick="showTab('upload', this)">📂 재무제표 분석</button>
+  <button onclick="showTab('sim', this)">💰 마진 시뮬레이터</button>
   <button onclick="showTab('proposal', this)">📋 제안서 자동 생성</button>
   <button onclick="showTab('trigger', this)">🚨 영업 트리거</button>
   <button onclick="showTab('about', this)">ℹ️ 서비스 소개</button>
@@ -448,7 +448,7 @@
 <div class="main">
 
   <!-- ══ TAB 0: 재무제표 업로드 분석 ══ -->
-  <div id="upload" class="section">
+  <div id="upload" class="section active">
 
     <div class="ib">
       <span class="ii">📌</span>
@@ -567,7 +567,7 @@
   </div>
 
   <!-- ══ TAB 1: 마진 시뮬레이터 ══ -->
-  <div id="sim" class="section active">
+  <div id="sim" class="section">
 
     <div class="ib">
       <span class="ii">💡</span>
@@ -580,7 +580,7 @@
     </div>
 
     <div class="card">
-      <h2>💰 FlowPay 도입 효과 시뮬레이터</h2>
+      <h2>💰 FlowBizAi 도입 평가</h2>
       <p class="sub">수주 정보를 입력하면 FlowPay 이용 시 순이익과 수주 포기 대비 효과를 자동 계산합니다</p>
 
       <div class="grid2">
@@ -1001,7 +1001,7 @@
 </div>
 
 <div class="footer">
-  <strong>FlowBizAi</strong> — FlowPay 영업 인텔리전스 플랫폼 &nbsp;|&nbsp; 276홀딩스 © 2026
+  <strong>FlowBizAi</strong> v2.1.0 — FlowPay 영업 인텔리전스 플랫폼 &nbsp;|&nbsp; 276홀딩스 © 2026
   &nbsp;|&nbsp; 02-785-7080 &nbsp;|&nbsp; contact@276holdings.com
   <div class="disc">
     본 시뮬레이션은 실제 거래 조건에 따라 달라질 수 있으며 참고용입니다. FlowPay는 대출 상품이 아닌 유통/구매 대행 서비스입니다.<br>
@@ -1197,16 +1197,43 @@
           if (!lineMap[y]) lineMap[y] = [];
           lineMap[y].push({ text: item.str, x: item.transform[4], w: item.width || 0 });
         }
+
+        // ── 적응형 gap 임계값 계산 ──
+        // PDF마다 글자 간격이 다름: 일반 PDF ~5pt, 낱자 PDF ~45pt, 컬럼 경계 ~140pt
+        // 양수 gap을 정렬한 뒤, 하위 75%에서 가장 큰 점프를 찾아 컬럼 경계로 사용
+        const allGaps = [];
+        for (const y of Object.keys(lineMap)) {
+          const chunks = lineMap[y].sort((a, b) => a.x - b.x);
+          for (let ci = 1; ci < chunks.length; ci++) {
+            const gap = chunks[ci].x - (chunks[ci-1].x + chunks[ci-1].w);
+            if (gap > 2) allGaps.push(gap);   // 2pt 이하(겹침/인접)는 제외
+          }
+        }
+        let gapThreshold = 15;  // 기본값
+        if (allGaps.length > 10) {
+          allGaps.sort((a, b) => a - b);
+          // 하위 75%까지만 탐색 → 텍스트↔컬럼 경계 점프를 찾음
+          // (상위 25%는 컬럼 경계 내부 변동이라 무시)
+          const searchLimit = Math.floor(allGaps.length * 0.75);
+          let maxJump = 0, jumpIdx = -1;
+          for (let g = 1; g < searchLimit; g++) {
+            const jump = allGaps[g] - allGaps[g - 1];
+            if (jump > maxJump) { maxJump = jump; jumpIdx = g; }
+          }
+          if (jumpIdx > 0 && maxJump > 10) {
+            gapThreshold = Math.round((allGaps[jumpIdx] + allGaps[jumpIdx - 1]) / 2);
+          }
+        }
+
         const sortedYs = Object.keys(lineMap).sort((a, b) => b - a);
         for (const y of sortedYs) {
           const chunks = lineMap[y].sort((a, b) => a.x - b.x);
-          // X좌표 기반 간격 계산: 큰 갭(컬럼 경계)이면 탭/다중공백 삽입
+          // X좌표 기반 간격 계산: 적응형 임계값 이상이면 컬럼 경계 → 탭 삽입
           let lineStr = '';
           for (let ci = 0; ci < chunks.length; ci++) {
             if (ci > 0) {
               const gap = chunks[ci].x - (chunks[ci-1].x + chunks[ci-1].w);
-              // 갭이 15pt 이상이면 컬럼 경계 → 탭 삽입 (당기/전기 구분)
-              lineStr += gap > 15 ? '\t' : ' ';
+              lineStr += gap > gapThreshold ? '\t' : ' ';
             }
             lineStr += chunks[ci].text;
           }
